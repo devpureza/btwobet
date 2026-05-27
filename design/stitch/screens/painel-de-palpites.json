@@ -1,0 +1,24 @@
+{
+  "content": [
+    {
+      "text": "{\"name\":\"projects/14895410954006795741/screens/227b5c8dbd24440ab4fa7de78a002708\",\"title\":\"Painel de Palpites\",\"screenshot\":{\"name\":\"projects/14895410954006795741/files/b9aaae3a556046b0b51d2da411951917\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/ADBb0ugsIhQuQidryV3kJ9Z9fxMIvTnI47KgDV3vg4qI4QTp12l9S1OqsxYHNw53PyzetVSEQPCuK0LZpBy9K5f-pjhYXGOIir3z3bG6DC66w3EjMtS0nDlnWbejTIMvJld19_OPWUy_gwvRvStrOMvd16RU9f4JnAOUM4qWTeGL6DCbU9Lm0l8PLmc7TxEXMtlrUsjtk8QwnjGoI0yuklJaSiXvaktV6uZG4ynybqWKKj5Mg-4nEqAtuinoXFo\"},\"htmlCode\":{\"name\":\"projects/14895410954006795741/files/f1097a25c32d4851b5454f869ab9972f\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzRkMDY4NGRmY2EzNzQyNWJiZDNiMDljM2ZlYjY2Zjc0EgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3034\",\"deviceType\":\"DESKTOP\"}",
+      "type": "text"
+    }
+  ],
+  "structuredContent": {
+    "deviceType": "DESKTOP",
+    "height": "3034",
+    "htmlCode": {
+      "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzRkMDY4NGRmY2EzNzQyNWJiZDNiMDljM2ZlYjY2Zjc0EgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086",
+      "mimeType": "text/html",
+      "name": "projects/14895410954006795741/files/f1097a25c32d4851b5454f869ab9972f"
+    },
+    "name": "projects/14895410954006795741/screens/227b5c8dbd24440ab4fa7de78a002708",
+    "screenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/ADBb0ugsIhQuQidryV3kJ9Z9fxMIvTnI47KgDV3vg4qI4QTp12l9S1OqsxYHNw53PyzetVSEQPCuK0LZpBy9K5f-pjhYXGOIir3z3bG6DC66w3EjMtS0nDlnWbejTIMvJld19_OPWUy_gwvRvStrOMvd16RU9f4JnAOUM4qWTeGL6DCbU9Lm0l8PLmc7TxEXMtlrUsjtk8QwnjGoI0yuklJaSiXvaktV6uZG4ynybqWKKj5Mg-4nEqAtuinoXFo",
+      "name": "projects/14895410954006795741/files/b9aaae3a556046b0b51d2da411951917"
+    },
+    "title": "Painel de Palpites",
+    "width": "2560"
+  }
+}

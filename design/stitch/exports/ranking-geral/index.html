@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MUNDIAL 2026 - Leaderboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#92d5a9",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#00408a",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#296a46",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-dim": "#d9dadb",
+                    "secondary-container": "#fcd400",
+                    "on-primary-fixed": "#002110",
+                    "on-tertiary-container": "#86afff",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#004d2c",
+                    "outline-variant": "#bfc9bf",
+                    "secondary-fixed": "#ffe16d",
+                    "secondary": "#705d00",
+                    "on-secondary-fixed": "#221b00",
+                    "background": "#f8f9fa",
+                    "inverse-on-surface": "#f0f1f2",
+                    "tertiary-fixed": "#d8e2ff",
+                    "surface-bright": "#f8f9fa",
+                    "surface-variant": "#e1e3e4",
+                    "primary": "#00341c",
+                    "on-secondary-fixed-variant": "#544600",
+                    "on-surface": "#191c1d",
+                    "surface-container-high": "#e7e8e9",
+                    "surface-container-highest": "#e1e3e4",
+                    "primary-fixed": "#aef2c4",
+                    "on-tertiary-fixed": "#001a41",
+                    "inverse-surface": "#2e3132",
+                    "primary-fixed-dim": "#92d5a9",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed-dim": "#e9c400",
+                    "outline": "#707971",
+                    "on-secondary-container": "#6e5c00",
+                    "surface": "#f8f9fa",
+                    "on-surface-variant": "#404942",
+                    "tertiary": "#002a60",
+                    "tertiary-fixed-dim": "#adc7ff",
+                    "on-primary-fixed-variant": "#085230",
+                    "on-background": "#191c1d",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "surface-container": "#edeeef"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1280px",
+                    "base": "4px",
+                    "xl": "48px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "gutter": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Montserrat"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-md": ["Montserrat"],
+                    "headline-lg": ["Montserrat"],
+                    "display-lg": ["Montserrat"],
+                    "label-sm": ["Space Mono"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .podium-gradient {
+            background: linear-gradient(180deg, rgba(0, 52, 28, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface/70 backdrop-blur-xl dark:bg-surface-container/70 docked full-width top-0 sticky z-50 border-b border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center px-4 md:px-lg py-sm max-w-container-max mx-auto">
+<div class="font-display-lg text-headline-md font-extrabold tracking-tighter text-primary dark:text-primary-fixed">MUNDIAL 2026</div>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high transition-colors px-md py-xs rounded-lg" href="#">Predictions</a>
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary px-md py-xs" href="#">Leaderboard</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high transition-colors px-md py-xs rounded-lg" href="#">Rules</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant active:scale-95 transition-transform duration-200" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant active:scale-95 transition-transform duration-200" data-icon="account_circle">account_circle</button>
+</div>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-4 md:px-lg py-lg md:py-xl mb-24 md:mb-0">
+<!-- Hero Section / Title -->
+<div class="mb-lg">
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-xs">Tournament Ranking</h1>
+<p class="text-on-surface-variant font-body-md">Compete with millions of fans across North America for the ultimate victory.</p>
+</div>
+<!-- Filter Controls -->
+<div class="flex flex-col md:flex-row justify-between items-center gap-md mb-lg">
+<div class="flex p-xs bg-surface-container-high rounded-xl w-full md:w-auto">
+<button class="flex-1 md:flex-none px-lg py-sm font-bold bg-white text-primary rounded-lg shadow-sm transition-all" id="global-filter">Global</button>
+<button class="flex-1 md:flex-none px-lg py-sm text-on-surface-variant hover:text-primary transition-all" id="private-filter">Private Leagues</button>
+</div>
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-sm rounded-xl border-outline-variant bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none" placeholder="Search users..." type="text"/>
+</div>
+</div>
+<!-- Podium / Top 3 -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-xl items-end">
+<!-- Rank 2 -->
+<div class="order-2 md:order-1 flex flex-col items-center glass-card border border-outline-variant/30 rounded-2xl p-lg shadow-sm">
+<div class="relative mb-md">
+<img class="w-20 h-20 rounded-full border-4 border-[#C0C0C0] object-cover" data-alt="A professional studio portrait of a young man with a confident expression, styled with modern corporate lighting against a clean, neutral studio backdrop. The image has a high-end, sleek aesthetic with subtle warm tones that align with a premium sport-related UI theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtAk8xLojvlWLZcoEbH7aA2UZFpsVZpv8kdHVu_3Jn-lHZBpsJanxx_ek1DVnLzv3tii9ZDeIANHR9LA4Ojvg-F-3mls9GHmDIfAecFtHK4PwV9OnzFVCoj6Exe5D6B1hbfIVq-_jEO3bPk6edhj8GqMu3USUz_4qTcgv0vUbwHARrxrnLogjx74twypxFk-P2_7pyGaC0vAIsupEwjH_Fs-cFWUOdpj0_7RNljz31SVHm1eWlGBhIaMTbBa5SoYCfbBI16aJ2Ympb"/>
+<div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#C0C0C0] text-on-primary px-3 rounded-full font-label-sm text-label-sm">2</div>
+</div>
+<h3 class="font-headline-md text-headline-md">SoccerPro_88</h3>
+<p class="text-on-surface-variant text-label-sm font-label-sm mb-md">Silver League</p>
+<div class="text-headline-md font-extrabold text-primary">142 pts</div>
+</div>
+<!-- Rank 1 -->
+<div class="order-1 md:order-2 flex flex-col items-center glass-card border-2 border-secondary-container rounded-2xl p-xl shadow-lg transform md:-translate-y-4 podium-gradient">
+<div class="relative mb-md">
+<img class="w-28 h-28 rounded-full border-4 border-secondary-container object-cover shadow-lg" data-alt="A vibrant and professional portrait of a woman smiling, captured with bright, high-key lighting in a modern workspace environment. The overall visual style is celebratory and energetic, featuring a clean color palette that perfectly complements a high-octane 2026 World Cup sweepstakes interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCRljg4HWsd9CiKZqgZnwEYymYmbNHfUuCHwsq_P4KwLSQdv6ItT_LzEJGM99UOmT_7JIJ47qUvkvlMl4sIanCVxUhXSnBSPNmsraYeBchYgt9Yt0h-l5d2mYXbvKvBYfBtB7BNZSNtbpcpbNf_u_Kv-8O5JfenimKT21ZDmDsHG9vYXy1Hbm_sY3UAoq80vradF1I6NgC5MAS3V1ntznbvrvnDrqjU38EIS3uQYco65UKKE80PTYh4x1HSUOKqmh0kNgqZM5FdOhl"/>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full font-label-sm text-label-sm font-bold ring-2 ring-white">1</div>
+<span class="material-symbols-outlined absolute -top-4 -right-4 text-secondary-container text-4xl" data-icon="workspace_premium" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-xl">MundialMaster</h3>
+<p class="text-on-surface-variant text-label-sm font-label-sm mb-md">Elite Legend</p>
+<div class="text-4xl font-extrabold text-primary">158 pts</div>
+</div>
+<!-- Rank 3 -->
+<div class="order-3 md:order-3 flex flex-col items-center glass-card border border-outline-variant/30 rounded-2xl p-lg shadow-sm">
+<div class="relative mb-md">
+<img class="w-20 h-20 rounded-full border-4 border-[#CD7F32] object-cover" data-alt="A modern and clean portrait of a smiling man, illuminated by natural, soft daylight coming from the side. The image is professional yet approachable, with a sharp focus and a background that suggests a contemporary urban setting, aligning with the North American World Cup aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvoAajJTFqJ4OC-QXf9qpPiLz2tLQr7LrrwV1Q0_3B0TKqpHWLWlsGNW_5ZwFOicRy6GnmsnZ4BCLlV6Muny6_U1EXDo6nQ4UzrrsRTxj8qsuhC4eVyXWDkLN5fmwYlNJk9438h6BQMfjIHF_sWwaqmeQiJy5YL1or6G-a9GOAQr2138oIYnrR3xvgLc-KKy_stvHTQwhcja_L9-YaaXMGdO60z0Obc8TVZNIHVowrn25kZLMoUaO1wOP-Ki8esofI8LZa-7i5FZhq"/>
+<div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#CD7F32] text-on-primary px-3 rounded-full font-label-sm text-label-sm">3</div>
+</div>
+<h3 class="font-headline-md text-headline-md">GoalGetter26</h3>
+<p class="text-on-surface-variant text-label-sm font-label-sm mb-md">Bronze League</p>
+<div class="text-headline-md font-extrabold text-primary">135 pts</div>
+</div>
+</div>
+<!-- Leaderboard Table -->
+<div class="overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm bg-white">
+<div class="overflow-x-auto">
+<table class="w-full border-collapse text-left">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant border-b border-outline-variant/20">
+<th class="px-lg py-md font-label-sm text-label-sm">RANK</th>
+<th class="px-lg py-md font-label-sm text-label-sm">USER</th>
+<th class="px-lg py-md font-label-sm text-label-sm text-center">EXACT (2pt)</th>
+<th class="px-lg py-md font-label-sm text-label-sm text-center">RESULT (1pt)</th>
+<th class="px-lg py-md font-label-sm text-label-sm text-right">TOTAL</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<!-- User Row (Current) -->
+<tr class="bg-primary/5 border-l-4 border-primary">
+<td class="px-lg py-md">
+<span class="font-bold text-primary">42</span>
+</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">ME</div>
+<div>
+<p class="font-bold">Lucky_Striker</p>
+<p class="text-xs text-on-surface-variant">You</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md text-center font-bold">12</td>
+<td class="px-lg py-md text-center font-bold">45</td>
+<td class="px-lg py-md text-right font-extrabold text-primary">69 pts</td>
+</tr>
+<!-- Regular Row -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md font-bold text-on-surface-variant">4</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A focused studio portrait of a stylish person with professional studio lighting that emphasizes texture and depth. The mood is confident and competitive, fitting for a sports leaderboard avatar. The color palette is modern and clean, utilizing the high-contrast lighting typical of upscale UI designs." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ0t7vhZ_EN2w08OsqV1jV5zBHjll-YM1bNDXTEfHNhuvMLBsBZ8chfBOEWx33w9y8qx_c4D-898khL-qYy8FO59W70SGZil0YOxfCLa193k8CjM1iYEPBhedJWvjOTN1e1mp6fqJNtzEuH-YKMKH5X2VQxIT3-pKE9JG1sTl_Gwe0pfKZpwpZvPXJmucfNoIrfbRelpkWIMdW88X5YOCjzTnBcEnav9W9nmmKM8TZ1tEXwTFT7-RUJN_jsR7Sdr1V7k6HISypepDR"/>
+<p class="font-medium">CaptainPulisic</p>
+</div>
+</td>
+<td class="px-lg py-md text-center">22</td>
+<td class="px-lg py-md text-center">88</td>
+<td class="px-lg py-md text-right font-bold text-primary">132 pts</td>
+</tr>
+<!-- Regular Row -->
+<tr class="bg-primary/[0.02] hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md font-bold text-on-surface-variant">5</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A vibrant and clear headshot of a professional looking individual against a soft-focus urban background. The lighting is balanced and natural, creating a friendly yet competitive feel. The aesthetic is modern and fits seamlessly into a high-quality, card-based mobile app design for a global sports event." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeeNxX7OvQVCcK69uIn_-Ztva_9rDMo0FDs2JKzBecdf9sHfsr2-TB4hon6FvraitWpFDyADtX5L4ScA021e7pWQPdGEhCvKFToQ78QiqH9fcKZroHsawqVXUbgXBmL5rK2At1laGSgxqUzh2gq2I8Zm7w6So1e2Zrf3777__ItIxeIw_YsF6jeY-tKUXPmSv0ktFnxofeG2cy-0ZJ-8fzAhOT-SiZJ446AETdBqgpk0Ni7uQbieuJRIzi7Q0R0uRYviieaKfNZuk_"/>
+<p class="font-medium">MapleLeafFan</p>
+</div>
+</td>
+<td class="px-lg py-md text-center">20</td>
+<td class="px-lg py-md text-center">90</td>
+<td class="px-lg py-md text-right font-bold text-primary">130 pts</td>
+</tr>
+<!-- Regular Row -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md font-bold text-on-surface-variant">6</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A sleek, high-definition portrait of a person with a warm smile, set against a dark, professional gradient background. The lighting is crisp and modern, emphasizing the premium nature of the application. The visual tone is energetic and celebratory, ideal for an international sports tournament fan profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7QDQGyskTf9FTA00_Y8zZ7vKNjPuOGkF8ONqd8V5erlFtFjGolZRVGXlhlk0Dri99eh9XqnMJWRJiHgn550GidRRatj9006aayYmhxlRGOmTJrc8__iSYGKnAwdKtHxFd989cJQUzqou220EyQ1jV6Rv2Ao_T64utW_SpVVlxn26Kxm1ArcoGBPtExCBxHRPNb0Qw5Abdx7uwrF59zH_ZspTkuHRBAKT_cOlU549VIKxVYBKJD1aKBIhSMRVHR271agGBTJ0GDYrC"/>
+<p class="font-medium">AztecEagle</p>
+</div>
+</td>
+<td class="px-lg py-md text-center">18</td>
+<td class="px-lg py-md text-center">92</td>
+<td class="px-lg py-md text-right font-bold text-primary">128 pts</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination-like Footer -->
+<div class="px-lg py-md border-t border-outline-variant/20 flex justify-between items-center bg-surface-container-lowest">
+<button class="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+                    Previous
+                </button>
+<div class="flex gap-sm">
+<span class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-on-primary font-bold">1</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high cursor-pointer">2</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high cursor-pointer">3</span>
+</div>
+<button class="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors">
+                    Next
+                    <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden flex justify-around items-center px-md py-sm pb-safe bg-surface/80 backdrop-blur-2xl dark:bg-surface-container-highest/80 fixed bottom-0 w-full z-50 rounded-t-xl border-t border-outline-variant/20 shadow-[0_-4px_10px_rgba(0,52,28,0.05)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="sports_soccer">sports_soccer</span>
+<span class="font-label-sm text-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-sm text-label-sm">Ranking</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-sm text-label-sm">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant full-width">
+<div class="flex flex-col md:flex-row justify-between items-center px-lg py-xl max-w-container-max mx-auto gap-lg">
+<div class="flex flex-col items-center md:items-start gap-sm">
+<div class="font-headline-md text-primary">MUNDIAL 2026</div>
+<p class="font-body-md text-body-md text-on-surface-variant">© 2026 FIFA World Cup Sweepstakes. All rights reserved.</p>
+</div>
+<div class="flex gap-lg">
+<a class="text-on-surface-variant font-body-md text-body-md hover:underline hover:text-primary transition-all" href="#">Terms of Service</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:underline hover:text-primary transition-all" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:underline hover:text-primary transition-all" href="#">Help Center</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple filter toggle interaction
+        const globalFilter = document.getElementById('global-filter');
+        const privateFilter = document.getElementById('private-filter');
+
+        globalFilter.addEventListener('click', () => {
+            globalFilter.classList.add('bg-white', 'shadow-sm', 'text-primary');
+            globalFilter.classList.remove('text-on-surface-variant');
+            privateFilter.classList.remove('bg-white', 'shadow-sm', 'text-primary');
+            privateFilter.classList.add('text-on-surface-variant');
+        });
+
+        privateFilter.addEventListener('click', () => {
+            privateFilter.classList.add('bg-white', 'shadow-sm', 'text-primary');
+            privateFilter.classList.remove('text-on-surface-variant');
+            globalFilter.classList.remove('bg-white', 'shadow-sm', 'text-primary');
+            globalFilter.classList.add('text-on-surface-variant');
+        });
+
+        // Add visual flair to podium cards on hover
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+                card.style.transition = 'transform 0.3s ease';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

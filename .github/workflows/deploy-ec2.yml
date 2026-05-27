@@ -1,0 +1,62 @@
+name: Deploy EC2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_DIR: /opt/btwobet
+      APP_URL: ${{ vars.APP_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build Flutter Web
+        working-directory: mobile
+        run: |
+          flutter pub get
+          if [ -n "$APP_URL" ]; then
+            flutter build web --release --dart-define=API_BASE_URL="${APP_URL}/api"
+          else
+            flutter build web --release
+          fi
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Sync files to EC2
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude 'backend/.env' \
+            --exclude 'backend/vendor' \
+            --exclude 'mobile/.dart_tool' \
+            --exclude '.env.production' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new" \
+            ./ "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${DEPLOY_DIR}/"
+
+      - name: Deploy on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" << 'REMOTE'
+          set -euo pipefail
+          cd /opt/btwobet
+          chmod +x deploy/remote-deploy.sh deploy/setup-ec2.sh
+          ./deploy/remote-deploy.sh
+          REMOTE

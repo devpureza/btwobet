@@ -1,0 +1,103 @@
+openapi: 3.0.3
+info:
+  title: Bolão Copa 2026 API
+  version: 0.1.0
+  description: API REST para bolão da Copa do Mundo 2026
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local Docker
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+
+  /register:
+    post:
+      summary: Cadastro de usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                password_confirmation: { type: string }
+      responses:
+        '201':
+          description: Usuário criado + token
+
+  /login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Token de acesso
+
+  /matches:
+    get:
+      summary: Lista jogos da Copa 2026
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Lista de partidas com times e bandeiras
+
+  /predictions:
+    post:
+      summary: Criar/atualizar palpite
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [match_id, home_score, away_score]
+              properties:
+                match_id: { type: integer }
+                home_score: { type: integer, minimum: 0 }
+                away_score: { type: integer, minimum: 0 }
+      responses:
+        '200':
+          description: Palpite salvo
+
+  /me/history:
+    get:
+      summary: Histórico de palpites e pontos do usuário
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Histórico com total
+
+  /ranking:
+    get:
+      summary: Ranking geral
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Participantes ordenados
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum

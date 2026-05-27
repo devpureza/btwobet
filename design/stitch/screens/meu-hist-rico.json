@@ -1,0 +1,24 @@
+{
+  "content": [
+    {
+      "text": "{\"name\":\"projects/14895410954006795741/screens/e8a5b8877d514423be3c31576403924e\",\"title\":\"Meu Histórico\",\"screenshot\":{\"name\":\"projects/14895410954006795741/files/7fa266a508b245f9b5b0511a5213550d\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/ADBb0uhWwqQXAimiw3CyJE2u2DbdaqmJVsLKOULyUbew010I4ca1_52AB41JNa26ZcJBokDC66eG-GD_uuAp76hwHOZPQ2R6DgTnhcjmdfgYIJW7zLL3dEpakReZTfawDvBoitTjt_UcNgirNXoDzJ0kNvb_xEwNb_gtMgZwWxtw8o8ToPiuBu0kVThQ1-ogyG2r4zKOLWeF1-duV6-0UXm3JuLiL9pwQkpjK1PfoA_0YppBVCvoeyj3OAUh5Y4X\"},\"htmlCode\":{\"name\":\"projects/14895410954006795741/files/6db8e836fee94f7b94a0c35fac952bfc\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzMxYzRjMmE4NzQ5MzQ5MDM5MDlmY2I5OThhYjMyYjVhEgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2176\",\"deviceType\":\"DESKTOP\"}",
+      "type": "text"
+    }
+  ],
+  "structuredContent": {
+    "deviceType": "DESKTOP",
+    "height": "2176",
+    "htmlCode": {
+      "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzMxYzRjMmE4NzQ5MzQ5MDM5MDlmY2I5OThhYjMyYjVhEgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086",
+      "mimeType": "text/html",
+      "name": "projects/14895410954006795741/files/6db8e836fee94f7b94a0c35fac952bfc"
+    },
+    "name": "projects/14895410954006795741/screens/e8a5b8877d514423be3c31576403924e",
+    "screenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/ADBb0uhWwqQXAimiw3CyJE2u2DbdaqmJVsLKOULyUbew010I4ca1_52AB41JNa26ZcJBokDC66eG-GD_uuAp76hwHOZPQ2R6DgTnhcjmdfgYIJW7zLL3dEpakReZTfawDvBoitTjt_UcNgirNXoDzJ0kNvb_xEwNb_gtMgZwWxtw8o8ToPiuBu0kVThQ1-ogyG2r4zKOLWeF1-duV6-0UXm3JuLiL9pwQkpjK1PfoA_0YppBVCvoeyj3OAUh5Y4X",
+      "name": "projects/14895410954006795741/files/7fa266a508b245f9b5b0511a5213550d"
+    },
+    "title": "Meu Histórico",
+    "width": "2560"
+  }
+}

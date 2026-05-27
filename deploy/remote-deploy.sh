@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Roda na EC2 após git pull / rsync do código.
+set -euo pipefail
+
+cd "${DEPLOY_DIR:-/opt/btwobet}"
+
+if [ ! -f .env.production ]; then
+  echo "Crie .env.production a partir de .env.production.example"
+  exit 1
+fi
+
+# Gera APP_KEY se ainda não existir
+if ! grep -q '^APP_KEY=base64:' .env.production 2>/dev/null; then
+  KEY=$(docker compose -f docker-compose.prod.yml --env-file .env.production run --rm --no-deps \
+    --entrypoint php app artisan key:generate --show)
+  if grep -q '^APP_KEY=' .env.production; then
+    sed -i.bak "s|^APP_KEY=.*|APP_KEY=${KEY}|" .env.production
+  else
+    echo "APP_KEY=${KEY}" >> .env.production
+  fi
+fi
+
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build --remove-orphans
+docker compose -f docker-compose.prod.yml --env-file .env.production exec -T app php artisan migrate --force
+
+echo "Deploy concluído. Teste: curl -s http://127.0.0.1/api/health"

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "stitch": {
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${STITCH_API_KEY}"
+      }
+    },
+    "github": {
+      "command": "/Users/mateuspureza/Documents/mateuspureza/btwobet/deploy/github-mcp.sh",
+      "args": []
+    },
+    "aws": {
+      "command": "npx",
+      "args": ["-y", "@aws/mcp-server-aws"],
+      "env": {
+        "AWS_REGION": "${env:AWS_REGION}",
+        "AWS_PROFILE": "${env:AWS_PROFILE}"
+      }
+    }
+  }
+}

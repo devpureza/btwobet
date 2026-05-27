@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bolão Mundial 2026 | Domine o Campo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Hanken+Grotesk:wght@400;500;700&amp;family=Space+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#92d5a9",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#00408a",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#296a46",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-dim": "#d9dadb",
+                    "secondary-container": "#fcd400",
+                    "on-primary-fixed": "#002110",
+                    "on-tertiary-container": "#86afff",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#004d2c",
+                    "outline-variant": "#bfc9bf",
+                    "secondary-fixed": "#ffe16d",
+                    "secondary": "#705d00",
+                    "on-secondary-fixed": "#221b00",
+                    "background": "#f8f9fa",
+                    "inverse-on-surface": "#f0f1f2",
+                    "tertiary-fixed": "#d8e2ff",
+                    "surface-bright": "#f8f9fa",
+                    "surface-variant": "#e1e3e4",
+                    "primary": "#00341c",
+                    "on-secondary-fixed-variant": "#544600",
+                    "on-surface": "#191c1d",
+                    "surface-container-high": "#e7e8e9",
+                    "surface-container-highest": "#e1e3e4",
+                    "primary-fixed": "#aef2c4",
+                    "on-tertiary-fixed": "#001a41",
+                    "inverse-surface": "#2e3132",
+                    "primary-fixed-dim": "#92d5a9",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed-dim": "#e9c400",
+                    "outline": "#707971",
+                    "on-secondary-container": "#6e5c00",
+                    "surface": "#f8f9fa",
+                    "on-surface-variant": "#404942",
+                    "tertiary": "#002a60",
+                    "tertiary-fixed-dim": "#adc7ff",
+                    "on-primary-fixed-variant": "#085230",
+                    "on-background": "#191c1d",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "surface-container": "#edeeef"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1280px",
+                    "base": "4px",
+                    "xl": "48px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "gutter": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Montserrat"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-md": ["Montserrat"],
+                    "headline-lg": ["Montserrat"],
+                    "display-lg": ["Montserrat"],
+                    "label-sm": ["Space Mono"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .stadium-gradient {
+            background: linear-gradient(to bottom, rgba(0, 52, 28, 0.8), rgba(0, 52, 28, 0.4)), url('image-stadium-hero');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<nav class="bg-surface/70 backdrop-blur-xl docked full-width top-0 sticky z-50 border-b border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center px-4 md:px-lg py-sm max-w-container-max mx-auto">
+<div class="font-display-lg text-headline-md font-extrabold tracking-tighter text-primary">
+                MUNDIAL 2026
+            </div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="text-primary font-bold border-b-2 border-primary py-xs font-body-md" href="#">Predictions</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors px-md py-xs rounded-lg font-body-md" href="#">Leaderboard</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors px-md py-xs rounded-lg font-body-md" href="#">Rules</a>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary p-sm hover:bg-surface-container-high rounded-full transition-colors active:scale-95 duration-200">notifications</button>
+<button class="material-symbols-outlined text-primary p-sm hover:bg-surface-container-high rounded-full transition-colors active:scale-95 duration-200">account_circle</button>
+</div>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative min-h-[870px] flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full stadium-gradient" data-alt="A cinematic low-angle shot of a massive, modern soccer stadium at twilight under vibrant purple and deep green skies. The lush green pitch is illuminated by high-intensity floodlights creating a celebratory atmosphere. In the background, thousands of fans are blurred into a sea of energy and light. The visual style is high-octane and crisp, reflecting the prestige of the 2026 World Cup."></div>
+</div>
+<div class="relative z-10 max-w-container-max mx-auto px-md text-center">
+<div class="inline-block px-md py-xs bg-secondary-container text-on-secondary-container rounded-full font-label-sm text-label-sm mb-lg animate-bounce">
+                    A CONTAGEM REGRESSIVA COMEÇOU
+                </div>
+<h1 class="font-display-lg text-headline-lg-mobile md:text-display-lg text-on-primary mb-md drop-shadow-lg">
+                    BOLÃO MUNDIAL 2026
+                </h1>
+<p class="font-body-lg text-on-primary/90 max-w-2xl mx-auto mb-xl drop-shadow">
+                    Sinta a adrenalina de cada gol. Desafie seus amigos, suba no ranking global e prove que você é o maior especialista em futebol do planeta.
+                </p>
+<div class="flex flex-col md:flex-row items-center justify-center gap-md">
+<button class="w-full md:w-auto px-xl py-md bg-secondary-container text-on-secondary-container font-headline-md rounded-xl shadow-lg hover:scale-105 transition-transform active:scale-95">
+                        Participar Agora
+                    </button>
+<button class="w-full md:w-auto px-xl py-md bg-white/10 backdrop-blur-md border border-white/20 text-on-primary font-headline-md rounded-xl hover:bg-white/20 transition-colors">
+                        Fazer Login
+                    </button>
+</div>
+</div>
+<!-- Floating Decoration Cards -->
+<div class="hidden lg:block absolute bottom-xl left-xl glass-card p-md rounded-xl shadow-xl animate-pulse">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container">trending_up</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">RANKING ATUAL</p>
+<p class="font-headline-md text-primary">#1 Gabriel M.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Rules Section (Bento Grid) -->
+<section class="py-xl bg-surface">
+<div class="max-w-container-max mx-auto px-md">
+<div class="text-center mb-xl">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-sm">REGRAS DO JOGO</h2>
+<p class="font-body-md text-on-surface-variant">Simples de jogar, difícil de dominar. Veja como acumular pontos.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Exact Score Rule -->
+<div class="md:col-span-2 glass-card p-xl rounded-xl border border-outline-variant/30 flex flex-col md:flex-row items-center gap-xl hover:shadow-md transition-shadow">
+<div class="flex-1">
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">target</span>
+</div>
+<h3 class="font-headline-lg text-primary mb-sm">Placar Exato</h3>
+<p class="font-body-md text-on-surface-variant mb-md">Se você acertar o número exato de gols de ambas as equipes, você domina a rodada.</p>
+<div class="inline-flex items-center gap-sm px-md py-sm bg-primary text-on-primary rounded-lg font-headline-md">
+                                +2 PONTOS
+                            </div>
+</div>
+<div class="flex-1 bg-surface-container rounded-xl p-md border border-outline-variant w-full">
+<p class="font-label-sm text-label-sm text-center mb-sm">EXEMPLO</p>
+<div class="flex justify-between items-center bg-white p-md rounded-lg shadow-sm mb-sm">
+<span class="font-bold">BRA 2</span>
+<span class="text-on-surface-variant">vs</span>
+<span class="font-bold">1 FRA</span>
+</div>
+<p class="text-center font-body-md text-primary font-bold">Seu palpite: 2 - 1</p>
+</div>
+</div>
+<!-- Result Rule -->
+<div class="glass-card p-xl rounded-xl border border-outline-variant/30 flex flex-col items-start hover:shadow-md transition-shadow">
+<div class="w-16 h-16 rounded-full bg-secondary-fixed flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-on-secondary-fixed text-4xl">check_circle</span>
+</div>
+<h3 class="font-headline-md text-primary mb-sm">Resultado</h3>
+<p class="font-body-md text-on-surface-variant mb-md">Acertou quem ganha ou se dá empate, mas errou o placar? Você ainda pontua!</p>
+<div class="mt-auto inline-flex items-center gap-sm px-md py-sm bg-secondary-container text-on-secondary-container rounded-lg font-headline-md">
+                            +1 PONTO
+                        </div>
+</div>
+<!-- Bonus Rule / Participation -->
+<div class="md:col-span-3 bg-primary-container text-on-primary p-xl rounded-xl flex flex-col md:flex-row items-center justify-between gap-xl overflow-hidden relative">
+<div class="z-10">
+<h3 class="font-headline-lg text-primary-fixed mb-sm">Desempate Real-Time</h3>
+<p class="font-body-md opacity-90 max-w-xl">Em caso de igualdade de pontos, o critério de desempate será a data e hora do último palpite salvo. Quanto antes você prever, melhor!</p>
+</div>
+<div class="z-10">
+<button class="bg-primary-fixed text-on-primary-fixed px-lg py-md rounded-lg font-bold hover:brightness-110 transition-all">Ver Regulamento Completo</button>
+</div>
+<!-- Abstract soccer pattern overlay -->
+<div class="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+<span class="material-symbols-outlined text-[300px]" style="font-variation-settings: 'FILL' 1;">sports_soccer</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Live Preview / Card Demo -->
+<section class="py-xl">
+<div class="max-w-container-max mx-auto px-md">
+<div class="flex flex-col md:flex-row justify-between items-end mb-xl gap-md">
+<div>
+<h2 class="font-headline-lg text-primary">PRÓXIMOS JOGOS</h2>
+<p class="font-body-md text-on-surface-variant">Prepare seus palpites para os grandes clássicos.</p>
+</div>
+<button class="text-primary font-bold flex items-center gap-xs">
+                        Ver todos os jogos <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Match Card 1 -->
+<div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,52,28,0.08)] overflow-hidden border border-outline-variant/20 group">
+<div class="bg-surface-container-low px-md py-sm flex justify-between items-center">
+<span class="flex items-center gap-xs font-label-sm text-label-sm text-error font-bold">
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span> LIVE
+                            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Estádio Azteca</span>
+</div>
+<div class="p-lg flex items-center justify-around gap-md">
+<div class="flex flex-col items-center gap-sm">
+<img alt="Mexico Flag" class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-4 border-surface shadow-sm" data-alt="Close-up of the official flag of Mexico with vibrant green, white, and red stripes and the central emblem, rendered with a slight textile texture and realistic lighting. The flag is displayed in a perfect circular frame with a subtle shadow against a clean light-mode background. The overall aesthetic is professional and athletic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7kvgRmkdJXBlWrSbO_i3jb_SnkfOHNmg7STHmebAD_IeuLozb0ilS1x87_XGJN-fzYQONJTcd3LvRn6FJPSfAfwEWXHq6pBnmpe4qsBynLA9fL51FQg__5Nr_vjywZmzFD7PdKCpBawr6-mu-pASvAJRQPwLcFzZlkCGkr8jjz_gEVghpjM1mOQsA4X9Q_FsrMjZiE7WBZ7MPlO3wVBs1sO4qdTnMasWIsgh6qKRe-67i0SbgOtrrUZnY6c34i7k1KqrptIxs6IkW"/>
+<span class="font-headline-md">MÉXICO</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="font-display-lg text-primary">2 - 1</div>
+<div class="px-sm py-xs bg-surface-container-high rounded font-label-sm text-label-sm">74'</div>
+</div>
+<div class="flex flex-col items-center gap-sm">
+<img alt="USA Flag" class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-4 border-surface shadow-sm" data-alt="The United States flag with its iconic stars and stripes, presented with sharp colors and a high-quality fabric finish. The image is cropped into a perfect circle with a soft ambient shadow beneath it, sitting on a pristine neutral background. The lighting is bright and even, conveying a sense of premium international sports competition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2n7byJcRT44XQctvVMXnwzxW1PLjII3K9_fthOVZjW7tkOWMG6bVFvA1YJhy6MneY3NH56J3ESGHzDRu-aZ1QfeylNKHHfUB3S2YRj-06bBhi52m27BkG62yeFU5zpmZbsgbbYAPnrJiypp8smUeS_5MHFd9YxlWlJaSZRy-pVNj06_0WOcE-usJ_CTNaib3eBaV-yfddqgN4a79gZRt-05CLiDRpj2P0yHqQAk7MU0-1tCiy4qIDb_VSbX7V0wv6bcYbd1VHjDOd"/>
+<span class="font-headline-md">EUA</span>
+</div>
+</div>
+<div class="p-md bg-surface-container-lowest border-t border-outline-variant/10">
+<div class="flex items-center gap-md">
+<p class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">SEU PALPITE:</p>
+<div class="flex-1 flex gap-sm">
+<input class="w-full text-center font-headline-md border-outline-variant rounded-lg focus:ring-primary focus:border-primary" type="number" value="2"/>
+<input class="w-full text-center font-headline-md border-outline-variant rounded-lg focus:ring-primary focus:border-primary" type="number" value="0"/>
+</div>
+<button class="bg-primary text-on-primary px-md py-sm rounded-lg font-bold group-hover:bg-primary-container transition-colors">Salvar</button>
+</div>
+</div>
+</div>
+<!-- Match Card 2 (Upcoming) -->
+<div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,52,28,0.08)] overflow-hidden border border-outline-variant/20 opacity-80 hover:opacity-100 transition-opacity">
+<div class="bg-surface-container-low px-md py-sm flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Amanhã, 16:00</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">MetLife Stadium</span>
+</div>
+<div class="p-lg flex items-center justify-around gap-md">
+<div class="flex flex-col items-center gap-sm">
+<img alt="Canada Flag" class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-4 border-surface shadow-sm" data-alt="A clean, vibrant representation of the Canadian national flag with its striking red maple leaf. The image is framed as a perfect circle with a subtle 3D shadow effect, giving it depth against the light interface background. The colors are punchy and saturated, reflecting a modern stadium broadcast style for the 2026 World Cup." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxmD8ZRPslN43muiaJYEHS8H5WXewTOhnxc983HvkqsoxxEpvEvhMKBDH8B75sah_YWejZ2-7g3V7pxZMVdJK1ib4bRBFNxY4mXhkf-MfK23dd8PRTx4fYyan34KpNfPBpSHAsz3NGttMvcMbK1g5-7tUQk01AYpAz2K6Fj7ShXWAPlV1zPxYz-Cxeo-8N4Lu7rIOULeihnSYJJsg7Uy90aKGmk1FVTetT_4LGVW2vFnwXy6Mc8n72GAuM0fpP36t6ThqsiYL95WI3"/>
+<span class="font-headline-md">CANADÁ</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="font-display-lg text-outline-variant">vs</div>
+</div>
+<div class="flex flex-col items-center gap-sm">
+<img alt="Brazil Flag" class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-4 border-surface shadow-sm" data-alt="The Brazilian national flag featuring the globe with the motto Ordem e Progresso, set within a yellow diamond on a green field. The flag is displayed in a circular emblem with high-fidelity texture and premium lighting that highlights the vibrant national colors. The aesthetic is clean and modern, suitable for a high-end sports application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ92G-7lJ0wyj1mMe6xgD7aUyubuY-eC8hghWAC-7Kxbarrsvws9h8fp2UNeaLF1hboP-U0JLlyjjqr3a8Ob8dROjt6s660s_P4SjmpjRszNlJVOuhbXJQ_2ljUuUxAWsNS7rIoXTC7n88Zzf7t5Ob7gpG8PFGg5-zbCo5LP8Hr9eosau2b_feDB4emnVXz--feUw64zCQwC8lrSdaufsX0qtmv1zR_RbNdRMHiIwoi5xmUIGtwHClB6UJdNE8SCSMhOLvyny_fb7h"/>
+<span class="font-headline-md">BRASIL</span>
+</div>
+</div>
+<div class="p-md bg-surface-container-lowest border-t border-outline-variant/10 text-center">
+<button class="w-full py-sm border-2 border-primary text-primary font-bold rounded-lg hover:bg-primary hover:text-on-primary transition-all">
+                                DAR MEU PALPITE
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant mt-xl">
+<div class="flex flex-col md:flex-row justify-between items-center px-lg py-xl max-w-container-max mx-auto gap-lg">
+<div class="flex flex-col items-center md:items-start gap-sm">
+<div class="font-headline-md text-primary font-extrabold tracking-tighter">MUNDIAL 2026</div>
+<p class="font-body-md text-on-surface-variant text-center md:text-left max-w-xs">
+                    O maior bolão digital da história da Copa do Mundo. Junte-se à nossa comunidade.
+                </p>
+</div>
+<div class="flex flex-wrap justify-center gap-lg">
+<a class="text-on-surface-variant hover:underline hover:text-primary transition-all font-body-md" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:underline hover:text-primary transition-all font-body-md" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:underline hover:text-primary transition-all font-body-md" href="#">Help Center</a>
+</div>
+<div class="text-on-surface-variant font-body-md">
+                © 2026 FIFA World Cup Sweepstakes. All rights reserved.
+            </div>
+</div>
+</footer>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 backdrop-blur-2xl border-t border-outline-variant/20 shadow-[0_-4px_10px_rgba(0,52,28,0.05)]">
+<div class="flex justify-around items-center px-md py-sm pb-safe">
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sports_soccer</span>
+<span class="font-label-sm text-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-label-sm text-label-sm">Ranking</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-sm text-label-sm">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple micro-interaction for the nav scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+    </script>
+</body></html>

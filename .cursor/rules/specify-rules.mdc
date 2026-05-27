@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan at:
+`specs/bolao-copa-2026/plan.md` and quickstart at `specs/bolao-copa-2026/quickstart.md`
+<!-- SPECKIT END -->

@@ -1,0 +1,24 @@
+{
+  "content": [
+    {
+      "text": "{\"name\":\"projects/14895410954006795741/screens/3f64d5ba200a4f428bf7b77078130920\",\"title\":\"Boas-vindas e Login\",\"screenshot\":{\"name\":\"projects/14895410954006795741/files/ee92706080424e98bf370e7fbdbc140d\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/ADBb0ugRdqxb32QkR0JaTcVJMUUN_MVIdXG6RrzhLaNsjkOoCqT6PZyDvdvKWFYEGfA9ITDUmJs2u7IKKaX_MSlgVDKCcJtIuh6IC39YOkHlKB7I3GbeyA_lllNttOOIQeF5AnDvQBBTDfy3Ddr8YYlTGlF1ixC425k8p7wSc_Qgtl5wIjGdrEtvNHbUMOq2-Bnhs9uPoK20Q4OdCW9DRIpTQRz2kyrgIvL30u8MRpxv-lRmQzYZiaRejXJtSTw\"},\"htmlCode\":{\"name\":\"projects/14895410954006795741/files/a018c06255c24b43ad3a67a464053004\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzVjNTQ5OGZkMDBjZTRkZDk4Y2IyY2NhMzA0MGYyMjEzEgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"4682\",\"deviceType\":\"DESKTOP\"}",
+      "type": "text"
+    }
+  ],
+  "structuredContent": {
+    "deviceType": "DESKTOP",
+    "height": "4682",
+    "htmlCode": {
+      "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzVjNTQ5OGZkMDBjZTRkZDk4Y2IyY2NhMzA0MGYyMjEzEgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086",
+      "mimeType": "text/html",
+      "name": "projects/14895410954006795741/files/a018c06255c24b43ad3a67a464053004"
+    },
+    "name": "projects/14895410954006795741/screens/3f64d5ba200a4f428bf7b77078130920",
+    "screenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/ADBb0ugRdqxb32QkR0JaTcVJMUUN_MVIdXG6RrzhLaNsjkOoCqT6PZyDvdvKWFYEGfA9ITDUmJs2u7IKKaX_MSlgVDKCcJtIuh6IC39YOkHlKB7I3GbeyA_lllNttOOIQeF5AnDvQBBTDfy3Ddr8YYlTGlF1ixC425k8p7wSc_Qgtl5wIjGdrEtvNHbUMOq2-Bnhs9uPoK20Q4OdCW9DRIpTQRz2kyrgIvL30u8MRpxv-lRmQzYZiaRejXJtSTw",
+      "name": "projects/14895410954006795741/files/ee92706080424e98bf370e7fbdbc140d"
+    },
+    "title": "Boas-vindas e Login",
+    "width": "2560"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "content": [
+    {
+      "text": "{\"name\":\"projects/14895410954006795741/screens/83f3d3bdec7f49a9b8d70916d3552920\",\"title\":\"Ranking Geral\",\"screenshot\":{\"name\":\"projects/14895410954006795741/files/76a6369e3708452d887ea1a46af5731c\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/ADBb0uh3RJ5qGLp0hr0dasAL5TBcPZ5uG4-1d-duC-9rt2gljK-VezCew4SgfJtFVB0wNnIerL02c4qWWhL3rD-1uYjinXy6hHSdhOATY8ZJ6lqhjT9A5m7yxV_uYx8CRet1R9SjWX15W48oO2l52WP0ZmPuHTYHgBJOiSQk9KMfsVfA6psBR6HyT-H0rrF7ssfXZJ_vZHR1Z9-GlR_CM3udiapqeCBDVuR54tHuvzWIT67b57YVLhifa3-ePn4q\"},\"htmlCode\":{\"name\":\"projects/14895410954006795741/files/f8a991e970d24f66af6b1d50e7891f29\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzgxMjdjMGZjYjdmYjQ1ZDFhNmM0MjA4ZDkxMTFiYWFkEgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2494\",\"deviceType\":\"DESKTOP\"}",
+      "type": "text"
+    }
+  ],
+  "structuredContent": {
+    "deviceType": "DESKTOP",
+    "height": "2494",
+    "htmlCode": {
+      "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzgxMjdjMGZjYjdmYjQ1ZDFhNmM0MjA4ZDkxMTFiYWFkEgsSBxC3hqfbtQkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNDg5NTQxMDk1NDAwNjc5NTc0MQ&filename=&opi=89354086",
+      "mimeType": "text/html",
+      "name": "projects/14895410954006795741/files/f8a991e970d24f66af6b1d50e7891f29"
+    },
+    "name": "projects/14895410954006795741/screens/83f3d3bdec7f49a9b8d70916d3552920",
+    "screenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/ADBb0uh3RJ5qGLp0hr0dasAL5TBcPZ5uG4-1d-duC-9rt2gljK-VezCew4SgfJtFVB0wNnIerL02c4qWWhL3rD-1uYjinXy6hHSdhOATY8ZJ6lqhjT9A5m7yxV_uYx8CRet1R9SjWX15W48oO2l52WP0ZmPuHTYHgBJOiSQk9KMfsVfA6psBR6HyT-H0rrF7ssfXZJ_vZHR1Z9-GlR_CM3udiapqeCBDVuR54tHuvzWIT67b57YVLhifa3-ePn4q",
+      "name": "projects/14895410954006795741/files/76a6369e3708452d887ea1a46af5731c"
+    },
+    "title": "Ranking Geral",
+    "width": "2560"
+  }
+}

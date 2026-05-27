@@ -1,0 +1,136 @@
+{
+  "designSystems": [
+    {
+      "name": "assets/333a74ed03214e2d96304958a5d0c627",
+      "designSystem": {
+        "displayName": "Unity Arena",
+        "styleGuidelines": "## Brand & Style\n\nThe brand personality is high-octane, celebratory, and competitive. Designed for the 2026 World Cup, it captures the diverse energy of North America through a \"Modern Stadium\" aesthetic. The UI should evoke the adrenaline of a last-minute goal and the communal joy of a tournament sweepstakes.\n\nThe design style is **Corporate Modern with Glassmorphism accents**. It utilizes a structured, card-based architecture to manage dense sports data, while layering translucent \"glass\" surfaces for overlays and navigation to maintain a sense of depth and lightness. Interactive elements should feel tactile and responsive, reflecting the real-time nature of live sports.\n\n## Layout & Spacing\n\nThe design system employs a **12-column fluid grid** for desktop and a **4-column grid** for mobile. A strict 4px base unit governs all spacing tokens, ensuring a rhythmic and balanced layout.\n\nOn mobile, margins are kept tight (16px) to maximize the real estate for match listings and score inputs. On desktop, the layout centers with a maximum width of 1280px. Spacing between cards (gutters) should be consistent at 20px to allow the soft shadows of the cards to breathe without overlapping visually.\n\n## Elevation & Depth\n\nThis design system uses a combination of **Tonal Layers** and **Glassmorphism**. \n\n1.  **Base Surface:** Pure White or very light gray (#F8F9FA).\n2.  **Match Cards:** Elevated by a soft, diffused shadow (10% opacity Primary Green tint) to make them appear slightly lifted from the \"pitch.\"\n3.  **Overlays & Modals:** Use a high-density background blur (20px) with a semi-transparent white fill (70% opacity). This allows the colors of the match cards underneath to bleed through, maintaining the vibrant energy.\n4.  **Interactive Elements:** Use a subtle inner-glow for \"Pressed\" states on score inputs, creating a tactile \"pushed-in\" feel.\n\n## Components\n\n### Match & Team Cards\nMatch cards are the primary container. They feature a horizontal layout for desktop (Team A vs Team B) and a stacked layout for mobile. Team flags are placed in circular or slightly rounded square frames.\n\n### Score Inputs\nInputs for sweepstakes guesses must be large and tappable. Use a bold `headline-md` font for the numbers. On focus, the input border should transition from a neutral gray to the Primary Green with a Gold glow.\n\n### Leaderboard Table\nThe leaderboard utilizes alternating row stripes (zebra striping) in 5% opacity Primary Green. The \"Top 3\" players should have Gold, Silver, and Bronze accents respectively, with the current user's row highlighted using a subtle Primary Green border.\n\n### Progress Bars\nUsed for group stage advancement. The background track is a light neutral, while the fill is a gradient from Primary Green to a brighter mint green.\n\n### Chips & Badges\nUse \"Live,\" \"Finished,\" and \"Upcoming\" status badges. These should be pill-shaped with high-contrast text and a small dot indicator for live matches.",
+        "theme": {
+          "colorMode": "LIGHT",
+          "font": "MONTSERRAT",
+          "roundness": "ROUND_EIGHT",
+          "customColor": "#004d2c",
+          "headlineFont": "MONTSERRAT",
+          "bodyFont": "HANKEN_GROTESK",
+          "labelFont": "SPACE_MONO",
+          "namedColors": {
+            "background": "#f8f9fa",
+            "error": "#ba1a1a",
+            "error_container": "#ffdad6",
+            "inverse_on_surface": "#f0f1f2",
+            "inverse_primary": "#92d5a9",
+            "inverse_surface": "#2e3132",
+            "on_background": "#191c1d",
+            "on_error": "#ffffff",
+            "on_error_container": "#93000a",
+            "on_primary": "#ffffff",
+            "on_primary_container": "#7bbd93",
+            "on_primary_fixed": "#002110",
+            "on_primary_fixed_variant": "#085230",
+            "on_secondary": "#ffffff",
+            "on_secondary_container": "#6e5c00",
+            "on_secondary_fixed": "#221b00",
+            "on_secondary_fixed_variant": "#544600",
+            "on_surface": "#191c1d",
+            "on_surface_variant": "#404942",
+            "on_tertiary": "#ffffff",
+            "on_tertiary_container": "#86afff",
+            "on_tertiary_fixed": "#001a41",
+            "on_tertiary_fixed_variant": "#004493",
+            "outline": "#707971",
+            "outline_variant": "#bfc9bf",
+            "primary": "#00341c",
+            "primary_container": "#004d2c",
+            "primary_fixed": "#aef2c4",
+            "primary_fixed_dim": "#92d5a9",
+            "secondary": "#705d00",
+            "secondary_container": "#fcd400",
+            "secondary_fixed": "#ffe16d",
+            "secondary_fixed_dim": "#e9c400",
+            "surface": "#f8f9fa",
+            "surface_bright": "#f8f9fa",
+            "surface_container": "#edeeef",
+            "surface_container_high": "#e7e8e9",
+            "surface_container_highest": "#e1e3e4",
+            "surface_container_low": "#f3f4f5",
+            "surface_container_lowest": "#ffffff",
+            "surface_dim": "#d9dadb",
+            "surface_tint": "#296a46",
+            "surface_variant": "#e1e3e4",
+            "tertiary": "#002a60",
+            "tertiary_container": "#00408a",
+            "tertiary_fixed": "#d8e2ff",
+            "tertiary_fixed_dim": "#adc7ff"
+          },
+          "designMd": "---\nname: Unity Arena\ncolors:\n  surface: '#f8f9fa'\n  surface-dim: '#d9dadb'\n  surface-bright: '#f8f9fa'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f3f4f5'\n  surface-container: '#edeeef'\n  surface-container-high: '#e7e8e9'\n  surface-container-highest: '#e1e3e4'\n  on-surface: '#191c1d'\n  on-surface-variant: '#404942'\n  inverse-surface: '#2e3132'\n  inverse-on-surface: '#f0f1f2'\n  outline: '#707971'\n  outline-variant: '#bfc9bf'\n  surface-tint: '#296a46'\n  primary: '#00341c'\n  on-primary: '#ffffff'\n  primary-container: '#004d2c'\n  on-primary-container: '#7bbd93'\n  inverse-primary: '#92d5a9'\n  secondary: '#705d00'\n  on-secondary: '#ffffff'\n  secondary-container: '#fcd400'\n  on-secondary-container: '#6e5c00'\n  tertiary: '#002a60'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#00408a'\n  on-tertiary-container: '#86afff'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#aef2c4'\n  primary-fixed-dim: '#92d5a9'\n  on-primary-fixed: '#002110'\n  on-primary-fixed-variant: '#085230'\n  secondary-fixed: '#ffe16d'\n  secondary-fixed-dim: '#e9c400'\n  on-secondary-fixed: '#221b00'\n  on-secondary-fixed-variant: '#544600'\n  tertiary-fixed: '#d8e2ff'\n  tertiary-fixed-dim: '#adc7ff'\n  on-tertiary-fixed: '#001a41'\n  on-tertiary-fixed-variant: '#004493'\n  background: '#f8f9fa'\n  on-background: '#191c1d'\n  surface-variant: '#e1e3e4'\ntypography:\n  display-lg:\n    fontFamily: Montserrat\n    fontSize: 48px\n    fontWeight: '800'\n    lineHeight: 56px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Montserrat\n    fontSize: 32px\n    fontWeight: '700'\n    lineHeight: 40px\n  headline-lg-mobile:\n    fontFamily: Montserrat\n    fontSize: 24px\n    fontWeight: '700'\n    lineHeight: 32px\n  headline-md:\n    fontFamily: Montserrat\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 28px\n  body-lg:\n    fontFamily: Hanken Grotesk\n    fontSize: 18px\n    fontWeight: '400'\n    lineHeight: 28px\n  body-md:\n    fontFamily: Hanken Grotesk\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 24px\n  label-sm:\n    fontFamily: Space Mono\n    fontSize: 12px\n    fontWeight: '500'\n    lineHeight: 16px\n    letterSpacing: 0.05em\nrounded:\n  sm: 0.25rem\n  DEFAULT: 0.5rem\n  md: 0.75rem\n  lg: 1rem\n  xl: 1.5rem\n  full: 9999px\nspacing:\n  base: 4px\n  xs: 4px\n  sm: 8px\n  md: 16px\n  lg: 24px\n  xl: 48px\n  container-max: 1280px\n  gutter: 20px\n---\n\n## Brand & Style\n\nThe brand personality is high-octane, celebratory, and competitive. Designed for the 2026 World Cup, it captures the diverse energy of North America through a \"Modern Stadium\" aesthetic. The UI should evoke the adrenaline of a last-minute goal and the communal joy of a tournament sweepstakes.\n\nThe design style is **Corporate Modern with Glassmorphism accents**. It utilizes a structured, card-based architecture to manage dense sports data, while layering translucent \"glass\" surfaces for overlays and navigation to maintain a sense of depth and lightness. Interactive elements should feel tactile and responsive, reflecting the real-time nature of live sports.\n\n## Colors\n\nThe palette is rooted in a **Deep Tournament Green** (#004D2C), providing a pitch-inspired foundation that feels prestigious and authoritative. **Bright Gold** (#FFD700) is used sparingly for \"winner\" states, icons, and primary call-to-actions, symbolizing the trophy and peak achievement.\n\nA clean **White and Neutral Gray** palette ensures maximum legibility for scoreboards and data tables. We introduce a **Tertiary Blue** to represent the oceanic and sky elements of the 2026 host nations. Backgrounds should use a subtle gradient from Neutral to White to prevent visual fatigue during long browsing sessions.\n\n## Typography\n\nThe typography system is built for impact and clarity. **Montserrat** is the primary typeface for all headings, utilized in bold and extra-bold weights to mimic the high-energy typography seen in stadium signage and sports broadcasting.\n\n**Hanken Grotesk** provides a sharp, contemporary feel for body copy and descriptions, ensuring that complex rules and betting odds remain readable at smaller sizes. **Space Mono** is used for \"meta\" information—such as match times, dates, and live scores—to give the app a technical, precise, and data-driven edge.\n\n## Layout & Spacing\n\nThe design system employs a **12-column fluid grid** for desktop and a **4-column grid** for mobile. A strict 4px base unit governs all spacing tokens, ensuring a rhythmic and balanced layout.\n\nOn mobile, margins are kept tight (16px) to maximize the real estate for match listings and score inputs. On desktop, the layout centers with a maximum width of 1280px. Spacing between cards (gutters) should be consistent at 20px to allow the soft shadows of the cards to breathe without overlapping visually.\n\n## Elevation & Depth\n\nThis design system uses a combination of **Tonal Layers** and **Glassmorphism**. \n\n1.  **Base Surface:** Pure White or very light gray (#F8F9FA).\n2.  **Match Cards:** Elevated by a soft, diffused shadow (10% opacity Primary Green tint) to make them appear slightly lifted from the \"pitch.\"\n3.  **Overlays & Modals:** Use a high-density background blur (20px) with a semi-transparent white fill (70% opacity). This allows the colors of the match cards underneath to bleed through, maintaining the vibrant energy.\n4.  **Interactive Elements:** Use a subtle inner-glow for \"Pressed\" states on score inputs, creating a tactile \"pushed-in\" feel.\n\n## Shapes\n\nThe shape language is modern and approachable. A **Rounded (0.5rem)** corner radius is applied to all standard cards and containers. Larger elements like hero sections or modals use `rounded-xl` (1.5rem) to soften the aesthetic.\n\nProgress bars and score input fields should be fully rounded (pill-shaped) to distinguish them from structural cards. Flags should be rendered with a tiny corner radius (2px) to maintain their iconic rectangular identity while fitting the softer UI style.\n\n## Components\n\n### Match & Team Cards\nMatch cards are the primary container. They feature a horizontal layout for desktop (Team A vs Team B) and a stacked layout for mobile. Team flags are placed in circular or slightly rounded square frames.\n\n### Score Inputs\nInputs for sweepstakes guesses must be large and tappable. Use a bold `headline-md` font for the numbers. On focus, the input border should transition from a neutral gray to the Primary Green with a Gold glow.\n\n### Leaderboard Table\nThe leaderboard utilizes alternating row stripes (zebra striping) in 5% opacity Primary Green. The \"Top 3\" players should have Gold, Silver, and Bronze accents respectively, with the current user's row highlighted using a subtle Primary Green border.\n\n### Progress Bars\nUsed for group stage advancement. The background track is a light neutral, while the fill is a gradient from Primary Green to a brighter mint green.\n\n### Chips & Badges\nUse \"Live,\" \"Finished,\" and \"Upcoming\" status badges. These should be pill-shaped with high-contrast text and a small dot indicator for live matches.",
+          "colorVariant": "FIDELITY",
+          "overridePrimaryColor": "#004d2c",
+          "overrideSecondaryColor": "#ffd700",
+          "overrideTertiaryColor": "#007bff",
+          "overrideNeutralColor": "#f8f9fa",
+          "spacingScale": 2,
+          "typography": {
+            "body-lg": {
+              "fontFamily": "Hanken Grotesk",
+              "fontSize": "18px",
+              "fontWeight": "400",
+              "lineHeight": "28px"
+            },
+            "body-md": {
+              "fontFamily": "Hanken Grotesk",
+              "fontSize": "16px",
+              "fontWeight": "400",
+              "lineHeight": "24px"
+            },
+            "display-lg": {
+              "fontFamily": "Montserrat",
+              "fontSize": "48px",
+              "fontWeight": "800",
+              "lineHeight": "56px",
+              "letterSpacing": "-0.02em"
+            },
+            "headline-lg": {
+              "fontFamily": "Montserrat",
+              "fontSize": "32px",
+              "fontWeight": "700",
+              "lineHeight": "40px"
+            },
+            "headline-lg-mobile": {
+              "fontFamily": "Montserrat",
+              "fontSize": "24px",
+              "fontWeight": "700",
+              "lineHeight": "32px"
+            },
+            "headline-md": {
+              "fontFamily": "Montserrat",
+              "fontSize": "20px",
+              "fontWeight": "600",
+              "lineHeight": "28px"
+            },
+            "label-sm": {
+              "fontFamily": "Space Mono",
+              "fontSize": "12px",
+              "fontWeight": "500",
+              "lineHeight": "16px",
+              "letterSpacing": "0.05em"
+            }
+          },
+          "spacing": {
+            "base": "4px",
+            "container-max": "1280px",
+            "gutter": "20px",
+            "lg": "24px",
+            "md": "16px",
+            "sm": "8px",
+            "xl": "48px",
+            "xs": "4px"
+          },
+          "headlineFontFamily": "Montserrat",
+          "bodyFontFamily": "Hanken Grotesk",
+          "labelFontFamily": "Space Mono"
+        }
+      },
+      "version": "1"
+    }
+  ]
+}
