@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\PredictionController;
 use App\Http\Controllers\Api\RankingController;
+use App\Http\Controllers\Api\Admin\BolaoResetAdminController;
 use App\Http\Controllers\Api\Admin\PredictionRulesAdminController;
 use App\Http\Controllers\Api\Admin\UserAdminController;
 use App\Http\Controllers\Api\Admin\MatchAdminController;
@@ -46,6 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
             Route::get('/prediction-rules', [PredictionRulesAdminController::class, 'show']);
             Route::patch('/prediction-rules', [PredictionRulesAdminController::class, 'update']);
+
+            Route::post('/reset', BolaoResetAdminController::class);
         });
     });
 });

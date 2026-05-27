@@ -93,4 +93,12 @@ class AdminRepository {
     final res = await _dio.patch('/admin/prediction-rules', data: data);
     return (res.data['data'] as Map).cast<String, dynamic>();
   }
+
+  Future<Map<String, dynamic>> resetBolao({required String scope}) async {
+    final res = await _dio.post('/admin/reset', data: {
+      'scope': scope,
+      'confirm': 'RESET',
+    });
+    return (res.data['data'] as Map).cast<String, dynamic>();
+  }
 }

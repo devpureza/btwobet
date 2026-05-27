@@ -75,3 +75,14 @@ cp .env.production.example .env.production
    - `EC2_HOST`, `EC2_USER` (`ubuntu`), `EC2_SSH_KEY` (conteúdo do `.pem`)
 
 Depois cada push em `main` roda o workflow **Deploy EC2**.
+
+## Passo 7 — Domínio e HTTPS
+
+1. **Elastic IP** já deve estar associado à EC2 (IP fixo para DNS).
+2. Conta no **Paid plan** (Free Plan não registra domínio no Route 53).
+3. `cp deploy/domain-contact.env.example deploy/domain-contact.env` e preencha.
+4. `./deploy/aws-register-domain.sh btwobet.dev`
+5. `./deploy/aws-setup-domain-https.sh btwobet.dev seu@email.com`
+6. No GitHub Secrets: `EC2_HOST` = IP elástico ou domínio; variável `APP_URL` = `https://btwobet.dev` no workflow.
+
+Detalhes: [deploy-aws.md](./deploy-aws.md) seção 5.

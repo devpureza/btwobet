@@ -1,0 +1,5 @@
+# HTTP only até DOMAIN estar no DNS apontando para esta EC2.
+# Depois: ./deploy/setup-https-domain.sh btwobet.dev seu@email.com
+:80 {
+	reverse_proxy nginx:80
+}

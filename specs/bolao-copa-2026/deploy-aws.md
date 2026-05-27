@@ -101,10 +101,36 @@ Credenciais: `aws configure` na máquina ou variáveis `AWS_ACCESS_KEY_ID` / `AW
 
 **Importante**: não commite chaves em `mcp.local.json`. Use `${VAR}` no `mcp.json` e valores locais no `.gitignore`.
 
-## 5. HTTPS (próximo passo)
+## 5. Domínio + HTTPS
 
-- Coloque um domínio apontando para o Elastic IP  
-- Use **Caddy** ou **Certbot** na frente do nginx, ou **Application Load Balancer + ACM**
+**IP fixo da EC2:** use o Elastic IP (ex.: `184.73.154.194`). Atualize o secret `EC2_HOST` no GitHub.
+
+### Conta AWS Free Plan
+
+Registro de domínio no Route 53 (`btwobet.dev`, etc.) **não funciona** no Free Plan — é preciso mudar para **Paid plan** no billing da conta, ou registrar o domínio em outro lugar e só usar Route 53 para DNS.
+
+### Fluxo recomendado (Caddy + Let's Encrypt)
+
+```bash
+# 1) Contato para registro (não commitar)
+cp deploy/domain-contact.env.example deploy/domain-contact.env
+# edite com dados reais
+
+# 2) Registrar domínio na AWS (após Paid plan)
+./deploy/aws-register-domain.sh btwobet.dev
+
+# 3) DNS + HTTPS na EC2
+export EC2_SSH_KEY_PATH=~/Downloads/sua-chave.pem
+./deploy/aws-setup-domain-https.sh btwobet.dev seu@email.com
+```
+
+Na EC2, após DNS propagar:
+
+```bash
+./deploy/setup-https-domain.sh btwobet.dev seu@email.com
+```
+
+Caddy termina HTTPS na frente do nginx (portas 80/443 no `docker-compose.prod.yml`).
 
 ## 6. Checklist pós-deploy
 

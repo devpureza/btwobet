@@ -68,6 +68,13 @@ class AdminScreen extends StatelessWidget {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.go('/admin/prediction-rules'),
                   ),
+                  ListTile(
+                    leading: Icon(Icons.restart_alt, color: scheme.error),
+                    title: const Text('Reset do bolão'),
+                    subtitle: const Text('Limpar palpites, placares ou apagar jogos/times'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.go('/admin/reset'),
+                  ),
                 ],
               ),
             ),

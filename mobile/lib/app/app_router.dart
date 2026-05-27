@@ -7,6 +7,7 @@ import '../features/admin/admin_prediction_rules_screen.dart';
 import '../features/admin/admin_matches_screen.dart';
 import '../features/admin/admin_teams_screen.dart';
 import '../features/admin/admin_screen.dart';
+import '../features/admin/admin_reset_screen.dart';
 import '../features/admin/admin_users_screen.dart';
 import '../features/history/history_screen.dart';
 import '../features/matches/matches_screen.dart';
@@ -86,6 +87,10 @@ class AppRouter {
             GoRoute(
               path: '/admin/prediction-rules',
               builder: (context, state) => AdminPredictionRulesScreen(session: session),
+            ),
+            GoRoute(
+              path: '/admin/reset',
+              builder: (context, state) => AdminResetScreen(session: session),
             ),
           ],
         ),
