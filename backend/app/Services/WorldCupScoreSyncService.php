@@ -66,14 +66,24 @@ class WorldCupScoreSyncService
 
     private function findMatch(int $homeId, int $awayId, Carbon $kickoff): ?FootballMatch
     {
-        $from = $kickoff->copy()->subHours(2);
-        $to = $kickoff->copy()->addHours(2);
-
-        return FootballMatch::query()
+        $candidates = FootballMatch::query()
             ->where('home_team_id', $homeId)
             ->where('away_team_id', $awayId)
-            ->whereBetween('kickoff_at', [$from, $to])
-            ->first();
+            ->orderBy('kickoff_at')
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            return null;
+        }
+
+        if ($candidates->count() === 1) {
+            return $candidates->first();
+        }
+
+        // Horário do GE pode divergir do openfootball (fuso); escolhe o mais próximo.
+        return $candidates->sortBy(fn (FootballMatch $m) => abs(
+            $m->kickoff_at->diffInMinutes($kickoff, false)
+        ))->first();
     }
 
     private function applyScores(

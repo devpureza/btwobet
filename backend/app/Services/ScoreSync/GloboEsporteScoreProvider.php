@@ -202,7 +202,8 @@ class GloboEsporteScoreProvider
         }
 
         try {
-            $kickoff = Carbon::parse($kickoffRaw)->utc();
+            // data_realizacao do GE vem sem offset; trata como horário dos EUA (sede da Copa).
+            $kickoff = Carbon::parse($kickoffRaw, 'America/New_York')->utc();
         } catch (\Throwable) {
             return null;
         }
