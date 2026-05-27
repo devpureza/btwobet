@@ -1,7 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/admin_helpers.dart';
+import '../../ui/avatar_image.dart';
 import '../../ui/glass.dart';
 import '../../ui/shell_header.dart';
 
@@ -71,10 +73,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _uploadAvatar() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+
+    final file = result.files.single;
+    final bytes = file.bytes;
+    if (bytes == null) {
+      if (mounted) showSnack(context, 'Não foi possível ler a imagem.', error: true);
+      return;
+    }
+
+    try {
+      final user = await widget.session.auth.uploadAvatar(bytes, file.name);
+      setState(() => _me = user);
+      await widget.session.refresh();
+      if (mounted) showSnack(context, 'Foto atualizada.');
+    } catch (e) {
+      if (mounted) showSnack(context, dioErrorMessage(e), error: true);
+    }
+  }
+
   Future<void> _editProfile() async {
     if (_me == null) return;
     final name = TextEditingController(text: _me!['name'] as String? ?? '');
-    final avatar = TextEditingController(text: _me!['avatar_url'] as String? ?? '');
     final password = TextEditingController();
 
     final saved = await showDialog<bool>(
@@ -92,13 +117,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 12),
               TextField(
-                controller: avatar,
-                decoration: const InputDecoration(
-                  labelText: 'URL da foto (opcional)',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
                 controller: password,
                 decoration: const InputDecoration(labelText: 'Nova senha (opcional)'),
                 obscureText: true,
@@ -112,11 +130,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () async {
               try {
                 final data = <String, dynamic>{'name': name.text.trim()};
-                if (avatar.text.trim().isNotEmpty) {
-                  data['avatar_url'] = avatar.text.trim();
-                } else {
-                  data['avatar_url'] = null;
-                }
                 if (password.text.isNotEmpty) data['password'] = password.text;
                 await widget.session.auth.updateProfile(data);
                 if (ctx.mounted) Navigator.pop(ctx, true);
@@ -131,7 +144,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     name.dispose();
-    avatar.dispose();
     password.dispose();
 
     if (saved == true) {
@@ -146,6 +158,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final avatarUrl = _me?['avatar_url'] as String?;
+    final displayName = (_me?['name'] as String?) ?? '—';
+    final initial = displayName.trim().isEmpty ? '?' : displayName.trim().substring(0, 1);
 
     return ShellPage(
       body: _loading
@@ -181,91 +195,108 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             Glass(
-                            blur: 12,
-                            borderRadius: BorderRadius.circular(24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 32,
-                                      backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                                          ? NetworkImage(avatarUrl)
-                                          : null,
-                                      backgroundColor: scheme.secondary.withValues(alpha: 0.45),
-                                      child: avatarUrl == null || avatarUrl.isEmpty
-                                          ? Text(
-                                              (_me?['name'] as String? ?? '?').trim().isEmpty
-                                                  ? '?'
-                                                  : (_me!['name'] as String).trim().substring(0, 1).toUpperCase(),
-                                              style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-                                            )
-                                          : null,
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Stack(
+                                        clipBehavior: Clip.none,
                                         children: [
-                                          Text(
-                                            (_me?['name'] as String?) ?? '—',
-                                            style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w800),
+                                          AvatarImage(
+                                            url: avatarUrl,
+                                            size: 64,
+                                            fallbackLetter: initial,
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            (_me?['email'] as String?) ?? '—',
-                                            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                                          Positioned(
+                                            right: -4,
+                                            bottom: -4,
+                                            child: Material(
+                                              color: scheme.primary,
+                                              shape: const CircleBorder(),
+                                              child: InkWell(
+                                                customBorder: const CircleBorder(),
+                                                onTap: _uploadAvatar,
+                                                child: const Padding(
+                                                  padding: EdgeInsets.all(6),
+                                                  child: Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    if ((_me?['is_admin'] as bool?) ?? false)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: scheme.primaryContainer.withValues(alpha: 0.20),
-                                          borderRadius: BorderRadius.circular(999),
-                                        ),
-                                        child: Text(
-                                          'Admin',
-                                          style: theme.textTheme.labelSmall?.copyWith(
-                                            color: scheme.onPrimaryContainer,
-                                            fontWeight: FontWeight.w800,
-                                          ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              displayName,
+                                              style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w800),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              (_me?['email'] as String?) ?? '—',
+                                              style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            TextButton.icon(
+                                              onPressed: _uploadAvatar,
+                                              icon: const Icon(Icons.upload_file, size: 18),
+                                              label: const Text('Trocar foto'),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Glass(
-                            blur: 12,
-                            borderRadius: BorderRadius.circular(24),
-                            child: Row(
-                              children: [
-                                Expanded(child: _statTile(theme, 'Pontos', '$_totalPoints', Icons.star)),
-                                Expanded(child: _statTile(theme, 'Palpites', '$_predictions', Icons.sports_soccer)),
-                                Expanded(child: _statTile(theme, 'Placares exatos', '$_exactHits', Icons.check_circle)),
-                                Expanded(
-                                  child: _statTile(
-                                    theme,
-                                    'Posição',
-                                    _rankPosition != null ? '#$_rankPosition' : '—',
-                                    Icons.leaderboard,
+                                      if ((_me?['is_admin'] as bool?) ?? false)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: scheme.primaryContainer.withValues(alpha: 0.20),
+                                            borderRadius: BorderRadius.circular(999),
+                                          ),
+                                          child: Text(
+                                            'Admin',
+                                            style: theme.textTheme.labelSmall?.copyWith(
+                                              color: scheme.onPrimaryContainer,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Glass(
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(24),
+                              child: Row(
+                                children: [
+                                  Expanded(child: _statTile(theme, 'Pontos', '$_totalPoints', Icons.star)),
+                                  Expanded(child: _statTile(theme, 'Palpites', '$_predictions', Icons.sports_soccer)),
+                                  Expanded(child: _statTile(theme, 'Placares exatos', '$_exactHits', Icons.check_circle)),
+                                  Expanded(
+                                    child: _statTile(
+                                      theme,
+                                      'Posição',
+                                      _rankPosition != null ? '#$_rankPosition' : '—',
+                                      Icons.leaderboard,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
     );
   }
 

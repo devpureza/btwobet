@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Team;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class TeamAdminController extends Controller
 {
@@ -58,18 +58,10 @@ class TeamAdminController extends Controller
 
         $file = $validated['file'];
         $ext = strtolower($file->getClientOriginalExtension() ?: 'png');
+        $filename = strtolower($team->code).'.'.$ext;
 
-        $code = strtolower($team->code);
-        $filename = $code.'.'.$ext;
-
-        $flagsDir = public_path('flags');
-        if (! is_dir($flagsDir)) {
-            mkdir($flagsDir, 0775, true);
-        }
-
-        $file->move($flagsDir, $filename);
-
-        $team->flag_url = '/flags/'.$filename;
+        $path = $file->storeAs('flags', $filename, 'public');
+        $team->flag_url = Storage::disk('public')->url($path);
         $team->save();
 
         return response()->json([

@@ -12,6 +12,7 @@ class RankingService
     public function getRanking(): Collection
     {
         return DB::table('users')
+            ->where('users.approval_status', 'approved')
             ->leftJoin('predictions', 'users.id', '=', 'predictions.user_id')
             ->select([
                 'users.id',

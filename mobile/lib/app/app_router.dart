@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/login_screen.dart';
+import '../features/auth/register_screen.dart';
 import '../features/admin/admin_prediction_rules_screen.dart';
 import '../features/admin/admin_matches_screen.dart';
 import '../features/admin/admin_teams_screen.dart';
@@ -22,12 +23,12 @@ class AppRouter {
       refreshListenable: session,
       redirect: (context, state) {
         final loggedIn = session.isLoggedIn;
-        final goingToLogin = state.matchedLocation == '/login';
+        final authRoute = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
-        if (!loggedIn && !goingToLogin) {
+        if (!loggedIn && !authRoute) {
           return '/login';
         }
-        if (loggedIn && goingToLogin) {
+        if (loggedIn && authRoute) {
           return '/';
         }
         if (loggedIn && state.matchedLocation.startsWith('/admin') && !session.isAdmin) {
@@ -40,6 +41,10 @@ class AppRouter {
         GoRoute(
           path: '/login',
           builder: (context, state) => LoginScreen(session: session),
+        ),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => RegisterScreen(session: session),
         ),
         ShellRoute(
           builder: (context, state, child) {

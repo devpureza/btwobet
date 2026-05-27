@@ -18,3 +18,5 @@ mobile/.flutter-plugins-dependencies
 .cursor/mcp.local.json
 .env
 STITCH_API_KEY
+deploy/keys/
+*.pem

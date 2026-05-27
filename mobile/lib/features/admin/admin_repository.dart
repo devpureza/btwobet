@@ -5,9 +5,27 @@ class AdminRepository {
 
   AdminRepository(this._dio);
 
-  Future<List<dynamic>> listUsers({String? q}) async {
-    final res = await _dio.get('/admin/users', queryParameters: q == null || q.isEmpty ? null : {'q': q});
+  Future<List<dynamic>> listUsers({String? q, String? approvalStatus}) async {
+    final params = <String, dynamic>{};
+    if (q != null && q.isNotEmpty) params['q'] = q;
+    if (approvalStatus != null && approvalStatus.isNotEmpty) {
+      params['approval_status'] = approvalStatus;
+    }
+    final res = await _dio.get(
+      '/admin/users',
+      queryParameters: params.isEmpty ? null : params,
+    );
     return res.data['data'] as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> approveUser(int id) async {
+    final res = await _dio.post('/admin/users/$id/approve');
+    return (res.data['data'] as Map).cast<String, dynamic>();
+  }
+
+  Future<Map<String, dynamic>> rejectUser(int id) async {
+    final res = await _dio.post('/admin/users/$id/reject');
+    return (res.data['data'] as Map).cast<String, dynamic>();
   }
 
   Future<Map<String, dynamic>> createUser(Map<String, dynamic> data) async {

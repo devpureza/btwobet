@@ -14,15 +14,23 @@ class UserAdminController extends Controller
     public function index(Request $request): JsonResponse
     {
         $q = trim((string) $request->query('q', ''));
+        $approvalStatus = trim((string) $request->query('approval_status', ''));
 
         $users = User::query()
             ->when($q !== '', function ($query) use ($q) {
-                $query->where('name', 'ilike', '%'.$q.'%')
-                    ->orWhere('email', 'ilike', '%'.$q.'%');
+                $query->where(function ($inner) use ($q) {
+                    $inner->where('name', 'ilike', '%'.$q.'%')
+                        ->orWhere('email', 'ilike', '%'.$q.'%');
+                });
             })
+            ->when(
+                in_array($approvalStatus, [User::STATUS_PENDING, User::STATUS_APPROVED, User::STATUS_REJECTED], true),
+                fn ($query) => $query->where('approval_status', $approvalStatus),
+            )
+            ->orderByRaw("CASE approval_status WHEN 'pending' THEN 0 ELSE 1 END")
             ->orderBy('name')
             ->limit(200)
-            ->get(['id', 'name', 'email', 'is_admin', 'avatar_url', 'created_at', 'updated_at']);
+            ->get(['id', 'name', 'email', 'is_admin', 'avatar_url', 'approval_status', 'created_at', 'updated_at']);
 
         return response()->json(['data' => $users]);
     }
@@ -43,9 +51,10 @@ class UserAdminController extends Controller
             'password' => Hash::make($validated['password']),
             'avatar_url' => $validated['avatar_url'] ?? null,
             'is_admin' => (bool) ($validated['is_admin'] ?? false),
+            'approval_status' => User::STATUS_APPROVED,
         ]);
 
-        return response()->json(['data' => $user], 201);
+        return response()->json(['data' => $this->userPayload($user)], 201);
     }
 
     public function update(Request $request, User $user): JsonResponse
@@ -70,7 +79,36 @@ class UserAdminController extends Controller
         $user->fill($validated);
         $user->save();
 
-        return response()->json(['data' => $user->fresh(['id', 'name', 'email', 'is_admin', 'avatar_url', 'created_at', 'updated_at'])]);
+        return response()->json(['data' => $this->userPayload($user->fresh())]);
+    }
+
+    public function approve(User $user): JsonResponse
+    {
+        if ($user->approval_status === User::STATUS_APPROVED) {
+            return response()->json(['message' => 'Participante já está aprovado.'], 422);
+        }
+
+        $user->update(['approval_status' => User::STATUS_APPROVED]);
+
+        return response()->json([
+            'message' => 'Cadastro aprovado.',
+            'data' => $this->userPayload($user->fresh()),
+        ]);
+    }
+
+    public function reject(User $user): JsonResponse
+    {
+        if ($user->approval_status === User::STATUS_REJECTED) {
+            return response()->json(['message' => 'Participante já está recusado.'], 422);
+        }
+
+        $user->tokens()->delete();
+        $user->update(['approval_status' => User::STATUS_REJECTED]);
+
+        return response()->json([
+            'message' => 'Cadastro recusado.',
+            'data' => $this->userPayload($user->fresh()),
+        ]);
     }
 
     public function destroy(Request $request, User $user): JsonResponse
@@ -81,6 +119,12 @@ class UserAdminController extends Controller
 
         $user->delete();
         return response()->json(['message' => 'Participante removido.']);
+    }
+
+    /** @return array<string, mixed> */
+    private function userPayload(User $user): array
+    {
+        return $user->only(['id', 'name', 'email', 'is_admin', 'avatar_url', 'approval_status', 'created_at', 'updated_at']);
     }
 }
 

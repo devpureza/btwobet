@@ -14,7 +14,8 @@ if ! grep -q '^APP_KEY=base64:' .env.production 2>/dev/null; then
   KEY=$(docker compose -f docker-compose.prod.yml --env-file .env.production run --rm --no-deps \
     --entrypoint php app artisan key:generate --show)
   if grep -q '^APP_KEY=' .env.production; then
-    sed -i.bak "s|^APP_KEY=.*|APP_KEY=${KEY}|" .env.production
+    awk -v key="$KEY" '/^APP_KEY=/{print "APP_KEY=" key; next} {print}' .env.production > .env.production.tmp \
+      && mv .env.production.tmp .env.production
   else
     echo "APP_KEY=${KEY}" >> .env.production
   fi

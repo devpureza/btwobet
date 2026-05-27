@@ -38,6 +38,23 @@ Como os confrontos (times) dependem do sorteio, o import usa um dataset público
 docker compose exec app php artisan worldcup:import-openfootball
 ```
 
+## Placares automáticos (ge.globo)
+
+A cada 30 minutos o backend lê a página da Copa no GE e atualiza placares dos jogos que aparecem no widget (JSON embutido na página).
+
+```bash
+# Rodar manualmente
+docker compose exec app php artisan worldcup:sync-scores
+```
+
+Em produção (`docker-compose.prod.yml`) o serviço `scheduler` executa `php artisan schedule:work`.
+
+Variável opcional: `GE_COPA_URL` (padrão `https://ge.globo.com/futebol/copa-do-mundo/`).
+
+## Foto de perfil
+
+Upload via `POST /api/me/avatar` (multipart, campo `file`). Na tela **Conta**, use **Trocar foto** ou o ícone da câmera.
+
 ## Fluxo de teste manual
 
 ### 1. Cadastro
@@ -45,7 +62,7 @@ docker compose exec app php artisan worldcup:import-openfootball
 ```bash
 curl -X POST http://localhost:8080/api/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"Igor","email":"igor@bolao.test","password":"senha1234","password_confirmation":"senha1234"}'
+  -d '{"name":"Seu Nome","email":"seu@email.com","password":"sua-senha","password_confirmation":"sua-senha"}'
 ```
 
 Guarde o `token` da resposta.

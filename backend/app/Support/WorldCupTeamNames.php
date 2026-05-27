@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Support;
+
+class WorldCupTeamNames
+{
+    /** Nomes em português (como no ge.globo) por nome em inglês do dataset. */
+    public static function toPortuguese(string $englishName): string
+    {
+        return self::MAP[$englishName] ?? $englishName;
+    }
+
+    public static function flagCdnUrl(string $iso2): string
+    {
+        return 'https://flagcdn.com/w80/'.strtolower($iso2).'.png';
+    }
+
+    /** @var array<string, string> */
+    private const MAP = [
+        'Mexico' => 'México',
+        'Canada' => 'Canadá',
+        'USA' => 'Estados Unidos',
+        'United States' => 'Estados Unidos',
+        'South Africa' => 'África do Sul',
+        'South Korea' => 'Coreia do Sul',
+        'Czech Republic' => 'República Tcheca',
+        'Brazil' => 'Brasil',
+        'Argentina' => 'Argentina',
+        'Colombia' => 'Colômbia',
+        'Chile' => 'Chile',
+        'Uruguay' => 'Uruguai',
+        'Ecuador' => 'Equador',
+        'Paraguay' => 'Paraguai',
+        'France' => 'França',
+        'Germany' => 'Alemanha',
+        'Spain' => 'Espanha',
+        'Portugal' => 'Portugal',
+        'England' => 'Inglaterra',
+        'Netherlands' => 'Holanda',
+        'Italy' => 'Itália',
+        'Belgium' => 'Bélgica',
+        'Switzerland' => 'Suíça',
+        'Morocco' => 'Marrocos',
+        'Australia' => 'Austrália',
+        'Turkey' => 'Turquia',
+        'Qatar' => 'Catar',
+        'Japan' => 'Japão',
+        'Ghana' => 'Gana',
+        'Panama' => 'Panamá',
+        'Tunisia' => 'Tunísia',
+        'Sweden' => 'Suécia',
+        'Norway' => 'Noruega',
+        'Egypt' => 'Egito',
+        'Iran' => 'Irã',
+        'New Zealand' => 'Nova Zelândia',
+        'Saudi Arabia' => 'Arábia Saudita',
+        'Cape Verde' => 'Cabo Verde',
+        'Iraq' => 'Iraque',
+        'Senegal' => 'Senegal',
+        'Algeria' => 'Argélia',
+        'Austria' => 'Áustria',
+        'Jordan' => 'Jordânia',
+        'Bosnia & Herzegovina' => 'Bósnia e Herzegovina',
+        'Scotland' => 'Escócia',
+        'Haiti' => 'Haiti',
+        'Croatia' => 'Croácia',
+        'Denmark' => 'Dinamarca',
+        'Poland' => 'Polônia',
+        'Ukraine' => 'Ucrânia',
+        'Wales' => 'País de Gales',
+        'Costa Rica' => 'Costa Rica',
+        'Jamaica' => 'Jamaica',
+        'Curacao' => 'Curaçao',
+    ];
+
+    /** @var array<string, string> */
+    public const ISO2 = [
+        'Mexico' => 'mx',
+        'Canada' => 'ca',
+        'USA' => 'us',
+        'United States' => 'us',
+        'South Africa' => 'za',
+        'South Korea' => 'kr',
+        'Czech Republic' => 'cz',
+        'Brazil' => 'br',
+        'Argentina' => 'ar',
+        'Colombia' => 'co',
+        'Chile' => 'cl',
+        'Uruguay' => 'uy',
+        'Ecuador' => 'ec',
+        'Paraguay' => 'py',
+        'France' => 'fr',
+        'Germany' => 'de',
+        'Spain' => 'es',
+        'Portugal' => 'pt',
+        'England' => 'gb-eng',
+        'Netherlands' => 'nl',
+        'Italy' => 'it',
+        'Belgium' => 'be',
+        'Switzerland' => 'ch',
+        'Morocco' => 'ma',
+        'Australia' => 'au',
+        'Turkey' => 'tr',
+        'Qatar' => 'qa',
+        'Japan' => 'jp',
+        'Ghana' => 'gh',
+        'Panama' => 'pa',
+        'Tunisia' => 'tn',
+        'Sweden' => 'se',
+        'Norway' => 'no',
+        'Egypt' => 'eg',
+        'Iran' => 'ir',
+        'New Zealand' => 'nz',
+        'Saudi Arabia' => 'sa',
+        'Cape Verde' => 'cv',
+        'Iraq' => 'iq',
+        'Senegal' => 'sn',
+        'Algeria' => 'dz',
+        'Austria' => 'at',
+        'Jordan' => 'jo',
+        'Bosnia & Herzegovina' => 'ba',
+        'Scotland' => 'gb-sct',
+        'Haiti' => 'ht',
+        'Croatia' => 'hr',
+        'Denmark' => 'dk',
+        'Poland' => 'pl',
+        'Ukraine' => 'ua',
+        'Wales' => 'gb-wls',
+        'Costa Rica' => 'cr',
+        'Jamaica' => 'jm',
+        'Curacao' => 'cw',
+    ];
+}

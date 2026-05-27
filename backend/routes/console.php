@@ -1,11 +1,18 @@
 <?php
 
+use App\Models\FootballMatch;
+use App\Models\Team;
+use App\Support\WorldCupTeamNames;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Str;
-use App\Models\FootballMatch;
-use App\Models\Team;
+
+Schedule::command('worldcup:sync-scores')
+    ->everyThirtyMinutes()
+    ->withoutOverlapping(25)
+    ->runInBackground();
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -61,60 +68,40 @@ Artisan::command('worldcup:import-openfootball {--url=https://raw.githubusercont
         return $code;
     };
 
-    $flagForTeamName = function (string $name): ?string {
-        $map = [
-            'Mexico' => 'mx',
-            'Canada' => 'ca',
-            'USA' => 'us',
-            'United States' => 'us',
-            'Brazil' => 'br',
-            'Argentina' => 'ar',
-            'Colombia' => 'co',
-            'Chile' => 'cl',
-            'France' => 'fr',
-            'Germany' => 'de',
-            'Spain' => 'es',
-            'Portugal' => 'pt',
-            'England' => 'gb-eng',
-            'Netherlands' => 'nl',
-            'Italy' => 'it',
-            'Belgium' => 'be',
-            'Switzerland' => 'ch',
-            'Morocco' => 'ma',
-            'Uruguay' => 'uy',
-            'Australia' => 'au',
-            'Turkey' => 'tr',
-            'Qatar' => 'qa',
-            'Japan' => 'jp',
-            'South Korea' => 'kr',
-            'South Africa' => 'za',
-            'Czech Republic' => 'cz',
-            'Scotland' => 'gb-sct',
-            'Ghana' => 'gh',
-            'Panama' => 'pa',
-            'Ecuador' => 'ec',
-            'Tunisia' => 'tn',
-            'Sweden' => 'se',
-            'Norway' => 'no',
-            'Egypt' => 'eg',
-            'Iran' => 'ir',
-            'New Zealand' => 'nz',
-            'Saudi Arabia' => 'sa',
-            'Cape Verde' => 'cv',
-            'Iraq' => 'iq',
-            'Senegal' => 'sn',
-            'Algeria' => 'dz',
-            'Austria' => 'at',
-            'Jordan' => 'jo',
-            'Paraguay' => 'py',
-            'Bosnia & Herzegovina' => 'ba',
-        ];
-
-        $code = $map[$name] ?? null;
-        if (!$code) {
+    $flagForTeamName = function (string $englishName): ?string {
+        $iso2 = WorldCupTeamNames::ISO2[$englishName] ?? null;
+        if (! $iso2) {
             return null;
         }
-        return '/flags/'.$code.'.png';
+
+        return WorldCupTeamNames::flagCdnUrl($iso2);
+    };
+
+    $parseKickoff = function (string $date, string $time): ?\DateTimeImmutable {
+        $date = trim($date);
+        $time = trim($time);
+        if ($date === '') {
+            return null;
+        }
+        if ($time === '') {
+            return new \DateTimeImmutable($date.' 12:00:00', new \DateTimeZone('UTC'));
+        }
+        if (preg_match('/^(\d{1,2}):(\d{2})\s*UTC([+-]\d+)/i', $time, $m)) {
+            $sign = $m[3][0] === '-' ? '-' : '+';
+            $hours = (int) substr($m[3], 1);
+            $tz = new \DateTimeZone(sprintf('%s%02d:00', $sign, $hours));
+
+            return (new \DateTimeImmutable(
+                sprintf('%s %02d:%02d:00', $date, (int) $m[1], (int) $m[2]),
+                $tz,
+            ))->setTimezone(new \DateTimeZone('UTC'));
+        }
+
+        try {
+            return new \DateTimeImmutable($date.' '.$time, new \DateTimeZone('UTC'));
+        } catch (\Throwable) {
+            return null;
+        }
     };
 
     $teamIdByName = [];
@@ -140,7 +127,7 @@ Artisan::command('worldcup:import-openfootball {--url=https://raw.githubusercont
 
             $team = Team::create([
                 'code' => $code,
-                'name' => $t,
+                'name' => WorldCupTeamNames::toPortuguese($t),
                 'group_name' => $groupLetter,
                 'flag_url' => $flagForTeamName($t),
             ]);
@@ -148,31 +135,36 @@ Artisan::command('worldcup:import-openfootball {--url=https://raw.githubusercont
         }
     }
 
+    $imported = 0;
     foreach ($matches as $m) {
         $date = (string) ($m['date'] ?? '');
         $time = (string) ($m['time'] ?? '');
-        $kickoffAt = trim($date.' '.$time);
-        if ($kickoffAt === '') {
+        $dt = $parseKickoff($date, $time);
+        if (! $dt) {
             continue;
         }
 
-        $dt = new DateTimeImmutable($kickoffAt);
-        $round = (string) ($m['round'] ?? 'group');
+        $round = Str::lower((string) ($m['round'] ?? 'group'));
         $group = isset($m['group']) ? (string) $m['group'] : null;
+        $isKnockout = Str::contains($round, 'final')
+            || Str::contains($round, 'semi')
+            || Str::contains($round, 'quarter')
+            || Str::contains($round, 'round of');
 
         FootballMatch::create([
             'home_team_id' => $teamIdByName[(string) $m['team1']],
             'away_team_id' => $teamIdByName[(string) $m['team2']],
-            'kickoff_at' => $dt->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
-            'stage' => Str::contains(Str::lower($round), 'round') || Str::contains(Str::lower($round), 'final') ? 'knockout' : 'group',
-            'group_name' => $group ? substr($group, -1) : null,
+            'kickoff_at' => $dt->format('Y-m-d H:i:s'),
+            'stage' => $isKnockout ? 'knockout' : 'group',
+            'group_name' => $group ? strtoupper(substr($group, -1)) : null,
             'venue' => isset($m['ground']) ? (string) $m['ground'] : null,
             'status' => 'scheduled',
             'home_score' => null,
             'away_score' => null,
         ]);
+        $imported++;
     }
 
-    $this->info('Import concluído.');
+    $this->info("Import concluído: {$imported} jogos, ".Team::count().' seleções.');
     return self::SUCCESS;
 })->purpose('Importa tabela de jogos (openfootball) para o banco');

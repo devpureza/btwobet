@@ -115,6 +115,14 @@ class MatchController extends Controller
                 'home_score' => $match->home_score,
                 'away_score' => $match->away_score,
             ] : null,
+            'live_score' => $match->status === 'scheduled'
+                && $match->home_score !== null
+                && $match->away_score !== null
+                ? [
+                    'home_score' => $match->home_score,
+                    'away_score' => $match->away_score,
+                ]
+                : null,
             'open_for_predictions' => $access['can_submit'],
             'prediction_deadline_at' => $access['deadline_at'],
             'prediction_lock_reason' => $access['reason'],

@@ -18,6 +18,7 @@ class ApiClient {
         receiveTimeout: const Duration(seconds: 20),
         headers: {
           'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
       ),
     );
@@ -25,6 +26,9 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (options.data is FormData) {
+            options.headers.remove('Content-Type');
+          }
           final token = await tokenStore.read();
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';

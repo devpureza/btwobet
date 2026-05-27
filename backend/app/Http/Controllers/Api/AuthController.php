@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -23,13 +24,12 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'approval_status' => User::STATUS_PENDING,
         ]);
 
-        $token = $user->createToken('mobile')->plainTextToken;
-
         return response()->json([
-            'user' => $user,
-            'token' => $token,
+            'message' => 'Cadastro enviado! Aguarde a aprovação de um administrador.',
+            'user' => $user->only(['id', 'name', 'email', 'approval_status', 'created_at']),
         ], 201);
     }
 
@@ -44,6 +44,14 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($validated['password'], $user->password)) {
             return response()->json(['message' => 'Credenciais inválidas.'], 401);
+        }
+
+        if ($user->approval_status === User::STATUS_PENDING) {
+            return response()->json(['message' => 'Seu cadastro está aguardando aprovação.'], 403);
+        }
+
+        if ($user->approval_status === User::STATUS_REJECTED) {
+            return response()->json(['message' => 'Seu cadastro foi recusado. Entre em contato com o organizador.'], 403);
         }
 
         $token = $user->createToken('mobile')->plainTextToken;
@@ -77,5 +85,27 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json(['user' => $user->fresh()]);
+    }
+
+    public function uploadAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
+        ]);
+
+        $file = $validated['file'];
+        $ext = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $filename = 'user-'.$user->id.'.'.$ext;
+
+        $path = $file->storeAs('avatars', $filename, 'public');
+        $user->avatar_url = Storage::disk('public')->url($path);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Foto de perfil atualizada.',
+            'user' => $user->fresh(),
+        ]);
     }
 }

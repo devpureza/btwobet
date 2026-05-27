@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
@@ -36,8 +35,7 @@ class _AppBootstrapState extends State<AppBootstrap> {
       if (!mounted) return;
       setState(() => _theme = theme);
 
-      const storage = FlutterSecureStorage();
-      final tokenStore = TokenStore(storage);
+      final tokenStore = await TokenStore.create();
       final session = await SessionController.create(tokenStore);
 
       if (!mounted) return;

@@ -20,26 +20,32 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::patch('/me', [AuthController::class, 'updateMe']);
-    Route::get('/matches', [MatchController::class, 'index']);
-    Route::post('/predictions', [PredictionController::class, 'store']);
-    Route::get('/ranking', [RankingController::class, 'index']);
-    Route::get('/me/history', HistoryController::class);
+    Route::post('/me/avatar', [AuthController::class, 'uploadAvatar']);
 
-    Route::middleware('admin')->prefix('admin')->group(function () {
-        Route::get('/users', [UserAdminController::class, 'index']);
-        Route::post('/users', [UserAdminController::class, 'store']);
-        Route::patch('/users/{user}', [UserAdminController::class, 'update']);
-        Route::delete('/users/{user}', [UserAdminController::class, 'destroy']);
+    Route::middleware('approved')->group(function () {
+        Route::get('/matches', [MatchController::class, 'index']);
+        Route::post('/predictions', [PredictionController::class, 'store']);
+        Route::get('/ranking', [RankingController::class, 'index']);
+        Route::get('/me/history', HistoryController::class);
 
-        Route::get('/matches', [MatchAdminController::class, 'index']);
-        Route::patch('/matches/{match}/result', [MatchAdminController::class, 'updateResult']);
-        Route::patch('/matches/{match}', [MatchAdminController::class, 'update']);
+        Route::middleware('admin')->prefix('admin')->group(function () {
+            Route::get('/users', [UserAdminController::class, 'index']);
+            Route::post('/users', [UserAdminController::class, 'store']);
+            Route::patch('/users/{user}', [UserAdminController::class, 'update']);
+            Route::post('/users/{user}/approve', [UserAdminController::class, 'approve']);
+            Route::post('/users/{user}/reject', [UserAdminController::class, 'reject']);
+            Route::delete('/users/{user}', [UserAdminController::class, 'destroy']);
 
-        Route::get('/teams', [TeamAdminController::class, 'index']);
-        Route::patch('/teams/{team}', [TeamAdminController::class, 'update']);
-        Route::post('/teams/{team}/flag', [TeamAdminController::class, 'uploadFlag']);
+            Route::get('/matches', [MatchAdminController::class, 'index']);
+            Route::patch('/matches/{match}/result', [MatchAdminController::class, 'updateResult']);
+            Route::patch('/matches/{match}', [MatchAdminController::class, 'update']);
 
-        Route::get('/prediction-rules', [PredictionRulesAdminController::class, 'show']);
-        Route::patch('/prediction-rules', [PredictionRulesAdminController::class, 'update']);
+            Route::get('/teams', [TeamAdminController::class, 'index']);
+            Route::patch('/teams/{team}', [TeamAdminController::class, 'update']);
+            Route::post('/teams/{team}/flag', [TeamAdminController::class, 'uploadFlag']);
+
+            Route::get('/prediction-rules', [PredictionRulesAdminController::class, 'show']);
+            Route::patch('/prediction-rules', [PredictionRulesAdminController::class, 'update']);
+        });
     });
 });

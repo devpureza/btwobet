@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'globo_esporte' => [
+        'copa_url' => env('GE_COPA_URL', 'https://ge.globo.com/futebol/copa-do-mundo/'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

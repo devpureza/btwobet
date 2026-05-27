@@ -75,6 +75,20 @@ class SessionController extends ChangeNotifier {
     await refresh();
   }
 
+  Future<String> register({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+  }) {
+    return auth.register(
+      name: name,
+      email: email,
+      password: password,
+      passwordConfirmation: passwordConfirmation,
+    );
+  }
+
   Future<void> logout() async {
     await auth.logout();
     await refresh();

@@ -19,6 +19,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   String? _error;
   List<dynamic> _users = [];
   final _q = TextEditingController();
+  String? _approvalFilter = 'pending';
 
   @override
   void dispose() {
@@ -34,6 +35,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     try {
       final data = await widget.session.admin.listUsers(
         q: _q.text.trim().isEmpty ? null : _q.text.trim(),
+        approvalStatus: _approvalFilter,
       );
       setState(() => _users = data);
     } catch (e) {
@@ -155,6 +157,59 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     }
   }
 
+  Future<void> _approve(Map<String, dynamic> user) async {
+    try {
+      await widget.session.admin.approveUser(user['id'] as int);
+      if (mounted) showSnack(context, 'Cadastro aprovado.');
+      await _load();
+    } catch (e) {
+      if (mounted) showSnack(context, dioErrorMessage(e), error: true);
+    }
+  }
+
+  Future<void> _reject(Map<String, dynamic> user) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Recusar cadastro'),
+        content: Text('Recusar o cadastro de ${user['name']} (${user['email']})?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Recusar'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    try {
+      await widget.session.admin.rejectUser(user['id'] as int);
+      if (mounted) showSnack(context, 'Cadastro recusado.');
+      await _load();
+    } catch (e) {
+      if (mounted) showSnack(context, dioErrorMessage(e), error: true);
+    }
+  }
+
+  String _statusLabel(String? status) {
+    return switch (status) {
+      'pending' => 'Aguardando',
+      'rejected' => 'Recusado',
+      _ => 'Aprovado',
+    };
+  }
+
+  Color _statusColor(ColorScheme scheme, String? status) {
+    return switch (status) {
+      'pending' => scheme.tertiary,
+      'rejected' => scheme.error,
+      _ => scheme.primary,
+    };
+  }
+
   Future<void> _confirmDelete(Map<String, dynamic> user) async {
     final ok = await showDialog<bool>(
       context: context,
@@ -210,20 +265,62 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 Glass(
                   blur: 12,
                   borderRadius: BorderRadius.circular(20),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _q,
-                          decoration: const InputDecoration(
-                            labelText: 'Buscar por nome ou email',
-                            prefixIcon: Icon(Icons.search),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _q,
+                              decoration: const InputDecoration(
+                                labelText: 'Buscar por nome ou email',
+                                prefixIcon: Icon(Icons.search),
+                              ),
+                              onSubmitted: (_) => _load(),
+                            ),
                           ),
-                          onSubmitted: (_) => _load(),
-                        ),
+                          const SizedBox(width: 12),
+                          FilledButton(onPressed: _load, child: const Text('Buscar')),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      FilledButton(onPressed: _load, child: const Text('Buscar')),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          FilterChip(
+                            label: const Text('Aguardando'),
+                            selected: _approvalFilter == 'pending',
+                            onSelected: (_) {
+                              setState(() => _approvalFilter = 'pending');
+                              _load();
+                            },
+                          ),
+                          FilterChip(
+                            label: const Text('Aprovados'),
+                            selected: _approvalFilter == 'approved',
+                            onSelected: (_) {
+                              setState(() => _approvalFilter = 'approved');
+                              _load();
+                            },
+                          ),
+                          FilterChip(
+                            label: const Text('Recusados'),
+                            selected: _approvalFilter == 'rejected',
+                            onSelected: (_) {
+                              setState(() => _approvalFilter = 'rejected');
+                              _load();
+                            },
+                          ),
+                          FilterChip(
+                            label: const Text('Todos'),
+                            selected: _approvalFilter == null,
+                            onSelected: (_) {
+                              setState(() => _approvalFilter = null);
+                              _load();
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -247,6 +344,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                   final u = (_users[index] as Map).cast<String, dynamic>();
                                   final isAdmin = (u['is_admin'] as bool?) ?? false;
                                   final avatarUrl = u['avatar_url'] as String?;
+                                  final approvalStatus = u['approval_status'] as String? ?? 'approved';
+                                  final isPending = approvalStatus == 'pending';
                                   return ListTile(
                                     leading: CircleAvatar(
                                       backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
@@ -262,6 +361,22 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
+                                        Container(
+                                          margin: const EdgeInsets.only(right: 8),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: _statusColor(scheme, approvalStatus).withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(999),
+                                          ),
+                                          child: Text(
+                                            _statusLabel(approvalStatus),
+                                            style: theme.textTheme.labelSmall?.copyWith(
+                                              color: _statusColor(scheme, approvalStatus),
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.4,
+                                            ),
+                                          ),
+                                        ),
                                         if (isAdmin)
                                           Container(
                                             margin: const EdgeInsets.only(right: 8),
@@ -279,6 +394,18 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                               ),
                                             ),
                                           ),
+                                        if (isPending) ...[
+                                          IconButton(
+                                            tooltip: 'Aprovar',
+                                            icon: Icon(Icons.check_circle_outline, color: scheme.primary),
+                                            onPressed: () => _approve(u),
+                                          ),
+                                          IconButton(
+                                            tooltip: 'Recusar',
+                                            icon: Icon(Icons.cancel_outlined, color: scheme.error),
+                                            onPressed: () => _reject(u),
+                                          ),
+                                        ],
                                         IconButton(
                                           tooltip: 'Editar',
                                           icon: const Icon(Icons.edit_outlined),

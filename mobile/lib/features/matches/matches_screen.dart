@@ -358,6 +358,7 @@ class _MatchCardState extends State<MatchCard> {
     final hasPrediction = widget.match['my_prediction'] != null;
 
     final result = widget.match['result'] as Map<String, dynamic>?;
+    final liveScore = widget.match['live_score'] as Map<String, dynamic>?;
     final venue = widget.match['venue'] as String?;
     final group = widget.match['group_name'] as String?;
 
@@ -467,6 +468,15 @@ class _MatchCardState extends State<MatchCard> {
                   Text(
                     'Resultado: ${result['home_score']} x ${result['away_score']}',
                     style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                ] else if (liveScore != null) ...[
+                  Text(
+                    'Ao vivo: ${liveScore['home_score']} x ${liveScore['away_score']}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                 ],

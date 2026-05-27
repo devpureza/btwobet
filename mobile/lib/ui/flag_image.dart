@@ -7,11 +7,22 @@ class FlagImage extends StatelessWidget {
 
   const FlagImage({super.key, required this.url, this.size = 56});
 
+  String? _resolveUrl(String raw) {
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return raw;
+    }
+    if (raw.startsWith('/')) {
+      return kIsWeb ? '${Uri.base.origin}$raw' : raw;
+    }
+    return raw;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final resolved = url == null || url!.isEmpty ? null : _resolveUrl(url!);
 
-    if (url == null || url!.isEmpty) {
+    if (resolved == null || resolved.isEmpty) {
       return _frame(
         scheme,
         Container(color: scheme.surfaceContainerHighest),
@@ -22,7 +33,7 @@ class FlagImage extends StatelessWidget {
       return _frame(
         scheme,
         Image.network(
-          url!,
+          resolved,
           fit: BoxFit.cover,
           webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
           errorBuilder: (context, error, stackTrace) {
@@ -35,7 +46,7 @@ class FlagImage extends StatelessWidget {
     return _frame(
       scheme,
       Image.network(
-        url!,
+        resolved,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return Container(color: scheme.surfaceContainerHighest);

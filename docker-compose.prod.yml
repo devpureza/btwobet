@@ -21,6 +21,8 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
+    volumes:
+      - app_public_storage:/var/www/html/storage/app/public
     env_file:
       - .env.production
     environment:
@@ -30,6 +32,26 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    restart: unless-stopped
+    command: ["php", "artisan", "schedule:work"]
+    volumes:
+      - app_public_storage:/var/www/html/storage/app/public
+    env_file:
+      - .env.production
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      RUN_SEED: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
 
   db:
     image: postgres:16-alpine
@@ -48,3 +70,4 @@ services:
 
 volumes:
   postgres_data:
+  app_public_storage:

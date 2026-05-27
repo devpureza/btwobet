@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/admin_helpers.dart';
+import '../../ui/flag_image.dart';
 import '../../ui/glass.dart';
 import '../../ui/shell_header.dart';
 
@@ -230,13 +231,9 @@ class _AdminTeamsScreenState extends State<AdminTeamsScreen> {
                                   final t = (_teams[index] as Map).cast<String, dynamic>();
                                   final flag = t['flag_url'] as String?;
                                   return ListTile(
-                                    leading: ClipRRect(
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: flag != null && flag.isNotEmpty
-                                          ? Image.network(flag, width: 40, height: 28, fit: BoxFit.cover,
-                                              errorBuilder: (_, _, _) => _placeholder(scheme, t))
-                                          : _placeholder(scheme, t),
-                                    ),
+                                    leading: flag != null && flag.isNotEmpty
+                                        ? FlagImage(url: flag, size: 36)
+                                        : _placeholder(scheme, t),
                                     title: Text(t['name'] as String),
                                     subtitle: Text(
                                       [

@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/glass.dart';
@@ -14,8 +16,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController(text: 'igor@bolao.test');
-  final _password = TextEditingController(text: 'senha1234');
+  final _email = TextEditingController();
+  final _password = TextEditingController();
 
   bool _loading = false;
   String? _error;
@@ -38,9 +40,30 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
       await widget.session.login(_email.text.trim(), _password.text);
+      if (!widget.session.isLoggedIn) {
+        throw StateError('Sessão não foi salva. Tente novamente ou use outro navegador.');
+      }
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      final msg = e.response?.data is Map
+          ? (e.response!.data as Map)['message']?.toString()
+          : null;
+      setState(() {
+        if (status == 401) {
+          _error = msg ?? 'Email ou senha incorretos.';
+        } else if (status == 403) {
+          _error = msg ?? 'Acesso não liberado.';
+        } else if (status == 419) {
+          _error = 'Sessão expirada no servidor. Atualize a página (Ctrl+Shift+R) e tente de novo.';
+        } else if (status != null) {
+          _error = msg ?? 'Erro do servidor ($status).';
+        } else {
+          _error = 'Sem conexão com o servidor. Verifique sua internet.';
+        }
+      });
     } catch (e) {
       setState(() {
-        _error = 'Falha no login. Verifique email/senha e se o backend está no ar.';
+        _error = e.toString().replaceFirst('StateError: ', '');
       });
     } finally {
       if (mounted) {
@@ -154,6 +177,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 'Use seu email e senha para entrar.',
                                 style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
                                 textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 4),
+                              TextButton(
+                                onPressed: _loading ? null : () => context.go('/register'),
+                                child: const Text('Ainda não tenho conta'),
                               ),
                             ],
                           ),
