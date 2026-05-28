@@ -25,6 +25,84 @@ class _RankingScreenState extends State<RankingScreen> {
     _load();
   }
 
+  void _showUserDetail(BuildContext context, Map<String, dynamic> row) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final pos = (row['position'] as num).toInt();
+    final name = row['name'] as String? ?? '—';
+    final initial = name.trim().isEmpty ? '?' : name.trim().substring(0, 1);
+    final avatarUrl = row['avatar_url'] as String?;
+    final totalPoints = (row['total_points'] as num?)?.toInt() ?? 0;
+    final totalPredictions = (row['total_predictions'] as num?)?.toInt() ?? 0;
+    final scoredPredictions = (row['scored_predictions'] as num?)?.toInt() ?? 0;
+    final exactHits = (row['exact_hits'] as num?)?.toInt() ?? 0;
+    final resultHits = (row['result_hits'] as num?)?.toInt() ?? 0;
+    final exactPercent = (row['exact_hit_percent'] as num?)?.toInt() ?? 0;
+    final resultPercent = (row['result_hit_percent'] as num?)?.toInt() ?? 0;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.paddingOf(ctx).bottom),
+        child: Glass(
+          borderRadius: BorderRadius.circular(24),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AvatarImage(
+                url: avatarUrl,
+                size: 96,
+                fallbackLetter: initial,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                name,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '#$pos no ranking • $totalPoints pts',
+                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 20),
+              _StatTile(
+                label: 'Palpites',
+                value: '$totalPredictions',
+                subtitle: scoredPredictions > 0
+                    ? '$scoredPredictions já avaliados'
+                    : 'Nenhum jogo finalizado ainda',
+              ),
+              const SizedBox(height: 10),
+              _StatTile(
+                label: 'Placar exato',
+                value: '$exactPercent%',
+                subtitle: '$exactHits de $scoredPredictions jogos avaliados',
+              ),
+              const SizedBox(height: 10),
+              _StatTile(
+                label: 'Resultado (V/E/D)',
+                value: '$resultPercent%',
+                subtitle: '$resultHits de $scoredPredictions jogos avaliados',
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Fechar'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -108,7 +186,9 @@ class _RankingScreenState extends State<RankingScreen> {
 
                           final zebra = index.isOdd ? scheme.primary.withValues(alpha: 0.04) : Colors.transparent;
 
-                          return Container(
+                          return InkWell(
+                            onTap: () => _showUserDetail(context, row),
+                            child: Container(
                             decoration: BoxDecoration(
                               color: zebra,
                               border: Border(
@@ -180,6 +260,7 @@ class _RankingScreenState extends State<RankingScreen> {
                                 ),
                               ],
                             ),
+                          ),
                           );
                         }),
                       ),
@@ -187,6 +268,64 @@ class _RankingScreenState extends State<RankingScreen> {
                   ],
                 ),
                 ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final String subtitle;
+
+  const _StatTile({
+    required this.label,
+    required this.value,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: scheme.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            value,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: scheme.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

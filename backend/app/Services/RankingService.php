@@ -14,11 +14,14 @@ class RankingService
         return DB::table('users')
             ->where('users.approval_status', 'approved')
             ->leftJoin('predictions', 'users.id', '=', 'predictions.user_id')
+            ->leftJoin('matches', 'predictions.match_id', '=', 'matches.id')
             ->select([
                 'users.id',
                 'users.name',
                 'users.avatar_url',
                 DB::raw('COALESCE(SUM(predictions.points), 0) as total_points'),
+                DB::raw('COUNT(predictions.id) as total_predictions'),
+                DB::raw("SUM(CASE WHEN matches.status = 'finished' THEN 1 ELSE 0 END) as scored_predictions"),
                 DB::raw('SUM(CASE WHEN predictions.points = 2 THEN 1 ELSE 0 END) as exact_hits'),
                 DB::raw('SUM(CASE WHEN predictions.points >= 1 THEN 1 ELSE 0 END) as result_hits'),
                 'users.created_at',

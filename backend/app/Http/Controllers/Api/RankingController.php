@@ -13,14 +13,22 @@ class RankingController extends Controller
     public function index(): JsonResponse
     {
         $ranking = $this->rankingService->getRanking()->values()->map(function ($row, $index) {
+            $scored = (int) $row->scored_predictions;
+            $exactHits = (int) $row->exact_hits;
+            $resultHits = (int) $row->result_hits;
+
             return [
                 'position' => $index + 1,
                 'user_id' => $row->id,
                 'name' => $row->name,
                 'avatar_url' => $row->avatar_url,
                 'total_points' => (int) $row->total_points,
-                'exact_hits' => (int) $row->exact_hits,
-                'result_hits' => (int) $row->result_hits,
+                'total_predictions' => (int) $row->total_predictions,
+                'scored_predictions' => $scored,
+                'exact_hits' => $exactHits,
+                'result_hits' => $resultHits,
+                'exact_hit_percent' => $scored > 0 ? (int) round(($exactHits / $scored) * 100) : 0,
+                'result_hit_percent' => $scored > 0 ? (int) round(($resultHits / $scored) * 100) : 0,
             ];
         });
 
