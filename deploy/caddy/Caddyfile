@@ -1,9 +1,13 @@
-# HTTP no IP; HTTPS na 443 com cert interno (evita ERR_CONNECTION_REFUSED no browser).
-http://:80 {
+{
+	email devpureza@gmail.com
+	auto_https disable_redirects
+}
+
+:80 {
 	reverse_proxy nginx:80
 }
 
 :443 {
-	tls internal
+	tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
 	reverse_proxy nginx:80
 }

@@ -19,5 +19,6 @@ mobile/.flutter-plugins-dependencies
 .env
 STITCH_API_KEY
 deploy/keys/
+deploy/caddy/certs/
 deploy/domain-contact.env
 *.pem
