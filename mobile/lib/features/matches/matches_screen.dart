@@ -227,7 +227,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 ? SliverGrid(
                                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                                       maxCrossAxisExtent: 620,
-                                      mainAxisExtent: 280,
+                                      mainAxisExtent: 296,
                                       crossAxisSpacing: 16,
                                       mainAxisSpacing: 16,
                                     ),
@@ -371,7 +371,8 @@ class MatchCard extends StatefulWidget {
 }
 
 class _MatchCardState extends State<MatchCard> {
-  static const double _teamVisualSize = 64;
+  static const double _flagSize = 56;
+  static const double _scoreSize = 56;
 
   late final TextEditingController _home;
   late final TextEditingController _away;
@@ -493,24 +494,22 @@ class _MatchCardState extends State<MatchCard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: _team(homeTeam, alignRight: true),
-                      ),
+                      child: _teamName(homeTeam, alignRight: true),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
+                    _teamFlag(homeTeam),
+                    const SizedBox(width: 6),
                     _scoreInputs(
                       theme: theme,
                       scheme: scheme,
                       homeEnabled: open && !awaitingTeams,
                       awayEnabled: open && !awaitingTeams,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
+                    _teamFlag(awayTeam),
+                    const SizedBox(width: 6),
                     Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: _team(awayTeam),
-                      ),
+                      child: _teamName(awayTeam),
                     ),
                   ],
                 ),
@@ -605,15 +604,15 @@ class _MatchCardState extends State<MatchCard> {
         ScoreBox(
           controller: _home,
           enabled: homeEnabled,
-          size: _teamVisualSize,
+          size: _scoreSize,
         ),
         SizedBox(
-          width: 28,
-          height: _teamVisualSize,
+          width: 24,
+          height: _scoreSize,
           child: Center(
             child: Text(
               '×',
-              style: theme.textTheme.headlineMedium?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 color: scheme.outline,
                 fontWeight: FontWeight.w700,
                 height: 1,
@@ -624,39 +623,40 @@ class _MatchCardState extends State<MatchCard> {
         ScoreBox(
           controller: _away,
           enabled: awayEnabled,
-          size: _teamVisualSize,
+          size: _scoreSize,
         ),
       ],
     );
   }
 
-  Widget _team(Map<String, dynamic> team, {bool alignRight = false}) {
+  Widget _teamName(Map<String, dynamic> team, {bool alignRight = false}) {
     final theme = Theme.of(context);
     final isPlaceholder = team['is_placeholder'] as bool? ?? false;
     final name = isPlaceholder ? 'A definir' : (team['name'] as String).toUpperCase();
-    final flag = isPlaceholder
-        ? SizedBox(width: _teamVisualSize, height: _teamVisualSize)
-        : FlagImage(url: team['flag_url'] as String?, size: _teamVisualSize);
-    final label = Flexible(
-      child: Text(
-        name,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-        textAlign: alignRight ? TextAlign.right : TextAlign.left,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          height: 1.2,
-        ),
-      ),
-    );
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: alignRight
-          ? [label, const SizedBox(width: 8), flag]
-          : [flag, const SizedBox(width: 8), label],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 88;
+        return Text(
+          name,
+          maxLines: wide ? 2 : 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: alignRight ? TextAlign.right : TextAlign.left,
+          style: (wide ? theme.textTheme.titleSmall : theme.textTheme.labelLarge)?.copyWith(
+            fontWeight: FontWeight.w700,
+            height: 1.15,
+            letterSpacing: 0.2,
+          ),
+        );
+      },
     );
+  }
+
+  Widget _teamFlag(Map<String, dynamic> team) {
+    final isPlaceholder = team['is_placeholder'] as bool? ?? false;
+    if (isPlaceholder) {
+      return SizedBox(width: _flagSize, height: _flagSize);
+    }
+    return FlagImage(url: team['flag_url'] as String?, size: _flagSize);
   }
 }
