@@ -21,13 +21,17 @@ class LoginHeroHeader extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: maxHeight),
-        child: Image.asset(
-          kLoginHeroAssetPath,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => _LoginHeroFallback(
-            scheme: scheme,
-            theme: theme,
-            maxHeight: maxHeight,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Image.asset(
+            kLoginHeroAssetPath,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (context, error, stackTrace) => _LoginHeroFallback(
+              scheme: scheme,
+              theme: theme,
+              maxHeight: maxHeight,
+            ),
           ),
         ),
       ),
