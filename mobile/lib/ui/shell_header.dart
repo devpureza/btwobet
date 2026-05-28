@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/session_controller.dart';
+import 'avatar_image.dart';
 import 'glass.dart';
 
 class ShellHeader extends StatelessWidget {
@@ -37,6 +38,8 @@ class ShellHeader extends StatelessWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= 900;
     final user = session.user;
     final name = user?['name'] as String? ?? '';
+    final avatarUrl = user?['avatar_url'] as String?;
+    final avatarInitial = name.trim().isEmpty ? '?' : name.trim().substring(0, 1);
 
     return Glass(
       blur: 18,
@@ -94,7 +97,11 @@ class ShellHeader extends StatelessWidget {
               IconButton(
                 tooltip: 'Minha conta',
                 onPressed: () => context.go('/profile'),
-                icon: const Icon(Icons.account_circle_outlined),
+                icon: AvatarImage(
+                  url: avatarUrl,
+                  size: 36,
+                  fallbackLetter: avatarInitial,
+                ),
               ),
             ],
           ),

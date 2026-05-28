@@ -148,17 +148,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
                           ),
                         ),
                       SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        sliver: SliverToBoxAdapter(
-                          child: Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 1280),
-                              child: const BolaoRulesCard(),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SliverPadding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                         sliver: SliverToBoxAdapter(
                           child: Center(
@@ -170,6 +159,17 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                 child: ScoreSyncBanner(repository: widget.session.scoreSync),
                               ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        sliver: SliverToBoxAdapter(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1280),
+                              child: const BolaoRulesCard(),
                             ),
                           ),
                         ),
