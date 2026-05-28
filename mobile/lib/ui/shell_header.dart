@@ -21,6 +21,7 @@ class ShellHeader extends StatelessWidget {
     if (location.startsWith('/admin/matches')) return 'Jogos e Resultados';
     if (location.startsWith('/admin/teams')) return 'Times e Bandeiras';
     if (location.startsWith('/admin/prediction-rules')) return 'Regras de Palpite';
+    if (location.startsWith('/admin/predictions')) return 'Histórico de palpites';
     if (location == '/admin') return 'CMS Administrativo';
     if (location == '/ranking') return 'Ranking';
     if (location == '/history') return 'Histórico';

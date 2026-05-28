@@ -69,6 +69,13 @@ class AdminScreen extends StatelessWidget {
                     onTap: () => context.go('/admin/prediction-rules'),
                   ),
                   ListTile(
+                    leading: const Icon(Icons.history),
+                    title: const Text('Histórico de palpites'),
+                    subtitle: const Text('Log de todos os palpites registrados'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.go('/admin/predictions'),
+                  ),
+                  ListTile(
                     leading: Icon(Icons.restart_alt, color: scheme.error),
                     title: const Text('Reset do bolão'),
                     subtitle: const Text('Limpar palpites, placares ou apagar jogos/times'),

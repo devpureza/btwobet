@@ -101,4 +101,18 @@ class AdminRepository {
     });
     return (res.data['data'] as Map).cast<String, dynamic>();
   }
+
+  Future<Map<String, dynamic>> listPredictionsHistory({
+    int page = 1,
+    int perPage = 25,
+    String? q,
+  }) async {
+    final params = <String, dynamic>{
+      'page': page,
+      'per_page': perPage,
+    };
+    if (q != null && q.isNotEmpty) params['q'] = q;
+    final res = await _dio.get('/admin/predictions', queryParameters: params);
+    return res.data as Map<String, dynamic>;
+  }
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
+import '../features/admin/admin_palpites_history_screen.dart';
 import '../features/admin/admin_prediction_rules_screen.dart';
 import '../features/admin/admin_matches_screen.dart';
 import '../features/admin/admin_teams_screen.dart';
@@ -91,6 +92,10 @@ class AppRouter {
             GoRoute(
               path: '/admin/prediction-rules',
               builder: (context, state) => AdminPredictionRulesScreen(session: session),
+            ),
+            GoRoute(
+              path: '/admin/predictions',
+              builder: (context, state) => AdminPalpitesHistoryScreen(session: session),
             ),
             GoRoute(
               path: '/admin/reset',
