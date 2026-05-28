@@ -105,11 +105,13 @@ class StadiumGradient extends StatelessWidget {
 class ScoreBox extends StatelessWidget {
   final TextEditingController controller;
   final bool enabled;
+  final double size;
 
   const ScoreBox({
     super.key,
     required this.controller,
     required this.enabled,
+    this.size = 64,
   });
 
   @override
@@ -118,8 +120,8 @@ class ScoreBox extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return SizedBox(
-      width: 64,
-      height: 64,
+      width: size,
+      height: size,
       child: Focus(
         child: Builder(
           builder: (context) {
@@ -143,10 +145,30 @@ class ScoreBox extends StatelessWidget {
                 enabled: enabled,
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
+                textAlignVertical: TextAlignVertical.center,
                 style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: '0',
                   isDense: true,
+                  filled: true,
+                  fillColor: scheme.surfaceContainerHighest,
+                  contentPadding: EdgeInsets.zero,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: scheme.secondary, width: 2),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             );

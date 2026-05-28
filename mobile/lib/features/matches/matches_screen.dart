@@ -371,6 +371,8 @@ class MatchCard extends StatefulWidget {
 }
 
 class _MatchCardState extends State<MatchCard> {
+  static const double _teamVisualSize = 64;
+
   late final TextEditingController _home;
   late final TextEditingController _away;
   bool _saving = false;
@@ -488,17 +490,28 @@ class _MatchCardState extends State<MatchCard> {
                 ),
                 const SizedBox(height: 14),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(child: _team(homeTeam, alignRight: true)),
-                    const SizedBox(width: 10),
-                    ScoreBox(controller: _home, enabled: open && !awaitingTeams),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text('X', style: theme.textTheme.headlineMedium?.copyWith(color: scheme.outline)),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _team(homeTeam, alignRight: true),
+                      ),
                     ),
-                    ScoreBox(controller: _away, enabled: open && !awaitingTeams),
-                    const SizedBox(width: 10),
-                    Expanded(child: _team(awayTeam)),
+                    const SizedBox(width: 8),
+                    _scoreInputs(
+                      theme: theme,
+                      scheme: scheme,
+                      homeEnabled: open && !awaitingTeams,
+                      awayEnabled: open && !awaitingTeams,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _team(awayTeam),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -579,23 +592,68 @@ class _MatchCardState extends State<MatchCard> {
     );
   }
 
+  Widget _scoreInputs({
+    required ThemeData theme,
+    required ColorScheme scheme,
+    required bool homeEnabled,
+    required bool awayEnabled,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ScoreBox(
+          controller: _home,
+          enabled: homeEnabled,
+          size: _teamVisualSize,
+        ),
+        SizedBox(
+          width: 28,
+          height: _teamVisualSize,
+          child: Center(
+            child: Text(
+              '×',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: scheme.outline,
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
+            ),
+          ),
+        ),
+        ScoreBox(
+          controller: _away,
+          enabled: awayEnabled,
+          size: _teamVisualSize,
+        ),
+      ],
+    );
+  }
+
   Widget _team(Map<String, dynamic> team, {bool alignRight = false}) {
     final theme = Theme.of(context);
     final isPlaceholder = team['is_placeholder'] as bool? ?? false;
     final name = isPlaceholder ? 'A definir' : (team['name'] as String).toUpperCase();
-    final flag = isPlaceholder ? const SizedBox(width: 48, height: 48) : FlagImage(url: team['flag_url'] as String?, size: 48);
+    final flag = isPlaceholder
+        ? SizedBox(width: _teamVisualSize, height: _teamVisualSize)
+        : FlagImage(url: team['flag_url'] as String?, size: _teamVisualSize);
     final label = Flexible(
       child: Text(
         name,
         overflow: TextOverflow.ellipsis,
-        maxLines: 2,
+        maxLines: 1,
         textAlign: alignRight ? TextAlign.right : TextAlign.left,
-        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          height: 1.2,
+        ),
       ),
     );
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: alignRight
           ? [label, const SizedBox(width: 8), flag]
           : [flag, const SizedBox(width: 8), label],
