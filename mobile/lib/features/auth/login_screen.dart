@@ -80,8 +80,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: Stack(
+        fit: StackFit.expand,
         children: [
           const Positioned.fill(child: StadiumGradient(child: SizedBox())),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: LoginHeroBackground(),
+          ),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -98,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                      SizedBox(height: LoginHeroBackground.heroHeight(context) * 0.35),
                       Center(
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -135,8 +143,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: theme.textTheme.bodyLarge?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.92)),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 20),
-                      const LoginHeroHeader(),
                       const SizedBox(height: 20),
                       Glass(
                         blur: 20,

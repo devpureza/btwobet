@@ -37,4 +37,9 @@ fi
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build --remove-orphans
 docker compose -f docker-compose.prod.yml --env-file .env.production exec -T app php artisan migrate --force
 
+# Garante scheduler ativo e um sync imediato após deploy (placares GE).
+docker compose -f docker-compose.prod.yml --env-file .env.production restart scheduler
+docker compose -f docker-compose.prod.yml --env-file .env.production exec -T scheduler php artisan worldcup:sync-scores \
+  || echo "Aviso: worldcup:sync-scores falhou (verifique logs do scheduler)"
+
 echo "Deploy concluído. Teste: curl -s http://127.0.0.1/api/health"
