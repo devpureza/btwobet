@@ -6,12 +6,14 @@ import '../features/admin/admin_repository.dart';
 import '../features/auth/auth_repository.dart';
 import '../features/history/history_repository.dart';
 import '../features/matches/matches_repository.dart';
+import '../features/matches/score_sync_repository.dart';
 import '../features/ranking/ranking_repository.dart';
 
 class SessionController extends ChangeNotifier {
   final TokenStore tokenStore;
   final AuthRepository auth;
   final MatchesRepository matches;
+  final ScoreSyncRepository scoreSync;
   final RankingRepository ranking;
   final HistoryRepository history;
   final AdminRepository admin;
@@ -27,6 +29,7 @@ class SessionController extends ChangeNotifier {
     required this.tokenStore,
     required this.auth,
     required this.matches,
+    required this.scoreSync,
     required this.ranking,
     required this.history,
     required this.admin,
@@ -37,6 +40,7 @@ class SessionController extends ChangeNotifier {
 
     final auth = AuthRepository(api.dio, tokenStore);
     final matches = MatchesRepository(api.dio);
+    final scoreSync = ScoreSyncRepository(api.dio);
     final ranking = RankingRepository(api.dio);
     final history = HistoryRepository(api.dio);
     final admin = AdminRepository(api.dio);
@@ -45,6 +49,7 @@ class SessionController extends ChangeNotifier {
       tokenStore: tokenStore,
       auth: auth,
       matches: matches,
+      scoreSync: scoreSync,
       ranking: ranking,
       history: history,
       admin: admin,

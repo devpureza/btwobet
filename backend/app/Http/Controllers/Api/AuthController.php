@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -100,7 +99,8 @@ class AuthController extends Controller
         $filename = 'user-'.$user->id.'.'.$ext;
 
         $path = $file->storeAs('avatars', $filename, 'public');
-        $user->avatar_url = Storage::disk('public')->url($path);
+        // Caminho relativo + cache-bust: funciona em qualquer domínio e após trocar a foto.
+        $user->avatar_url = '/storage/'.$path.'?v='.time();
         $user->save();
 
         return response()->json([

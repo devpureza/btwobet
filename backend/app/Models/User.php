@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,5 +47,27 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected function avatarUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null || $value === '') {
+                    return null;
+                }
+                if (str_starts_with($value, '/storage/')) {
+                    return $value;
+                }
+                $path = parse_url($value, PHP_URL_PATH);
+                if (is_string($path) && str_starts_with($path, '/storage/')) {
+                    $query = parse_url($value, PHP_URL_QUERY);
+
+                    return $query ? $path.'?'.$query : $path;
+                }
+
+                return $value;
+            },
+        );
     }
 }

@@ -48,6 +48,7 @@ class AvatarImage extends StatelessWidget {
         height: size,
         child: Image.network(
           resolved,
+          key: ValueKey(resolved),
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             return CircleAvatar(

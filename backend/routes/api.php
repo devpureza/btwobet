@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\PredictionController;
 use App\Http\Controllers\Api\RankingController;
+use App\Http\Controllers\Api\ScoreSyncController;
 use App\Http\Controllers\Api\Admin\BolaoResetAdminController;
 use App\Http\Controllers\Api\Admin\PredictionRulesAdminController;
 use App\Http\Controllers\Api\Admin\UserAdminController;
@@ -24,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/me/avatar', [AuthController::class, 'uploadAvatar']);
 
     Route::middleware('approved')->group(function () {
+        Route::get('/score-sync/status', ScoreSyncController::class);
         Route::get('/matches', [MatchController::class, 'index']);
         Route::post('/predictions', [PredictionController::class, 'store']);
         Route::get('/ranking', [RankingController::class, 'index']);

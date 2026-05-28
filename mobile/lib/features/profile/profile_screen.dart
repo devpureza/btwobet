@@ -91,6 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final user = await widget.session.auth.uploadAvatar(bytes, file.name);
       setState(() => _me = user);
       await widget.session.refresh();
+      if (mounted) setState(() => _me = (widget.session.user ?? user));
       if (mounted) showSnack(context, 'Foto atualizada.');
     } catch (e) {
       if (mounted) showSnack(context, dioErrorMessage(e), error: true);

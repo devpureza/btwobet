@@ -16,6 +16,8 @@ return [
 
     'globo_esporte' => [
         'copa_url' => env('GE_COPA_URL', 'https://ge.globo.com/futebol/copa-do-mundo/'),
+        'sync_interval_minutes' => (int) env('GE_SYNC_INTERVAL_MINUTES', 30),
+        'source_label' => env('GE_SOURCE_LABEL', 'ge.globo'),
     ],
 
     'postmark' => [

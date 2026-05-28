@@ -13,6 +13,7 @@ class WorldCupScoreSyncService
     public function __construct(
         private readonly GloboEsporteScoreProvider $globo,
         private readonly RankingService $rankingService,
+        private readonly ScoreSyncStatusService $syncStatus,
     ) {}
 
     /**
@@ -60,6 +61,8 @@ class WorldCupScoreSyncService
         if ($stats['unmatched'] !== []) {
             Log::info('globo_esporte.sync.unmatched', ['games' => array_slice($stats['unmatched'], 0, 20)]);
         }
+
+        $this->syncStatus->recordRun($stats);
 
         return $stats;
     }
