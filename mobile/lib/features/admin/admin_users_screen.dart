@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/admin_helpers.dart';
+import '../../ui/avatar_image.dart';
+import '../../ui/avatar_upload_flow.dart';
 import '../../ui/glass.dart';
 import '../../ui/shell_header.dart';
 
@@ -45,13 +47,28 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     }
   }
 
+  Future<void> _uploadUserAvatar(BuildContext ctx, int userId, void Function(String url) onUpdated) async {
+    final picked = await pickCropAvatarBytes(ctx);
+    if (picked == null) return;
+
+    try {
+      final updated = await widget.session.admin.uploadUserAvatar(userId, picked.bytes, picked.filename);
+      final url = updated['avatar_url'] as String?;
+      if (url != null) onUpdated(url);
+      if (ctx.mounted) showSnack(ctx, 'Foto atualizada.');
+    } catch (e) {
+      if (ctx.mounted) showSnack(ctx, dioErrorMessage(e), error: true);
+    }
+  }
+
   Future<void> _openForm({Map<String, dynamic>? user}) async {
     final isEdit = user != null;
     final name = TextEditingController(text: user?['name'] as String? ?? '');
     final email = TextEditingController(text: user?['email'] as String? ?? '');
     final password = TextEditingController();
-    final avatar = TextEditingController(text: user?['avatar_url'] as String? ?? '');
+    var avatarUrl = user?['avatar_url'] as String?;
     var isAdmin = (user?['is_admin'] as bool?) ?? false;
+    var avatarChanged = false;
 
     final saved = await showDialog<bool>(
       context: context,
@@ -64,6 +81,33 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (isEdit) ...[
+                    Center(
+                      child: Column(
+                        children: [
+                          AvatarImage(
+                            url: avatarUrl,
+                            size: 72,
+                            fallbackLetter: name.text.trim().isEmpty ? '?' : name.text.trim(),
+                          ),
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            onPressed: () => _uploadUserAvatar(
+                              ctx,
+                              user['id'] as int,
+                              (url) => setLocal(() {
+                                avatarUrl = url;
+                                avatarChanged = true;
+                              }),
+                            ),
+                            icon: const Icon(Icons.photo_camera_outlined),
+                            label: const Text('Alterar foto'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   TextField(
                     controller: name,
                     decoration: const InputDecoration(labelText: 'Nome'),
@@ -83,14 +127,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                       labelText: isEdit ? 'Nova senha (opcional)' : 'Senha',
                     ),
                     obscureText: true,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: avatar,
-                    decoration: const InputDecoration(
-                      labelText: 'URL da foto (opcional)',
-                      hintText: 'https://...',
-                    ),
                   ),
                   const SizedBox(height: 8),
                   CheckboxListTile(
@@ -120,7 +156,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     'name': name.text.trim(),
                     'email': email.text.trim(),
                     'is_admin': isAdmin,
-                    'avatar_url': avatar.text.trim().isEmpty ? null : avatar.text.trim(),
                   };
                   if (password.text.isNotEmpty) payload['password'] = password.text;
                   if (isEdit) {
@@ -148,12 +183,13 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     name.dispose();
     email.dispose();
     password.dispose();
-    avatar.dispose();
 
-    if (saved == true) {
-      if (mounted) showSnack(context, isEdit ? 'Participante atualizado.' : 'Participante criado.');
+    if (saved == true || avatarChanged) {
+      if (saved == true && mounted) {
+        showSnack(context, isEdit ? 'Participante atualizado.' : 'Participante criado.');
+      }
       await _load();
-      await widget.session.refresh();
+      if (saved == true) await widget.session.refresh();
     }
   }
 
@@ -347,14 +383,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                   final approvalStatus = u['approval_status'] as String? ?? 'approved';
                                   final isPending = approvalStatus == 'pending';
                                   return ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                                          ? NetworkImage(avatarUrl)
-                                          : null,
-                                      backgroundColor: scheme.secondary.withValues(alpha: 0.35),
-                                      child: avatarUrl == null || avatarUrl.isEmpty
-                                          ? Text((u['name'] as String).substring(0, 1).toUpperCase())
-                                          : null,
+                                    leading: AvatarImage(
+                                      url: avatarUrl,
+                                      size: 40,
+                                      fallbackLetter: u['name'] as String? ?? '?',
                                     ),
                                     title: Text(u['name'] as String),
                                     subtitle: Text(u['email'] as String),

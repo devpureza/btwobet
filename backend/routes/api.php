@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/users', [UserAdminController::class, 'index']);
             Route::post('/users', [UserAdminController::class, 'store']);
             Route::patch('/users/{user}', [UserAdminController::class, 'update']);
+            Route::post('/users/{user}/avatar', [UserAdminController::class, 'uploadAvatar']);
             Route::post('/users/{user}/approve', [UserAdminController::class, 'approve']);
             Route::post('/users/{user}/reject', [UserAdminController::class, 'reject']);
             Route::delete('/users/{user}', [UserAdminController::class, 'destroy']);

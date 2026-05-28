@@ -121,6 +121,26 @@ class UserAdminController extends Controller
         return response()->json(['message' => 'Participante removido.']);
     }
 
+    public function uploadAvatar(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
+        ]);
+
+        $file = $validated['file'];
+        $ext = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $filename = 'user-'.$user->id.'.'.$ext;
+
+        $path = $file->storeAs('avatars', $filename, 'public');
+        $user->avatar_url = '/storage/'.$path.'?v='.time();
+        $user->save();
+
+        return response()->json([
+            'message' => 'Foto do participante atualizada.',
+            'data' => $this->userPayload($user->fresh()),
+        ]);
+    }
+
     /** @return array<string, mixed> */
     private function userPayload(User $user): array
     {

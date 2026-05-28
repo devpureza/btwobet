@@ -42,6 +42,14 @@ class AdminRepository {
     await _dio.delete('/admin/users/$id');
   }
 
+  Future<Map<String, dynamic>> uploadUserAvatar(int id, List<int> bytes, String filename) async {
+    final form = FormData.fromMap({
+      'file': MultipartFile.fromBytes(bytes, filename: filename),
+    });
+    final res = await _dio.post('/admin/users/$id/avatar', data: form);
+    return (res.data['data'] as Map).cast<String, dynamic>();
+  }
+
   Future<List<dynamic>> listMatches({String? group, String? stage, String? status}) async {
     final params = <String, dynamic>{};
     if (group != null && group.isNotEmpty) params['group'] = group;
