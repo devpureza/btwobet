@@ -12,6 +12,15 @@ cd "$DEPLOY_DIR"
 CADDYFILE="deploy/caddy/Caddyfile"
 sed -e "s|__DOMAIN__|${DOMAIN}|g" -e "s|__ACME_EMAIL__|${ACME_EMAIL}|g" \
   deploy/caddy/Caddyfile.https.tpl > "$CADDYFILE"
+# Mantém HTTP no IP até o certificado do domínio estar ativo
+if ! grep -q 'http://:80' "$CADDYFILE" 2>/dev/null; then
+  cat >> "$CADDYFILE" <<'EOF'
+
+http://:80 {
+	reverse_proxy nginx:80
+}
+EOF
+fi
 
 if [ -f .env.production ]; then
   if grep -q '^APP_URL=' .env.production; then
