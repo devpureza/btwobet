@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Admin\TeamAdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
+Route::get('/score-sync/status', ScoreSyncController::class);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,7 +26,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/me/avatar', [AuthController::class, 'uploadAvatar']);
 
     Route::middleware('approved')->group(function () {
-        Route::get('/score-sync/status', ScoreSyncController::class);
         Route::get('/matches', [MatchController::class, 'index']);
         Route::post('/predictions', [PredictionController::class, 'store']);
         Route::get('/ranking', [RankingController::class, 'index']);
