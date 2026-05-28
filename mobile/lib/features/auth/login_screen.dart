@@ -77,27 +77,19 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final viewHeight = MediaQuery.sizeOf(context).height -
+        MediaQuery.paddingOf(context).vertical;
 
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const Positioned.fill(child: StadiumGradient(child: SizedBox())),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: LoginHeroBackground(),
-          ),
+          const Positioned.fill(child: LoginHeroBackground()),
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.sizeOf(context).height -
-                      MediaQuery.paddingOf(context).vertical -
-                      32,
-                ),
+                constraints: BoxConstraints(minHeight: viewHeight - 40),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 520),
@@ -105,103 +97,107 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                      SizedBox(height: LoginHeroBackground.heroHeight(context) * 0.35),
-                      Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: scheme.secondary.withValues(alpha: 0.95),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            'A CONTAGEM REGRESSIVA COMEÇOU',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.2,
+                        SizedBox(height: viewHeight * 0.06),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: scheme.secondary.withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(999),
                             ),
-                            textAlign: TextAlign.center,
+                            child: Text(
+                              'A CONTAGEM REGRESSIVA COMEÇOU',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'BOLÃO MUNDIAL 2026',
-                        style: theme.textTheme.displayLarge?.copyWith(
-                          color: scheme.onPrimary,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 18,
-                              color: Colors.black.withValues(alpha: 0.35),
-                            )
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Sinta a adrenalina de cada gol. Desafie seus amigos e suba no ranking.',
-                        style: theme.textTheme.bodyLarge?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.92)),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      Glass(
-                        blur: 20,
-                        borderRadius: BorderRadius.circular(24),
-                        padding: const EdgeInsets.all(20),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (_error != null) ...[
-                                Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
-                                const SizedBox(height: 12),
-                              ],
-                              TextFormField(
-                                controller: _email,
-                                keyboardType: TextInputType.emailAddress,
-                                decoration: const InputDecoration(labelText: 'Email'),
-                                validator: (v) => (v == null || v.isEmpty) ? 'Informe o email' : null,
-                              ),
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _password,
-                                obscureText: true,
-                                decoration: const InputDecoration(labelText: 'Senha'),
-                                validator: (v) => (v == null || v.isEmpty) ? 'Informe a senha' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              FilledButton(
-                                onPressed: _loading ? null : _submit,
-                                child: _loading
-                                    ? const SizedBox(
-                                        height: 16,
-                                        width: 16,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
-                                      )
-                                    : const Text('Entrar'),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Use seu email e senha para entrar.',
-                                style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 4),
-                              TextButton(
-                                onPressed: _loading ? null : () => context.go('/register'),
-                                child: const Text('Ainda não tenho conta'),
+                        const SizedBox(height: 16),
+                        Text(
+                          'BOLÃO MUNDIAL 2026',
+                          style: theme.textTheme.displayLarge?.copyWith(
+                            color: scheme.onPrimary,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 18,
+                                color: Colors.black.withValues(alpha: 0.45),
                               ),
                             ],
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        Text(
+                          'Sinta a adrenalina de cada gol. Desafie seus amigos e suba no ranking.',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: scheme.onPrimary.withValues(alpha: 0.92),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        Glass(
+                          blur: 24,
+                          borderRadius: BorderRadius.circular(24),
+                          padding: const EdgeInsets.all(20),
+                          color: scheme.surface.withValues(alpha: 0.88),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (_error != null) ...[
+                                  Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                                  const SizedBox(height: 12),
+                                ],
+                                TextFormField(
+                                  controller: _email,
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: const InputDecoration(labelText: 'Email'),
+                                  validator: (v) => (v == null || v.isEmpty) ? 'Informe o email' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _password,
+                                  obscureText: true,
+                                  decoration: const InputDecoration(labelText: 'Senha'),
+                                  validator: (v) => (v == null || v.isEmpty) ? 'Informe a senha' : null,
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton(
+                                  onPressed: _loading ? null : _submit,
+                                  child: _loading
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : const Text('Entrar'),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Use seu email e senha para entrar.',
+                                  style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 4),
+                                TextButton(
+                                  onPressed: _loading ? null : () => context.go('/register'),
+                                  child: const Text('Ainda não tenho conta'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           ),
         ],
       ),

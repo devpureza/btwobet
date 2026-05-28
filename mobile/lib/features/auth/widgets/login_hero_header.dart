@@ -1,39 +1,46 @@
 import 'package:flutter/material.dart';
 
-/// Arte opcional da tela de login (ex.: ilustração festiva da Copa).
+/// Arte da tela de login (Ronaldo + troféu, retrato).
 const String kLoginHeroAssetPath = 'assets/images/login_hero.png';
 
-/// Faixa hero no topo da tela — imagem ampla com opacidade e gradiente para legibilidade.
+/// Fundo full-screen: imagem em tela cheia + gradientes para legibilidade do texto e do formulário.
 class LoginHeroBackground extends StatelessWidget {
   const LoginHeroBackground({super.key});
 
-  static double heroHeight(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final fraction = size.width >= 600 ? 0.42 : 0.48;
-    return (size.height * fraction).clamp(220.0, 420.0);
-  }
+  /// Alinhamento da imagem em [BoxFit.cover] — rosto e troféu ficam visíveis (evita corte no topo da cabeça).
+  static const Alignment imageAlignment = Alignment(0, 0.28);
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final height = heroHeight(context);
+    final scheme = Theme.of(context).colorScheme;
+    final height = MediaQuery.sizeOf(context).height;
 
-    return SizedBox(
-      height: height,
-      width: double.infinity,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: height),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Opacity(
-            opacity: 0.42,
-            child: Image.asset(
-              kLoginHeroAssetPath,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              errorBuilder: (context, error, stackTrace) => _LoginHeroFallback(
-                scheme: scheme,
-                theme: theme,
+          Image.asset(
+            kLoginHeroAssetPath,
+            fit: BoxFit.cover,
+            alignment: imageAlignment,
+            errorBuilder: (context, error, stackTrace) => _LoginHeroFallback(
+              scheme: scheme,
+              theme: Theme.of(context),
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.4, 0.72, 1.0],
+                colors: [
+                  Colors.black.withValues(alpha: 0.35),
+                  scheme.primary.withValues(alpha: 0.55),
+                  scheme.primary.withValues(alpha: 0.78),
+                  scheme.primary.withValues(alpha: 0.94),
+                ],
               ),
             ),
           ),
@@ -42,11 +49,10 @@ class LoginHeroBackground extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.55, 1.0],
+                stops: const [0.55, 1.0],
                 colors: [
-                  Colors.black.withValues(alpha: 0.08),
-                  scheme.primary.withValues(alpha: 0.35),
-                  scheme.primary.withValues(alpha: 0.92),
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.42),
                 ],
               ),
             ),
