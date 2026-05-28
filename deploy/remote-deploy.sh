@@ -9,6 +9,13 @@ if [ ! -f .env.production ]; then
   exit 1
 fi
 
+if [[ ! -f deploy/caddy/certs/cert.pem ]]; then
+  chmod +x deploy/caddy/generate-ip-cert.sh
+  DEPLOY_IP="${DEPLOY_IP:-184.73.154.194}"
+  DOMAIN="$(grep -E '^DOMAIN=' .env.production 2>/dev/null | cut -d= -f2- | tr -d '"' || echo btwobet.click)"
+  ./deploy/caddy/generate-ip-cert.sh "$DEPLOY_IP" "$DOMAIN"
+fi
+
 # Gera APP_KEY se ainda não existir
 if ! grep -q '^APP_KEY=base64:' .env.production 2>/dev/null; then
   KEY=$(docker compose -f docker-compose.prod.yml --env-file .env.production run --rm --no-deps \
