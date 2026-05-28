@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/admin_helpers.dart';
+import '../../ui/bolao_fund_card.dart';
 import '../../ui/flag_image.dart';
 import '../../ui/glass.dart';
 import '../../ui/match_filters.dart';
@@ -22,6 +23,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
   bool _loading = true;
   String? _error;
   List<dynamic> _matches = [];
+  Map<String, dynamic>? _fund;
   String? _group;
   String? _stage;
   bool _onlyOpen = false;
@@ -39,8 +41,14 @@ class _MatchesScreenState extends State<MatchesScreen> {
     });
 
     try {
-      final data = await widget.session.matches.listMatches();
-      setState(() => _matches = data);
+      final results = await Future.wait([
+        widget.session.matches.listMatches(),
+        widget.session.bolaoFund.getFund(),
+      ]);
+      setState(() {
+        _matches = results[0] as List<dynamic>;
+        _fund = (results[1] as Map).cast<String, dynamic>();
+      });
     } catch (e) {
       setState(() => _error = 'Falha ao carregar jogos.');
     } finally {
@@ -121,6 +129,23 @@ class _MatchesScreenState extends State<MatchesScreen> {
                           ),
                         ),
                       ),
+                      if (_fund != null)
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 1280),
+                                child: BolaoFundCard(
+                                  participantCount: (_fund!['participant_count'] as num?)?.toInt() ?? 0,
+                                  amountPerParticipantBrl:
+                                      (_fund!['amount_per_participant_brl'] as num?)?.toInt() ?? 50,
+                                  totalAmountBrl: (_fund!['total_amount_brl'] as num?)?.toInt() ?? 0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       SliverPadding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                         sliver: SliverToBoxAdapter(

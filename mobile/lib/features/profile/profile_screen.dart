@@ -1,9 +1,9 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/admin_helpers.dart';
 import '../../ui/avatar_image.dart';
+import '../../ui/avatar_upload_flow.dart';
 import '../../ui/glass.dart';
 import '../../ui/shell_header.dart';
 
@@ -74,21 +74,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _uploadAvatar() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      withData: true,
-    );
-    if (result == null || result.files.isEmpty) return;
-
-    final file = result.files.single;
-    final bytes = file.bytes;
-    if (bytes == null) {
-      if (mounted) showSnack(context, 'Não foi possível ler a imagem.', error: true);
-      return;
-    }
+    final picked = await pickCropAvatarBytes(context);
+    if (picked == null) return;
 
     try {
-      final user = await widget.session.auth.uploadAvatar(bytes, file.name);
+      final user = await widget.session.auth.uploadAvatar(picked.bytes, picked.filename);
       setState(() => _me = user);
       await widget.session.refresh();
       if (mounted) setState(() => _me = (widget.session.user ?? user));

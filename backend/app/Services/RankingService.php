@@ -17,12 +17,13 @@ class RankingService
             ->select([
                 'users.id',
                 'users.name',
+                'users.avatar_url',
                 DB::raw('COALESCE(SUM(predictions.points), 0) as total_points'),
                 DB::raw('SUM(CASE WHEN predictions.points = 2 THEN 1 ELSE 0 END) as exact_hits'),
                 DB::raw('SUM(CASE WHEN predictions.points >= 1 THEN 1 ELSE 0 END) as result_hits'),
                 'users.created_at',
             ])
-            ->groupBy('users.id', 'users.name', 'users.created_at')
+            ->groupBy('users.id', 'users.name', 'users.avatar_url', 'users.created_at')
             ->orderByDesc('total_points')
             ->orderByDesc('exact_hits')
             ->orderByDesc('result_hits')

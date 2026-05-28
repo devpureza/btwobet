@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/session_controller.dart';
+import '../../ui/avatar_image.dart';
 import '../../ui/glass.dart';
 import '../../ui/shell_header.dart';
 
@@ -96,6 +97,9 @@ class _RankingScreenState extends State<RankingScreen> {
                         children: List.generate(_ranking.length, (index) {
                           final row = _ranking[index] as Map<String, dynamic>;
                           final pos = (row['position'] as num).toInt();
+                          final name = row['name'] as String? ?? '—';
+                          final initial = name.trim().isEmpty ? '?' : name.trim().substring(0, 1);
+                          final avatarUrl = row['avatar_url'] as String?;
 
                           Color? accent;
                           if (pos == 1) accent = const Color(0xFFFCD400); // gold
@@ -114,21 +118,37 @@ class _RankingScreenState extends State<RankingScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 42,
-                                  height: 42,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: (accent ?? scheme.secondary).withValues(alpha: 0.95),
-                                  ),
-                                  child: Text(
-                                    '$pos',
-                                    style: theme.textTheme.headlineMedium?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: scheme.onSurface,
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    AvatarImage(
+                                      url: avatarUrl,
+                                      size: 44,
+                                      fallbackLetter: initial,
                                     ),
-                                  ),
+                                    Positioned(
+                                      right: -2,
+                                      bottom: -2,
+                                      child: Container(
+                                        width: 22,
+                                        height: 22,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: accent ?? scheme.primary,
+                                          border: Border.all(color: scheme.surface, width: 2),
+                                        ),
+                                        child: Text(
+                                          '$pos',
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: scheme.onPrimary,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -136,7 +156,7 @@ class _RankingScreenState extends State<RankingScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        row['name'] as String,
+                                        name,
                                         style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
                                       ),
                                       const SizedBox(height: 2),

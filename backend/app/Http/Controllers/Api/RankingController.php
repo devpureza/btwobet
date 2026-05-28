@@ -17,6 +17,7 @@ class RankingController extends Controller
                 'position' => $index + 1,
                 'user_id' => $row->id,
                 'name' => $row->name,
+                'avatar_url' => $row->avatar_url,
                 'total_points' => (int) $row->total_points,
                 'exact_hits' => (int) $row->exact_hits,
                 'result_hits' => (int) $row->result_hits,

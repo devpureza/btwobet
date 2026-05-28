@@ -14,6 +14,7 @@ import '../features/matches/matches_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/ranking/ranking_screen.dart';
 import 'session_controller.dart';
+import '../ui/avatar_prompt_host.dart';
 import '../ui/glass.dart';
 import '../ui/shell_header.dart';
 
@@ -49,7 +50,10 @@ class AppRouter {
         ),
         ShellRoute(
           builder: (context, state, child) {
-            return HomeShell(session: session, child: child);
+            return AvatarPromptHost(
+              session: session,
+              child: HomeShell(session: session, child: child),
+            );
           },
           routes: [
             GoRoute(
