@@ -42,15 +42,15 @@ class ApiClient {
   }
 
   static String _defaultBaseUrl() {
+    if (kIsWeb) {
+      // Mesma origem (http ou https) — evita mixed content quando a página é HTTPS.
+      return '${Uri.base.origin}/api';
+    }
+
     const fromEnv = String.fromEnvironment('API_BASE_URL');
     if (fromEnv.isNotEmpty) {
       final base = fromEnv.endsWith('/') ? fromEnv.substring(0, fromEnv.length - 1) : fromEnv;
       return base.endsWith('/api') ? base : '$base/api';
-    }
-
-    if (kIsWeb) {
-      // Mesma origem em produção (nginx serve app + /api)
-      return '${Uri.base.origin}/api';
     }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
