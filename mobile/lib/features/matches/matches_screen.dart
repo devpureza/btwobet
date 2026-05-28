@@ -93,29 +93,31 @@ class _MatchesScreenState extends State<MatchesScreen> {
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 1280),
                               child: SizedBox(
-                                height: isDesktop ? 240 : 200,
+                                height: isDesktop ? 168 : 128,
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24),
+                                  borderRadius: BorderRadius.circular(20),
                                   child: StadiumGradient(
                                     assetPath: 'assets/images/hero-stadium.png',
                                     child: Padding(
-                                      padding: const EdgeInsets.all(20),
+                                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
                                       child: Align(
                                         alignment: Alignment.bottomLeft,
                                         child: Column(
+                                          mainAxisSize: MainAxisSize.min,
                                           mainAxisAlignment: MainAxisAlignment.end,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'Seus Palpites',
-                                              style: theme.textTheme.headlineLarge?.copyWith(
+                                              style: theme.textTheme.titleLarge?.copyWith(
                                                 color: theme.colorScheme.onPrimary,
+                                                fontWeight: FontWeight.w700,
                                               ),
                                             ),
-                                            const SizedBox(height: 8),
+                                            const SizedBox(height: 4),
                                             Text(
                                               'Preveja os placares e suba no ranking global.',
-                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                              style: theme.textTheme.bodySmall?.copyWith(
                                                 color: theme.colorScheme.onPrimary.withValues(alpha: 0.90),
                                               ),
                                             ),
