@@ -12,20 +12,7 @@ cd "$DEPLOY_DIR"
 CADDYFILE="deploy/caddy/Caddyfile"
 sed -e "s|__DOMAIN__|${DOMAIN}|g" -e "s|__ACME_EMAIL__|${ACME_EMAIL}|g" \
   deploy/caddy/Caddyfile.https.tpl > "$CADDYFILE"
-# Mantém HTTP no IP até o certificado do domínio estar ativo
-if ! grep -q 'http://:80' "$CADDYFILE" 2>/dev/null; then
-  cat >> "$CADDYFILE" <<'EOF'
-
-http://:80 {
-	reverse_proxy nginx:80
-}
-
-:443 {
-	tls internal
-	reverse_proxy nginx:80
-}
-EOF
-fi
+# Bloco HTTP no IP já vem no template; não adicionar :443 com tls internal (conflita com LE).
 
 if [ -f .env.production ]; then
   if grep -q '^APP_URL=' .env.production; then
