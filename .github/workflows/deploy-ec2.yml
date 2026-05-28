@@ -28,8 +28,14 @@ jobs:
         working-directory: mobile
         run: |
           flutter pub get
-          BASE_URL="${APP_URL:-http://184.73.154.194}"
+          BASE_URL="${APP_URL:-https://btwobet.click}"
           flutter build web --release --dart-define=API_BASE_URL="${BASE_URL}/api"
+
+      - name: Verify Flutter web bundle
+        working-directory: mobile
+        run: |
+          test -f build/web/main.dart.js
+          grep -q 'Regras do bol' build/web/main.dart.js || { echo "::error::Rules card strings missing from web build"; exit 1; }
 
       - name: Configure SSH
         run: |

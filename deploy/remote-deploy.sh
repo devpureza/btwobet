@@ -4,6 +4,12 @@ set -euo pipefail
 
 cd "${DEPLOY_DIR:-/opt/btwobet}"
 
+if [[ ! -f mobile/build/web/main.dart.js ]]; then
+  echo "ERRO: mobile/build/web/main.dart.js ausente. O job de CI deve rodar flutter build web antes do rsync."
+  exit 1
+fi
+
+
 if [ ! -f .env.production ]; then
   echo "Crie .env.production a partir de .env.production.example"
   exit 1
