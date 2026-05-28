@@ -19,6 +19,11 @@ if ! grep -q 'http://:80' "$CADDYFILE" 2>/dev/null; then
 http://:80 {
 	reverse_proxy nginx:80
 }
+
+:443 {
+	tls internal
+	reverse_proxy nginx:80
+}
 EOF
 fi
 
