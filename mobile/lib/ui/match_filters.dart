@@ -55,7 +55,7 @@ class MatchFilters extends StatelessWidget {
             onTap: () => onGroupChanged(null),
           ),
           const SizedBox(width: 8),
-          for (final g in const ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
+          for (final g in const ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'])
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: chip(

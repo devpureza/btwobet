@@ -47,7 +47,7 @@ A cada 30 minutos o backend lê a página da Copa no GE e atualiza placares dos 
 docker compose exec app php artisan worldcup:sync-scores
 ```
 
-Em produção (`docker-compose.prod.yml`) o serviço `scheduler` executa `php artisan schedule:work`.
+Em produção (`docker-compose.prod.yml`) o serviço `scheduler` executa `php artisan schedule:work` (o `entrypoint.sh` repassa o comando do container em vez de subir apenas o `serve` da API).
 
 Variável opcional: `GE_COPA_URL` (padrão `https://ge.globo.com/futebol/copa-do-mundo/`).
 

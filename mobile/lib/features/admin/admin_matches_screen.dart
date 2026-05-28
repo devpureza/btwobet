@@ -115,7 +115,7 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                       decoration: const InputDecoration(labelText: 'Grupo'),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
-                        ...List.generate(8, (i) {
+                        ...List.generate(12, (i) {
                           final g = String.fromCharCode(65 + i);
                           return DropdownMenuItem(value: g, child: Text('Grupo $g'));
                         }),

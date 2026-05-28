@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\FootballMatch;
 use App\Models\Prediction;
+use App\Support\TeamSlot;
 use Carbon\Carbon;
 
 class PredictionWindow
@@ -35,6 +36,14 @@ class PredictionWindow
             return [
                 'can_submit' => false,
                 'reason' => 'Jogo já iniciado ou finalizado.',
+                'deadline_at' => null,
+            ];
+        }
+
+        if (! $this->teamsAreDefined($match)) {
+            return [
+                'can_submit' => false,
+                'reason' => 'Aguardando definição dos times.',
                 'deadline_at' => null,
             ];
         }
@@ -91,5 +100,13 @@ class PredictionWindow
     public function isOpenForNewPredictions(FootballMatch $match): bool
     {
         return $this->evaluate($match, null)['can_submit'];
+    }
+
+    public function teamsAreDefined(FootballMatch $match): bool
+    {
+        $match->loadMissing(['homeTeam', 'awayTeam']);
+
+        return ! TeamSlot::isPlaceholder($match->homeTeam)
+            && ! TeamSlot::isPlaceholder($match->awayTeam);
     }
 }

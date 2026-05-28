@@ -33,7 +33,7 @@ class TeamAdminController extends Controller
         $validated = $request->validate([
             'code' => ['sometimes', 'string', 'size:3', 'unique:teams,code,'.$team->id],
             'name' => ['sometimes', 'string', 'max:255'],
-            'group_name' => ['nullable', 'string', 'size:1', 'regex:/^[A-H]$/i'],
+            'group_name' => ['nullable', 'string', 'size:1', 'regex:/^[A-L]$/i'],
             'flag_url' => ['nullable', 'string', 'max:2048'],
         ]);
 

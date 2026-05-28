@@ -51,6 +51,29 @@ class PredictionWindowTest extends TestCase
         $this->assertFalse($access['can_submit']);
     }
 
+    public function test_knockout_with_placeholder_teams_blocks_predictions(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 6, 1, 12, 0, 0, 'UTC'));
+
+        $home = Team::create(['code' => '2A', 'name' => '2A']);
+        $away = Team::create(['code' => '2B', 'name' => '2B']);
+
+        $match = FootballMatch::create([
+            'home_team_id' => $home->id,
+            'away_team_id' => $away->id,
+            'kickoff_at' => Carbon::create(2026, 7, 5, 18, 0, 0, 'UTC'),
+            'stage' => 'knockout',
+            'group_name' => null,
+            'venue' => 'Test',
+            'status' => 'scheduled',
+        ]);
+
+        $access = app(PredictionWindow::class)->evaluate($match, null);
+
+        $this->assertFalse($access['can_submit']);
+        $this->assertSame('Aguardando definição dos times.', $access['reason']);
+    }
+
     public function test_existing_prediction_cannot_be_changed(): void
     {
         Carbon::setTestNow(Carbon::create(2026, 6, 1, 12, 0, 0, 'UTC'));

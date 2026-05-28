@@ -79,7 +79,7 @@ class _AdminTeamsScreenState extends State<AdminTeamsScreen> {
                     decoration: const InputDecoration(labelText: 'Grupo'),
                     items: [
                       const DropdownMenuItem(value: null, child: Text('—')),
-                      ...List.generate(8, (i) {
+                      ...List.generate(12, (i) {
                         final g = String.fromCharCode(65 + i);
                         return DropdownMenuItem(value: g, child: Text('Grupo $g'));
                       }),
@@ -201,7 +201,7 @@ class _AdminTeamsScreenState extends State<AdminTeamsScreen> {
                         decoration: const InputDecoration(labelText: 'Grupo'),
                         items: [
                           const DropdownMenuItem(value: null, child: Text('Todos')),
-                          ...List.generate(8, (i) {
+                          ...List.generate(12, (i) {
                             final g = String.fromCharCode(65 + i);
                             return DropdownMenuItem(value: g, child: Text('Grupo $g'));
                           }),

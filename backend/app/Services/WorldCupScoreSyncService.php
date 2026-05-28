@@ -67,6 +67,17 @@ class WorldCupScoreSyncService
         return $stats;
     }
 
+    public function recordFailedRun(): void
+    {
+        $this->syncStatus->recordRun([
+            'found' => 0,
+            'matched' => 0,
+            'updated' => 0,
+            'finished' => 0,
+            'unmatched' => [],
+        ]);
+    }
+
     private function findMatch(int $homeId, int $awayId, Carbon $kickoff): ?FootballMatch
     {
         $candidates = FootballMatch::query()

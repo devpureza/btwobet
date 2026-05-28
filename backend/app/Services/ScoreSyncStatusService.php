@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -9,12 +10,27 @@ class ScoreSyncStatusService
 {
     public const CACHE_KEY = 'worldcup_scores_sync.last_run';
 
+    public const SETTING_KEY_AT = 'score_sync.last_at';
+
+    public const SETTING_KEY_UPDATED = 'score_sync.last_updated_matches';
+
     public function recordRun(array $stats): void
     {
-        Cache::put(self::CACHE_KEY, [
+        $payload = [
             'at' => now()->toIso8601String(),
             'updated' => (int) ($stats['updated'] ?? 0),
-        ], now()->addDays(30));
+        ];
+
+        Cache::put(self::CACHE_KEY, $payload, now()->addDays(30));
+
+        Setting::query()->updateOrCreate(
+            ['key' => self::SETTING_KEY_AT],
+            ['value' => $payload['at']],
+        );
+        Setting::query()->updateOrCreate(
+            ['key' => self::SETTING_KEY_UPDATED],
+            ['value' => (string) $payload['updated']],
+        );
     }
 
     /**
@@ -31,7 +47,7 @@ class ScoreSyncStatusService
         $interval = max(1, (int) config('services.globo_esporte.sync_interval_minutes', 30));
         $source = (string) config('services.globo_esporte.source_label', 'ge.globo');
 
-        $payload = Cache::get(self::CACHE_KEY);
+        $payload = $this->lastRunPayload();
         $lastAt = isset($payload['at']) ? Carbon::parse($payload['at']) : null;
 
         if ($lastAt) {
@@ -50,6 +66,26 @@ class ScoreSyncStatusService
             'next_sync_at' => $nextAt->toIso8601String(),
             'last_updated_matches' => isset($payload['updated']) ? (int) $payload['updated'] : null,
         ];
+    }
+
+    /**
+     * @return array{at?: string, updated?: int}
+     */
+    private function lastRunPayload(): array
+    {
+        $fromSetting = Setting::query()->find(self::SETTING_KEY_AT)?->value;
+        if ($fromSetting) {
+            $updatedRaw = Setting::query()->find(self::SETTING_KEY_UPDATED)?->value;
+
+            return [
+                'at' => $fromSetting,
+                'updated' => $updatedRaw !== null ? (int) $updatedRaw : 0,
+            ];
+        }
+
+        $cached = Cache::get(self::CACHE_KEY);
+
+        return is_array($cached) ? $cached : [];
     }
 
     private function nextScheduledSlot(Carbon $from): Carbon

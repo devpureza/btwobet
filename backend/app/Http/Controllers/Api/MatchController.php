@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\FootballMatch;
 use App\Services\PredictionWindow;
+use App\Support\TeamSlot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -123,6 +124,7 @@ class MatchController extends Controller
                     'away_score' => $match->away_score,
                 ]
                 : null,
+            'teams_defined' => $this->window->teamsAreDefined($match),
             'open_for_predictions' => $access['can_submit'],
             'prediction_deadline_at' => $access['deadline_at'],
             'prediction_lock_reason' => $access['reason'],
@@ -141,6 +143,7 @@ class MatchController extends Controller
             'code' => $team->code,
             'name' => $this->translateTeamName($team->name),
             'flag_url' => $team->flag_url,
+            'is_placeholder' => TeamSlot::isPlaceholder($team),
         ];
     }
 

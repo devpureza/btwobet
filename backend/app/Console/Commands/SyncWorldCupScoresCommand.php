@@ -14,7 +14,15 @@ class SyncWorldCupScoresCommand extends Command
     public function handle(WorldCupScoreSyncService $sync): int
     {
         $this->info('Buscando jogos no ge.globo...');
-        $stats = $sync->syncFromGloboEsporte();
+
+        try {
+            $stats = $sync->syncFromGloboEsporte();
+        } catch (\Throwable $e) {
+            $this->error($e->getMessage());
+            $sync->recordFailedRun();
+
+            return self::FAILURE;
+        }
 
         $this->line("Jogos no GE: {$stats['found']}");
         $this->line("Casados no banco: {$stats['matched']}");

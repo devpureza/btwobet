@@ -77,4 +77,8 @@ if [ "${APP_ENV}" = "production" ]; then
   php artisan route:cache
 fi
 
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
 exec php artisan serve --host=0.0.0.0 --port=8000

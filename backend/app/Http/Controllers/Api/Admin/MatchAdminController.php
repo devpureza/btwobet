@@ -86,7 +86,7 @@ class MatchAdminController extends Controller
         $validated = $request->validate([
             'kickoff_at' => ['sometimes', 'date'],
             'stage' => ['sometimes', 'string', 'in:group,knockout'],
-            'group_name' => ['nullable', 'string', 'size:1', 'regex:/^[A-H]$/i'],
+            'group_name' => ['nullable', 'string', 'size:1', 'regex:/^[A-L]$/i'],
             'venue' => ['nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'string', 'in:scheduled,finished'],
         ]);

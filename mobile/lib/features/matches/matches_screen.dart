@@ -93,13 +93,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 1280),
                               child: SizedBox(
-                                height: isDesktop ? 200 : 168,
+                                height: isDesktop ? 240 : 200,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(24),
                                   child: StadiumGradient(
                                     assetPath: 'assets/images/hero-stadium.png',
                                     child: Padding(
-                                      padding: const EdgeInsets.all(16),
+                                      padding: const EdgeInsets.all(20),
                                       child: Align(
                                         alignment: Alignment.bottomLeft,
                                         child: Column(
@@ -108,16 +108,14 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                           children: [
                                             Text(
                                               'Seus Palpites',
-                                              style: theme.textTheme.headlineMedium?.copyWith(
+                                              style: theme.textTheme.headlineLarge?.copyWith(
                                                 color: theme.colorScheme.onPrimary,
                                               ),
                                             ),
-                                            const SizedBox(height: 4),
+                                            const SizedBox(height: 8),
                                             Text(
                                               'Preveja os placares e suba no ranking global.',
                                               style: theme.textTheme.bodyMedium?.copyWith(
-                                                fontSize: 14,
-                                                height: 1.25,
                                                 color: theme.colorScheme.onPrimary.withValues(alpha: 0.90),
                                               ),
                                             ),
@@ -407,8 +405,10 @@ class _MatchCardState extends State<MatchCard> {
     final awayTeam = widget.match['away_team'] as Map<String, dynamic>;
 
     final kickoff = DateTime.parse(widget.match['kickoff_at'] as String).toLocal();
+    final teamsDefined = widget.match['teams_defined'] as bool? ?? true;
     final open = widget.match['open_for_predictions'] as bool? ?? false;
     final lockReason = widget.match['prediction_lock_reason'] as String?;
+    final awaitingTeams = !teamsDefined;
     final deadlineRaw = widget.match['prediction_deadline_at'] as String?;
     final deadline = deadlineRaw != null ? DateTime.tryParse(deadlineRaw)?.toLocal() : null;
     final hasPrediction = widget.match['my_prediction'] != null;
@@ -489,12 +489,12 @@ class _MatchCardState extends State<MatchCard> {
                   children: [
                     Expanded(child: _team(homeTeam, alignRight: true)),
                     const SizedBox(width: 10),
-                    ScoreBox(controller: _home, enabled: open),
+                    ScoreBox(controller: _home, enabled: open && !awaitingTeams),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Text('X', style: theme.textTheme.headlineMedium?.copyWith(color: scheme.outline)),
                     ),
-                    ScoreBox(controller: _away, enabled: open),
+                    ScoreBox(controller: _away, enabled: open && !awaitingTeams),
                     const SizedBox(width: 10),
                     Expanded(child: _team(awayTeam)),
                   ],
@@ -505,7 +505,16 @@ class _MatchCardState extends State<MatchCard> {
                     'Prazo: ${DateFormat('dd/MM/yyyy HH:mm', 'pt_BR').format(deadline)}',
                     style: theme.textTheme.labelSmall?.copyWith(color: scheme.primary),
                   ),
-                if (lockReason != null && !open) ...[
+                if (awaitingTeams) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Aguardando definição dos times',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ] else if (lockReason != null && !open) ...[
                   const SizedBox(height: 8),
                   Text(
                     lockReason,
@@ -539,7 +548,7 @@ class _MatchCardState extends State<MatchCard> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: FilledButton(
-                    onPressed: (!open || _saving)
+                    onPressed: (!open || awaitingTeams || _saving)
                         ? null
                         : () async {
                             final hs = int.tryParse(_home.text) ?? 0;
@@ -553,7 +562,11 @@ class _MatchCardState extends State<MatchCard> {
                           },
                     child: _saving
                         ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : Text(hasPrediction ? 'Registrado' : (open ? 'Salvar palpite' : 'Fechado')),
+                        : Text(
+                            awaitingTeams
+                                ? 'Times pendentes'
+                                : (hasPrediction ? 'Registrado' : (open ? 'Salvar palpite' : 'Fechado')),
+                          ),
                   ),
                 ),
               ],
@@ -566,8 +579,9 @@ class _MatchCardState extends State<MatchCard> {
 
   Widget _team(Map<String, dynamic> team, {bool alignRight = false}) {
     final theme = Theme.of(context);
-    final name = (team['name'] as String).toUpperCase();
-    final flag = FlagImage(url: team['flag_url'] as String?, size: 48);
+    final isPlaceholder = team['is_placeholder'] as bool? ?? false;
+    final name = isPlaceholder ? 'A definir' : (team['name'] as String).toUpperCase();
+    final flag = isPlaceholder ? const SizedBox(width: 48, height: 48) : FlagImage(url: team['flag_url'] as String?, size: 48);
     final label = Flexible(
       child: Text(
         name,
