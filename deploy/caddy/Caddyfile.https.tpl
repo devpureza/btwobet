@@ -1,8 +1,8 @@
 # Gerado por setup-https-domain.sh — não editar à mão.
 {
-	email {$ACME_EMAIL}
+	email __ACME_EMAIL__
 }
 
-{$DOMAIN} {
+__DOMAIN__ {
 	reverse_proxy nginx:80
 }

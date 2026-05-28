@@ -81,8 +81,10 @@ Depois cada push em `main` roda o workflow **Deploy EC2**.
 1. **Elastic IP** já deve estar associado à EC2 (IP fixo para DNS).
 2. Conta no **Paid plan** (Free Plan não registra domínio no Route 53).
 3. `cp deploy/domain-contact.env.example deploy/domain-contact.env` e preencha.
-4. `./deploy/aws-register-domain.sh btwobet.dev`
-5. `./deploy/aws-setup-domain-https.sh btwobet.dev seu@email.com`
-6. No GitHub Secrets: `EC2_HOST` = IP elástico ou domínio; variável `APP_URL` = `https://btwobet.dev` no workflow.
+4. `./deploy/aws-upgrade-paid.sh` (se a conta ainda estiver no Free plan)
+5. `./deploy/aws-register-domain.sh btwobet.click` (~**US$ 3/ano** — mais barato no Route 53; alternativa: `btwobet.link` ~US$ 5)
+6. Use **devpureza@gmail.com** em `deploy/domain-contact.env` (mesmo e-mail da conta AWS)
+7. `./deploy/aws-setup-domain-https.sh btwobet.click devpureza@gmail.com`
+8. No GitHub Secrets: `EC2_HOST` = `btwobet.click`; variável `APP_URL` = `https://btwobet.click`
 
 Detalhes: [deploy-aws.md](./deploy-aws.md) seção 5.

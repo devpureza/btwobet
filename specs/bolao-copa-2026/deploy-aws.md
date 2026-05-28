@@ -107,7 +107,11 @@ Credenciais: `aws configure` na máquina ou variáveis `AWS_ACCESS_KEY_ID` / `AW
 
 ### Conta AWS Free Plan
 
-Registro de domínio no Route 53 (`btwobet.dev`, etc.) **não funciona** no Free Plan — é preciso mudar para **Paid plan** no billing da conta, ou registrar o domínio em outro lugar e só usar Route 53 para DNS.
+Registro de domínio no Route 53 **não funciona** no Free Plan. Rode `./deploy/aws-upgrade-paid.sh` ou no console: Billing → Upgrade account.
+
+Domínio mais barato na AWS: **`btwobet.click`** (~**US$ 3/ano**). Segunda opção: **`btwobet.link`** (~US$ 5/ano). Evite `.xyz` (~US$ 18) salvo preferência explícita.
+
+E-mail de contato do domínio: **devpureza@gmail.com** (mesmo da conta AWS).
 
 ### Fluxo recomendado (Caddy + Let's Encrypt)
 
@@ -117,11 +121,12 @@ cp deploy/domain-contact.env.example deploy/domain-contact.env
 # edite com dados reais
 
 # 2) Registrar domínio na AWS (após Paid plan)
-./deploy/aws-register-domain.sh btwobet.dev
+./deploy/aws-upgrade-paid.sh
+./deploy/aws-register-domain.sh btwobet.click
 
 # 3) DNS + HTTPS na EC2
 export EC2_SSH_KEY_PATH=~/Downloads/sua-chave.pem
-./deploy/aws-setup-domain-https.sh btwobet.dev seu@email.com
+./deploy/aws-setup-domain-https.sh btwobet.click devpureza@gmail.com
 ```
 
 Na EC2, após DNS propagar:

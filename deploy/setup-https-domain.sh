@@ -4,13 +4,13 @@
 set -euo pipefail
 
 DOMAIN="${1:?Informe o domínio, ex: btwobet.dev}"
-ACME_EMAIL="${2:?Informe e-mail para Let's Encrypt, ex: admin@example.com}"
+ACME_EMAIL="${2:?Informe e-mail ACME (Lets Encrypt), ex: admin@example.com}"
 
 DEPLOY_DIR="${DEPLOY_DIR:-/opt/btwobet}"
 cd "$DEPLOY_DIR"
 
 CADDYFILE="deploy/caddy/Caddyfile"
-sed -e "s/\${DOMAIN}/${DOMAIN}/g" -e "s/\${ACME_EMAIL}/${ACME_EMAIL}/g" \
+sed -e "s|__DOMAIN__|${DOMAIN}|g" -e "s|__ACME_EMAIL__|${ACME_EMAIL}|g" \
   deploy/caddy/Caddyfile.https.tpl > "$CADDYFILE"
 
 if [ -f .env.production ]; then

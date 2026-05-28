@@ -11,13 +11,14 @@ CONTACT_FILE="${CONTACT_FILE:-deploy/domain-contact.env}"
 
 if [ ! -f "$CONTACT_FILE" ]; then
   echo "Crie $CONTACT_FILE a partir de deploy/domain-contact.env.example"
+  echo "Use o e-mail da conta AWS (ex.: devpureza@gmail.com), não um e-mail aleatório do git."
   exit 1
 fi
 # shellcheck disable=SC1090
 source "$CONTACT_FILE"
 
 required_vars=(CONTACT_FIRST_NAME CONTACT_LAST_NAME CONTACT_ADDRESS CONTACT_CITY \
-  CONTACT_STATE CONTACT_COUNTRY CONTACT_ZIP CONTACT_PHONE CONTACT_EMAIL)
+  CONTACT_COUNTRY CONTACT_ZIP CONTACT_PHONE CONTACT_EMAIL)
 for v in "${required_vars[@]}"; do
   if [ -z "${!v:-}" ]; then
     echo "Variável $v não definida em $CONTACT_FILE"
@@ -43,15 +44,28 @@ if [ "$AVAIL" != "AVAILABLE" ] && [ "$AVAIL" != "AVAILABLE_PREORDER" ]; then
 fi
 echo "Disponível: $DOMAIN"
 
-CONTACT_JSON="$(jq -n \
-  --arg fn "$CONTACT_FIRST_NAME" --arg ln "$CONTACT_LAST_NAME" \
-  --arg a1 "$CONTACT_ADDRESS" --arg city "$CONTACT_CITY" --arg st "$CONTACT_STATE" \
-  --arg cc "$CONTACT_COUNTRY" --arg zip "$CONTACT_ZIP" --arg ph "$CONTACT_PHONE" --arg em "$CONTACT_EMAIL" \
-  '{
-    FirstName: $fn, LastName: $ln, ContactType: "PERSON",
-    AddressLine1: $a1, City: $city, State: $st, CountryCode: $cc, ZipCode: $zip,
-    PhoneNumber: $ph, Email: $em
-  }')"
+# Brasil: sem State; CEP no formato 12345-678
+if [ "$CONTACT_COUNTRY" = "BR" ]; then
+  CONTACT_JSON="$(jq -n \
+    --arg fn "$CONTACT_FIRST_NAME" --arg ln "$CONTACT_LAST_NAME" \
+    --arg a1 "$CONTACT_ADDRESS" --arg city "$CONTACT_CITY" \
+    --arg cc "$CONTACT_COUNTRY" --arg zip "$CONTACT_ZIP" --arg ph "$CONTACT_PHONE" --arg em "$CONTACT_EMAIL" \
+    '{
+      FirstName: $fn, LastName: $ln, ContactType: "PERSON",
+      AddressLine1: $a1, City: $city, CountryCode: $cc, ZipCode: $zip,
+      PhoneNumber: $ph, Email: $em
+    }')"
+else
+  CONTACT_JSON="$(jq -n \
+    --arg fn "$CONTACT_FIRST_NAME" --arg ln "$CONTACT_LAST_NAME" \
+    --arg a1 "$CONTACT_ADDRESS" --arg city "$CONTACT_CITY" --arg st "${CONTACT_STATE:-}" \
+    --arg cc "$CONTACT_COUNTRY" --arg zip "$CONTACT_ZIP" --arg ph "$CONTACT_PHONE" --arg em "$CONTACT_EMAIL" \
+    '{
+      FirstName: $fn, LastName: $ln, ContactType: "PERSON",
+      AddressLine1: $a1, City: $city, State: $st, CountryCode: $cc, ZipCode: $zip,
+      PhoneNumber: $ph, Email: $em
+    }')"
+fi
 
 REGISTER_JSON="$(jq -n \
   --arg domain "$DOMAIN" \
