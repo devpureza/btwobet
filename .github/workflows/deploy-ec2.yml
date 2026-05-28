@@ -28,11 +28,8 @@ jobs:
         working-directory: mobile
         run: |
           flutter pub get
-          if [ -n "$APP_URL" ]; then
-            flutter build web --release --dart-define=API_BASE_URL="${APP_URL}/api"
-          else
-            flutter build web --release
-          fi
+          BASE_URL="${APP_URL:-http://184.73.154.194}"
+          flutter build web --release --dart-define=API_BASE_URL="${BASE_URL}/api"
 
       - name: Configure SSH
         run: |
