@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/glass.dart';
+import 'widgets/login_hero_header.dart';
 
 class LoginScreen extends StatefulWidget {
   final SessionController session;
@@ -134,7 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: theme.textTheme.bodyLarge?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.92)),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
+                      const LoginHeroHeader(),
+                      const SizedBox(height: 20),
                       Glass(
                         blur: 20,
                         borderRadius: BorderRadius.circular(24),
@@ -170,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         width: 16,
                                         child: CircularProgressIndicator(strokeWidth: 2),
                                       )
-                                    : const Text('Participar Agora'),
+                                    : const Text('Entrar'),
                               ),
                               const SizedBox(height: 8),
                               Text(
