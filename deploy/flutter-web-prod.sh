@@ -27,9 +27,8 @@ else
   echo ">> Usando bundle existente em mobile/build/web (sem rebuild)"
 fi
 
-echo ">> Reiniciando nginx (e caddy) sem tocar DB/app"
-docker compose -f docker-compose.prod.yml --env-file .env.production restart nginx
-docker compose -f docker-compose.prod.yml --env-file .env.production restart caddy
+echo ">> Recriando nginx/caddy (sem tocar DB/app)"
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-deps nginx caddy
 
 echo ">> Verificando containers e endpoints locais"
 docker compose -f docker-compose.prod.yml --env-file .env.production ps nginx caddy
