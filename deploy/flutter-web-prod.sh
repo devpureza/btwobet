@@ -27,6 +27,14 @@ else
   echo ">> Usando bundle existente em mobile/build/web (sem rebuild)"
 fi
 
+if [[ ! -f deploy/caddy/certs/cert.pem || ! -f deploy/caddy/certs/key.pem ]]; then
+  echo ">> Cert TLS ausente; gerando autoassinado (IP/domínio)"
+  chmod +x deploy/caddy/generate-ip-cert.sh
+  DEPLOY_IP="${DEPLOY_IP:-184.73.154.194}"
+  DOMAIN="$(grep -E '^DOMAIN=' .env.production 2>/dev/null | cut -d= -f2- | tr -d '\"' || echo btwobet.click)"
+  ./deploy/caddy/generate-ip-cert.sh "$DEPLOY_IP" "$DOMAIN"
+fi
+
 echo ">> Recriando nginx/caddy (sem tocar DB/app)"
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-deps nginx caddy
 

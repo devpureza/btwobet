@@ -66,6 +66,7 @@ jobs:
             --exclude 'backend/.env' \
             --exclude 'backend/vendor' \
             --exclude 'mobile/.dart_tool' \
+            --exclude 'deploy/caddy/certs' \
             --exclude '.env.production' \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new" \
             ./ "${EC2_USER}@${EC2_HOST}:${DEPLOY_DIR}/"
