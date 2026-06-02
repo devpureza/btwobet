@@ -78,6 +78,6 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "${EC2_USER}@${EC2_HOST}" << 'REMOTE'
           set -euo pipefail
           cd /opt/btwobet
-          chmod +x deploy/remote-deploy.sh deploy/setup-ec2.sh
-          ./deploy/remote-deploy.sh
+          chmod +x deploy/flutter-web-prod.sh
+          ./deploy/flutter-web-prod.sh
           REMOTE
