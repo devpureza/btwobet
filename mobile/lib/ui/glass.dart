@@ -114,6 +114,19 @@ class ScoreBox extends StatelessWidget {
     this.size = 64,
   });
 
+  void _ensureVisible(BuildContext context) {
+    // Garante que o campo fique visível quando o teclado abrir/for focado.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      Scrollable.ensureVisible(
+        context,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -123,6 +136,10 @@ class ScoreBox extends StatelessWidget {
       width: size,
       height: size,
       child: Focus(
+        onFocusChange: (hasFocus) {
+          if (!hasFocus) return;
+          _ensureVisible(context);
+        },
         child: Builder(
           builder: (context) {
             final focused = Focus.of(context).hasFocus;
@@ -147,6 +164,7 @@ class ScoreBox extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
                 textAlignVertical: TextAlignVertical.center,
+                onTap: () => _ensureVisible(context),
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   height: 1,

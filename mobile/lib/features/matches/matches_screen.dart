@@ -85,6 +85,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   onRefresh: _load,
                   child: CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                     slivers: [
                       SliverPadding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -295,7 +296,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                   ),
                           ),
                         ],
-                      const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+                      SliverPadding(
+                        padding: EdgeInsets.only(bottom: 24 + MediaQuery.of(context).viewInsets.bottom),
+                      ),
                     ],
                   ),
                 ),

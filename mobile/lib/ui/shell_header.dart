@@ -126,6 +126,7 @@ class ShellPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: body,
+      resizeToAvoidBottomInset: true,
       floatingActionButton: floatingActionButton,
     );
   }
