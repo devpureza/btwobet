@@ -31,3 +31,48 @@ cd /opt/btwobet && ./deploy/remote-deploy.sh
 ## Variável `APP_URL` (GitHub → Settings → Variables)
 
 Defina `APP_URL=https://btwobet.click` para o build web apontar à API correta.
+
+## Atualizar só o Flutter Web (sem tocar no PostgreSQL)
+
+O diretório `mobile/build/web/` **não vai para o git** (`mobile/build/` no `.gitignore`). `git pull` atualiza o código-fonte, **não** o que o nginx serve.
+
+### Procedimento seguro na EC2
+
+```bash
+cd /opt/btwobet
+git pull origin main
+./deploy/flutter-web-prod.sh
+```
+
+Com Flutter instalado na máquina, o script faz `flutter build web` e reinicia **somente** o container `nginx`.
+
+### Build local + envio do bundle (sem Flutter na EC2)
+
+No Mac (ajuste host/usuário/chave):
+
+```bash
+cd /caminho/para/btwobet
+git pull origin main
+cd mobile
+flutter pub get
+flutter build web --release --dart-define=API_BASE_URL=https://btwobet.click/api
+rsync -azv --delete build/web/ ubuntu@SEU_IP:/opt/btwobet/mobile/build/web/
+ssh -i sua-chave.pem ubuntu@SEU_IP \
+  'cd /opt/btwobet && docker compose -f docker-compose.prod.yml --env-file .env.production restart nginx'
+```
+
+### Deploy completo (backend + Flutter via CI)
+
+GitHub Actions **Deploy EC2**: build Flutter, rsync do repo inteiro, `./deploy/remote-deploy.sh` (rebuild app, `migrate --force`). O volume `postgres_data` **permanece**; evite `RUN_SEED=true` após o primeiro deploy.
+
+### Nunca rode em produção (perda ou sobrescrita de dados)
+
+| Comando | Risco |
+|---------|--------|
+| `docker compose down -v` | Apaga volume `postgres_data` |
+| `docker volume rm ... postgres_data` | Idem |
+| `php artisan worldcup:import-openfootball` | Reimporta/apaga dados de jogos conforme implementação |
+| `php artisan db:seed --force` com `RUN_SEED=true` no app | Roda seeders de novo no container |
+| Reset administrativo destrutivo / scripts de “reset bolão” | Apaga palpites/usuários conforme o comando |
+
+`./deploy/remote-deploy.sh` é seguro para o **banco** (não usa `-v`), mas **não** use quando a intenção for só atualizar o front — prefira `./deploy/flutter-web-prod.sh`.
