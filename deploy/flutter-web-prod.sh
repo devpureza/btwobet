@@ -33,8 +33,21 @@ docker compose -f docker-compose.prod.yml --env-file .env.production restart cad
 
 echo ">> Verificando containers e endpoints locais"
 docker compose -f docker-compose.prod.yml --env-file .env.production ps nginx caddy
-curl -fsSI "http://127.0.0.1/" >/dev/null
-curl -fsSI "http://127.0.0.1/api/health" >/dev/null
+
+for url in "http://127.0.0.1/" "http://127.0.0.1/api/health"; do
+  ok=0
+  for i in {1..12}; do
+    if curl -fsSI "$url" >/dev/null; then
+      ok=1
+      break
+    fi
+    sleep 1
+  done
+  if [[ "$ok" != "1" ]]; then
+    echo "ERRO: endpoint não respondeu OK: $url"
+    exit 1
+  fi
+done
 
 echo "OK. Valide: curl -sS \"${BASE}/main.dart.js\" | head -c 200"
 echo "     No navegador: Ctrl+Shift+R (hard refresh)."
