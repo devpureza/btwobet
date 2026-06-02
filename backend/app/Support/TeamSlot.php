@@ -45,8 +45,11 @@ final class TeamSlot
     {
         $value = trim($value);
 
-        // 1A, 2B, 3A/B/C/D/F
-        if (preg_match('/^\d+[A-L](?:\/\d+[A-L])*$/i', $value)) {
+        // openfootball usa formatos como:
+        // - "1A", "2B"
+        // - "3A/B/C/D/F" (melhores terceiros)
+        // - e também pode aparecer como "1A/2B" em alguns datasets
+        if (preg_match('/^\d+[A-L](?:\/(?:\d+)?[A-L])*$/i', $value)) {
             return true;
         }
 

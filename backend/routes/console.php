@@ -168,3 +168,75 @@ Artisan::command('worldcup:import-openfootball {--url=https://raw.githubusercont
     $this->info("Import concluído: {$imported} jogos, ".Team::count().' seleções.');
     return self::SUCCESS;
 })->purpose('Importa tabela de jogos (openfootball) para o banco');
+
+Artisan::command('predictions:clear
+    {--user= : ID ou email do usuário}
+    {--match= : Filtra por match_id}
+    {--status= : Filtra por status do jogo (scheduled|finished)}
+    {--stage= : Filtra por stage do jogo (group|knockout)}
+    {--dry-run : Apenas mostra quantos seriam apagados}', function () {
+    $userOpt = trim((string) $this->option('user'));
+    if ($userOpt === '') {
+        $this->error('Informe --user=<id|email>.');
+        return self::FAILURE;
+    }
+
+    $user = null;
+    if (ctype_digit($userOpt)) {
+        $user = \App\Models\User::query()->find((int) $userOpt);
+    }
+    if (! $user) {
+        $user = \App\Models\User::query()->where('email', $userOpt)->first();
+    }
+    if (! $user) {
+        $this->error('Usuário não encontrado.');
+        return self::FAILURE;
+    }
+
+    $matchId = $this->option('match');
+    $status = $this->option('status');
+    $stage = $this->option('stage');
+
+    if ($matchId !== null && $matchId !== '' && ! ctype_digit((string) $matchId)) {
+        $this->error('--match deve ser um número.');
+        return self::FAILURE;
+    }
+    $matchId = ($matchId !== null && $matchId !== '') ? (int) $matchId : null;
+
+    if ($status !== null && $status !== '' && ! in_array($status, ['scheduled', 'finished'], true)) {
+        $this->error('--status deve ser scheduled ou finished.');
+        return self::FAILURE;
+    }
+    $status = ($status !== null && $status !== '') ? (string) $status : null;
+
+    if ($stage !== null && $stage !== '' && ! in_array($stage, ['group', 'knockout'], true)) {
+        $this->error('--stage deve ser group ou knockout.');
+        return self::FAILURE;
+    }
+    $stage = ($stage !== null && $stage !== '') ? (string) $stage : null;
+
+    $query = \App\Models\Prediction::query()
+        ->where('user_id', $user->id)
+        ->when($matchId !== null, fn ($q) => $q->where('match_id', $matchId))
+        ->when($status !== null || $stage !== null, function ($q) use ($status, $stage) {
+            $q->whereHas('match', function ($mq) use ($status, $stage) {
+                $mq->when($status !== null, fn ($inner) => $inner->where('status', $status))
+                    ->when($stage !== null, fn ($inner) => $inner->where('stage', $stage));
+            });
+        });
+
+    $count = (int) $query->count();
+    if ($this->option('dry-run')) {
+        $this->info("Dry-run: {$count} palpites seriam apagados (user_id={$user->id}).");
+        return self::SUCCESS;
+    }
+
+    if (! $this->confirm("Apagar {$count} palpites do usuário {$user->email}?", false)) {
+        $this->warn('Operação cancelada.');
+        return self::SUCCESS;
+    }
+
+    $deleted = (int) $query->delete();
+    $this->info("Palpites apagados: {$deleted} (user_id={$user->id}).");
+    return self::SUCCESS;
+})->purpose('Apaga palpites de um usuário (admin CLI)');

@@ -26,7 +26,8 @@ class AdminUserAvatarTest extends TestCase
         Sanctum::actingAs($admin);
 
         $response = $this->post('/api/admin/users/'.$player->id.'/avatar', [
-            'file' => UploadedFile::fake()->image('avatar.jpg'),
+            // Evita dependência de GD no container de testes.
+            'file' => UploadedFile::fake()->create('avatar.jpg', 10, 'image/jpeg'),
         ], ['Accept' => 'application/json']);
 
         $response->assertOk()
@@ -55,7 +56,7 @@ class AdminUserAvatarTest extends TestCase
         Sanctum::actingAs($user);
 
         $this->post('/api/admin/users/'.$target->id.'/avatar', [
-            'file' => UploadedFile::fake()->image('avatar.jpg'),
+            'file' => UploadedFile::fake()->create('avatar.jpg', 10, 'image/jpeg'),
         ], ['Accept' => 'application/json'])->assertForbidden();
     }
 }

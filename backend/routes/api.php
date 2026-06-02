@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PredictionController;
 use App\Http\Controllers\Api\RankingController;
 use App\Http\Controllers\Api\ScoreSyncController;
 use App\Http\Controllers\Api\Admin\BolaoResetAdminController;
+use App\Http\Controllers\Api\Admin\UserPredictionsAdminController;
 use App\Http\Controllers\Api\Admin\PredictionHistoryAdminController;
 use App\Http\Controllers\Api\Admin\PredictionRulesAdminController;
 use App\Http\Controllers\Api\Admin\UserAdminController;
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/users/{user}/approve', [UserAdminController::class, 'approve']);
             Route::post('/users/{user}/reject', [UserAdminController::class, 'reject']);
             Route::delete('/users/{user}', [UserAdminController::class, 'destroy']);
+            Route::post('/users/{user}/predictions/clear', [UserPredictionsAdminController::class, 'clear']);
 
             Route::get('/matches', [MatchAdminController::class, 'index']);
             Route::patch('/matches/{match}/result', [MatchAdminController::class, 'updateResult']);

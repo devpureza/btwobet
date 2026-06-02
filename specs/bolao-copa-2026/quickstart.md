@@ -30,6 +30,8 @@ docker compose exec app php artisan migrate --force
 docker compose exec app php artisan db:seed --force
 ```
 
+O `db:seed` cria **um jogo de demonstração** (para o app não ficar com lista vazia). Para importar a tabela “real” de jogos, rode o comando abaixo.
+
 ## Importar a tabela “real” de jogos (slots) — Copa 2026
 
 Como os confrontos (times) dependem do sorteio, o import usa um dataset público com **datas/horários/locais** e placeholders em fases finais.
