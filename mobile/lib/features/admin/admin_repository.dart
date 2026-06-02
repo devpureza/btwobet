@@ -128,4 +128,36 @@ class AdminRepository {
     final res = await _dio.get('/admin/predictions', queryParameters: params);
     return res.data as Map<String, dynamic>;
   }
+
+  static ({List<int> bytes, String? filename, String mimeType}) _downloadPayloadFromResponse(Response<List<int>> res) {
+    final bytes = res.data ?? <int>[];
+    final mimeType = res.headers.value('content-type') ?? 'application/octet-stream';
+    final cd = res.headers.value('content-disposition') ?? '';
+    final filename = _tryParseFilenameFromContentDisposition(cd);
+    return (bytes: bytes, filename: filename, mimeType: mimeType);
+  }
+
+  static String? _tryParseFilenameFromContentDisposition(String contentDisposition) {
+    // Ex: attachment; filename=palpites_20260602_123456.csv
+    final match = RegExp(r'filename\s*=\s*"?([^";]+)"?', caseSensitive: false).firstMatch(contentDisposition);
+    return match?.group(1)?.trim();
+  }
+
+  Future<({List<int> bytes, String? filename, String mimeType})> exportPredictions({
+    String format = 'csv',
+    Map<String, dynamic>? filters,
+  }) async {
+    final params = <String, dynamic>{
+      'format': format,
+      ...?filters,
+    };
+
+    final res = await _dio.get<List<int>>(
+      '/admin/predictions/export',
+      queryParameters: params,
+      options: Options(responseType: ResponseType.bytes),
+    );
+
+    return _downloadPayloadFromResponse(res);
+  }
 }

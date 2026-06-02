@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/session_controller.dart';
 import '../../ui/glass.dart';
 import '../../ui/shell_header.dart';
+import '../../utils/download_file/download_file.dart';
 
 class AdminScreen extends StatelessWidget {
   final SessionController session;
@@ -46,6 +47,29 @@ class AdminScreen extends StatelessWidget {
                     subtitle: const Text('Adicionar/editar nome, email, senha e foto'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.go('/admin/users'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.download),
+                    title: const Text('Exportar palpites'),
+                    subtitle: const Text('Baixar CSV para planilha'),
+                    onTap: () async {
+                      try {
+                        final payload = await session.admin.exportPredictions(format: 'csv');
+                        final filename = payload.filename ?? 'palpites.csv';
+                        downloadFile(bytes: payload.bytes, filename: filename, mimeType: payload.mimeType);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Download iniciado: $filename')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Falha ao exportar palpites: $e')),
+                          );
+                        }
+                      }
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.sports_soccer),

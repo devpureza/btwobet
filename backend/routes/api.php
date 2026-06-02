@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ScoreSyncController;
 use App\Http\Controllers\Api\Admin\BolaoResetAdminController;
 use App\Http\Controllers\Api\Admin\UserPredictionsAdminController;
 use App\Http\Controllers\Api\Admin\PredictionHistoryAdminController;
+use App\Http\Controllers\Api\Admin\PredictionExportAdminController;
 use App\Http\Controllers\Api\Admin\PredictionRulesAdminController;
 use App\Http\Controllers\Api\Admin\UserAdminController;
 use App\Http\Controllers\Api\Admin\MatchAdminController;
@@ -57,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/prediction-rules', [PredictionRulesAdminController::class, 'update']);
 
             Route::get('/predictions', [PredictionHistoryAdminController::class, 'index']);
+            Route::get('/predictions/export', PredictionExportAdminController::class);
 
             Route::post('/reset', BolaoResetAdminController::class);
         });

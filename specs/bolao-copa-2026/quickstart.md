@@ -99,6 +99,16 @@ curl http://localhost:8080/api/me/history \
   -H "Authorization: Bearer SEU_TOKEN"
 ```
 
+## Admin — exportar palpites (CSV)
+
+Requer usuário **admin** e aprovado.
+
+```bash
+curl -L "http://localhost:8080/api/admin/predictions/export?format=csv" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -o palpites.csv
+```
+
 ## Preview UI (Stitch)
 
 Abra no navegador os HTMLs exportados:
