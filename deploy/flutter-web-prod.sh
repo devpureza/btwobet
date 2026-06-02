@@ -56,6 +56,8 @@ for url in "http://127.0.0.1/" "http://127.0.0.1/api/health"; do
   done
   if [[ "$ok" != "1" ]]; then
     echo "ERRO: endpoint não respondeu OK: $url"
+    docker compose -f docker-compose.prod.yml --env-file .env.production ps nginx caddy || true
+    docker compose -f docker-compose.prod.yml --env-file .env.production logs --tail=200 nginx caddy || true
     exit 1
   fi
 done
