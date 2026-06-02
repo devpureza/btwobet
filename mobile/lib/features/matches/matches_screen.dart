@@ -8,6 +8,7 @@ import '../../ui/bolao_fund_card.dart';
 import '../../ui/bolao_rules_card.dart';
 import '../../ui/flag_image.dart';
 import '../../ui/glass.dart';
+import '../../ui/hall_sections.dart';
 import '../../ui/match_filters.dart';
 import '../../ui/score_sync_banner.dart';
 import '../../ui/shell_header.dart';
@@ -169,6 +170,17 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                   ),
                                 ),
                               ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        sliver: SliverToBoxAdapter(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1280),
+                              child: const HallSections(),
                             ),
                           ),
                         ),
