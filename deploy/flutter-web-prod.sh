@@ -39,8 +39,8 @@ if [[ ! -f deploy/caddy/certs/cert.pem || ! -f deploy/caddy/certs/key.pem ]]; th
   ./deploy/caddy/generate-ip-cert.sh "$DEPLOY_IP" "$DOMAIN"
 fi
 
-echo ">> Recriando nginx/caddy (sem tocar DB/app)"
-docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-deps nginx caddy
+echo ">> Subindo app + nginx + caddy (sem tocar DB/app)"
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-deps app nginx caddy
 
 echo ">> Verificando containers e endpoints locais"
 docker compose -f docker-compose.prod.yml --env-file .env.production ps nginx caddy
