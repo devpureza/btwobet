@@ -11,6 +11,7 @@ import '../features/matches/bolao_fund_repository.dart';
 import '../features/matches/matches_repository.dart';
 import '../features/matches/score_sync_repository.dart';
 import '../features/ranking/ranking_repository.dart';
+import '../ui/achievement_unlock_feed.dart';
 
 class SessionController extends ChangeNotifier {
   final TokenStore tokenStore;
@@ -27,12 +28,20 @@ class SessionController extends ChangeNotifier {
   Map<String, dynamic>? _user;
   int _achievementsUnlocked = 0;
   int _achievementsTotal = 0;
+  final Set<String> _knownUnlockedSlugs = {};
+  final Set<String> _bannerDismissedSlugs = {};
+  final List<Map<String, dynamic>> _recentUnlocks = [];
 
   bool get isLoggedIn => _isLoggedIn;
   Map<String, dynamic>? get user => _user;
   bool get isAdmin => (_user?['is_admin'] as bool?) ?? false;
   int get achievementsUnlocked => _achievementsUnlocked;
   int get achievementsTotal => _achievementsTotal;
+  List<Map<String, dynamic>> get recentUnlocks => List.unmodifiable(_recentUnlocks);
+
+  List<Map<String, dynamic>> get unreadRecentUnlocks => _recentUnlocks
+      .where((item) => !_bannerDismissedSlugs.contains(item['slug'] as String?))
+      .toList(growable: false);
 
   SessionController._({
     required this.tokenStore,
@@ -88,6 +97,7 @@ class SessionController extends ChangeNotifier {
           _user = null;
           _achievementsUnlocked = 0;
           _achievementsTotal = 0;
+          _knownUnlockedSlugs.clear();
         }
       } catch (_) {
         // Timeout/rede: trata como sem sessão para não prender o router na home.
@@ -96,11 +106,13 @@ class SessionController extends ChangeNotifier {
         _user = null;
         _achievementsUnlocked = 0;
         _achievementsTotal = 0;
+        _knownUnlockedSlugs.clear();
       }
     } else {
       _user = null;
       _achievementsUnlocked = 0;
       _achievementsTotal = 0;
+      _knownUnlockedSlugs.clear();
     }
     notifyListeners();
 
@@ -113,18 +125,100 @@ class SessionController extends ChangeNotifier {
     if (!_isLoggedIn) return;
 
     try {
+      final payload = catalog == null
+          ? await achievements.getMyAchievements().timeout(const Duration(seconds: 8))
+          : null;
       final items = catalog ??
-          ((await achievements.getMyAchievements().timeout(const Duration(seconds: 8)))['catalog']
-                  as List<dynamic>? ??
-              []);
+          (payload?['catalog'] as List<dynamic>? ?? []);
+      final fromApi = payload == null
+          ? const <Map<String, dynamic>>[]
+          : (payload['newly_unlocked'] as List<dynamic>? ?? [])
+              .map((e) => (e as Map).cast<String, dynamic>())
+              .toList();
+      if (fromApi.isNotEmpty) {
+        markUnlocksKnown(fromApi);
+      }
       _achievementsTotal = items.length;
       _achievementsUnlocked = items.where((item) {
         return ((item as Map)['unlocked'] as bool?) ?? false;
       }).length;
+      syncKnownUnlocks(items);
       notifyListeners();
     } catch (_) {
       // Mantém valores anteriores se a API falhar.
     }
+  }
+
+  /// Conquistas recém-desbloqueadas em relação ao último estado conhecido.
+  List<Map<String, dynamic>> detectNewUnlocks(List<dynamic> catalog) {
+    final fresh = <Map<String, dynamic>>[];
+    for (final item in catalog) {
+      final map = (item as Map).cast<String, dynamic>();
+      final slug = map['slug'] as String?;
+      final unlocked = map['unlocked'] as bool? ?? false;
+      if (slug == null || !unlocked || _knownUnlockedSlugs.contains(slug)) continue;
+      _knownUnlockedSlugs.add(slug);
+      fresh.add(map);
+    }
+    return fresh;
+  }
+
+  void syncKnownUnlocks(List<dynamic> catalog) {
+    for (final item in catalog) {
+      final map = (item as Map).cast<String, dynamic>();
+      final slug = map['slug'] as String?;
+      final unlocked = map['unlocked'] as bool? ?? false;
+      if (slug != null && unlocked) _knownUnlockedSlugs.add(slug);
+    }
+  }
+
+  void markUnlocksKnown(Iterable<Map<String, dynamic>> unlocked) {
+    for (final map in unlocked) {
+      final slug = map['slug'] as String?;
+      if (slug != null) _knownUnlockedSlugs.add(slug);
+    }
+    recordRecentUnlocks(unlocked);
+  }
+
+  void recordRecentUnlocks(Iterable<Map<String, dynamic>> unlocked) {
+    for (final unlock in unlocked) {
+      final slug = unlock['slug'] as String?;
+      if (slug == null) continue;
+
+      _bannerDismissedSlugs.remove(slug);
+      _recentUnlocks.removeWhere((item) => item['slug'] == slug);
+      _recentUnlocks.insert(0, {
+        'slug': slug,
+        'name': unlock['name'] as String? ?? 'Conquista',
+        'tier': unlock['tier'] as String? ?? 'bronze',
+        'recorded_at': DateTime.now().toIso8601String(),
+      });
+    }
+
+    while (_recentUnlocks.length > 5) {
+      final removed = _recentUnlocks.removeLast();
+      final slug = removed['slug'] as String?;
+      if (slug != null) _bannerDismissedSlugs.remove(slug);
+    }
+    notifyListeners();
+  }
+
+  void dismissRecentUnlockBanner({String? slug}) {
+    if (slug != null) {
+      _bannerDismissedSlugs.add(slug);
+    } else {
+      for (final item in _recentUnlocks) {
+        final s = item['slug'] as String?;
+        if (s != null) _bannerDismissedSlugs.add(s);
+      }
+    }
+    notifyListeners();
+  }
+
+  void presentUnlockedAchievements(List<Map<String, dynamic>> unlocked) {
+    if (unlocked.isEmpty) return;
+    markUnlocksKnown(unlocked);
+    showAchievementUnlocks(unlocked);
   }
 
   Future<void> login(String email, String password) async {

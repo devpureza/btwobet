@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import '../api/token_store.dart';
+import '../ui/achievement_unlock_feed.dart';
 import 'app_router.dart';
 import 'app_theme.dart';
 import 'session_controller.dart';
@@ -144,6 +145,11 @@ class _AppBootstrapState extends State<AppBootstrap> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) {
+        return AchievementUnlockFeedHost(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

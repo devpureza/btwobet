@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../app/session_controller.dart';
+import '../../ui/achievement_tier_style.dart';
 import '../../ui/admin_helpers.dart';
 import '../../ui/bolao_fund_card.dart';
 import '../../ui/bolao_rules_card.dart';
@@ -78,10 +79,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
       await _load();
       if (!context.mounted) return;
       showSnack(context, 'Palpite salvo. Não será possível alterar.');
-      for (final achievement in unlocked) {
-        final name = achievement['name'] as String? ?? 'Conquista';
-        showSnack(context, 'Conquista desbloqueada: $name');
-      }
+      widget.session.presentUnlockedAchievements(unlocked);
     } catch (e) {
       if (context.mounted) {
         showSnack(context, dioErrorMessage(e), error: true);
@@ -99,7 +97,12 @@ class _MatchesScreenState extends State<MatchesScreen> {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
 
     return ShellPage(
-      body: _loading
+      body: ListenableBuilder(
+        listenable: widget.session,
+        builder: (context, _) {
+          final unreadUnlocks = widget.session.unreadRecentUnlocks;
+
+          return _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text(_error!))
@@ -109,8 +112,23 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                     slivers: [
+                      if (unreadUnlocks.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 1280),
+                                child: _RecentUnlocksBanner(
+                                  session: widget.session,
+                                  unlocks: unreadUnlocks,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        padding: EdgeInsets.fromLTRB(16, unreadUnlocks.isEmpty ? 16 : 8, 16, 0),
                         sliver: SliverToBoxAdapter(
                           child: Center(
                             child: ConstrainedBox(
@@ -299,7 +317,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
                       ),
                     ],
                   ),
-                ),
+                );
+        },
+      ),
     );
   }
 
@@ -323,6 +343,68 @@ class _MatchesScreenState extends State<MatchesScreen> {
     }
 
     return items.where(match).toList();
+  }
+}
+
+class _RecentUnlocksBanner extends StatelessWidget {
+  final SessionController session;
+  final List<Map<String, dynamic>> unlocks;
+
+  const _RecentUnlocksBanner({
+    required this.session,
+    required this.unlocks,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final latest = unlocks.first;
+    final name = latest['name'] as String? ?? 'Conquista';
+    final tier = latest['tier'] as String? ?? 'bronze';
+    final tierColor = achievementTierColor(tier, scheme);
+    final extra = unlocks.length - 1;
+
+    return Glass(
+      blur: 12,
+      borderRadius: BorderRadius.circular(16),
+      border: BorderSide(color: tierColor.withValues(alpha: 0.45)),
+      child: Row(
+        children: [
+          Icon(
+            achievementTierIcon(tier, unlocked: true),
+            color: tierColor,
+            size: 28,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Você conquistou: $name',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (extra > 0)
+                  Text(
+                    extra == 1 ? '+1 conquista recente' : '+$extra conquistas recentes',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Fechar',
+            onPressed: () => session.dismissRecentUnlockBanner(),
+            icon: Icon(Icons.close, color: scheme.outline, size: 20),
+          ),
+        ],
+      ),
+    );
   }
 }
 
