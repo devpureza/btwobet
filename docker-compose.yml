@@ -17,6 +17,7 @@ services:
       DB_DATABASE: btwobet
       DB_USERNAME: btwobet
       DB_PASSWORD: btwobet
+      RUN_SEED: "false"
     working_dir: /var/www/html
     depends_on:
       - db
@@ -34,3 +35,4 @@ services:
 
 volumes:
   postgres_data:
+    name: btwobet_postgres_data

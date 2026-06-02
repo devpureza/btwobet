@@ -5,11 +5,37 @@
 - Docker Desktop
 - curl ou Postman/Insomnia
 
-## Subir ambiente
+## Subir ambiente (recomendado)
 
 ```bash
 cd /Users/mateuspureza/Documents/mateuspureza/btwobet
-docker compose up -d --build
+./scripts/local-up.sh
+```
+
+O script sobe Docker **sem apagar volumes**, roda `migrate`, faz `db:seed` **somente se não houver usuários**, e inicia o `spa_server` (porta 4173) se o build web existir.
+
+Alternativa manual:
+
+```bash
+docker compose up -d          # preferir sem --build se nada mudou no Dockerfile
+docker compose exec app php artisan migrate --force
+# db:seed só na primeira vez (banco vazio)
+```
+
+### Comandos seguros vs nunca rodar (local)
+
+| Seguro | Nunca (apaga ou sobrescreve dados) |
+|--------|-------------------------------------|
+| `./scripts/local-up.sh` | `docker compose down -v` |
+| `docker compose up -d` | `docker volume rm btwobet_postgres_data` |
+| `docker compose exec app php artisan migrate --force` | `php artisan migrate:fresh` |
+| `docker compose down` (sem `-v`) | `php artisan db:wipe` |
+| Rebuild só do app: `docker compose up -d --build app` | `db:seed --force` repetido “para resetar” |
+
+O Postgres local usa o volume nomeado **`btwobet_postgres_data`**. `docker compose up -d --build` **não** apaga esse volume; só recria o container `app` (breve indisponibilidade da API enquanto o entrypoint roda migrate).
+
+```bash
+docker compose up -d --build   # ok, mas desnecessário se só mudou código PHP (volume ./backend)
 ```
 
 Aguarde ~30s e teste:
@@ -23,14 +49,17 @@ curl http://localhost:8080/api/health
 - **Postgres** roda no Docker.
 - **Porta local**: `5433` (para não conflitar com um Postgres já instalado na máquina).
 
-## Seed (primeira vez / reset)
+## Seed (primeira vez)
+
+Na primeira subida com banco vazio, `./scripts/local-up.sh` roda o seed automaticamente.
+
+Manual (só se `users` = 0):
 
 ```bash
-docker compose exec app php artisan migrate --force
 docker compose exec app php artisan db:seed --force
 ```
 
-O `db:seed` cria **um jogo de demonstração** (para o app não ficar com lista vazia). Para importar a tabela “real” de jogos, rode o comando abaixo.
+O seed cria o admin de dev e **um jogo demo** se não houver jogos. Para a tabela completa de jogos, use o import abaixo — **não** use seed como “reset”.
 
 ## Importar a tabela “real” de jogos (slots) — Copa 2026
 

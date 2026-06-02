@@ -68,7 +68,9 @@ fi
 php artisan migrate --force
 php artisan storage:link || true
 
-if [ "${RUN_SEED:-true}" = "true" ]; then
+# Seed só quando RUN_SEED=true (local-up.sh usa seed condicional via exec).
+# Padrão: false — rebuild/restart do container NÃO reexecuta seeders.
+if [ "${RUN_SEED:-false}" = "true" ]; then
   php artisan db:seed --force
 fi
 
