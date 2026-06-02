@@ -30,6 +30,10 @@ fi
 if [[ ! -f deploy/caddy/certs/cert.pem || ! -f deploy/caddy/certs/key.pem ]]; then
   echo ">> Cert TLS ausente; gerando autoassinado (IP/domínio)"
   chmod +x deploy/caddy/generate-ip-cert.sh
+  mkdir -p deploy/caddy/certs
+  if command -v sudo >/dev/null 2>&1; then
+    sudo -n chown -R "$(id -u)":"$(id -g)" deploy/caddy/certs 2>/dev/null || true
+  fi
   DEPLOY_IP="${DEPLOY_IP:-184.73.154.194}"
   DOMAIN="$(grep -E '^DOMAIN=' .env.production 2>/dev/null | cut -d= -f2- | tr -d '\"' || echo btwobet.click)"
   ./deploy/caddy/generate-ip-cert.sh "$DEPLOY_IP" "$DOMAIN"
