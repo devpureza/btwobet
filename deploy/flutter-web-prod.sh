@@ -27,8 +27,14 @@ else
   echo ">> Usando bundle existente em mobile/build/web (sem rebuild)"
 fi
 
-echo ">> Reiniciando apenas nginx (DB e app intactos)"
+echo ">> Reiniciando nginx (e caddy) sem tocar DB/app"
 docker compose -f docker-compose.prod.yml --env-file .env.production restart nginx
+docker compose -f docker-compose.prod.yml --env-file .env.production restart caddy
+
+echo ">> Verificando containers e endpoints locais"
+docker compose -f docker-compose.prod.yml --env-file .env.production ps nginx caddy
+curl -fsSI "http://127.0.0.1/" >/dev/null
+curl -fsSI "http://127.0.0.1/api/health" >/dev/null
 
 echo "OK. Valide: curl -sS \"${BASE}/main.dart.js\" | head -c 200"
 echo "     No navegador: Ctrl+Shift+R (hard refresh)."
