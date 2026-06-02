@@ -7,13 +7,22 @@ use App\Models\FootballMatch;
 use App\Models\Prediction;
 use App\Models\User;
 use App\Models\UserAchievement;
+
 class AchievementService
 {
     public function __construct(private readonly AchievementEvaluator $evaluator) {}
 
     /**
+     * Idempotent backfill: unlocks achievements the user already qualifies for
+     * from historical predictions, finished matches, and ranking data.
+     *
      * @return list<array{slug: string, name: string, tier: string}>
      */
+    public function evaluateForUser(User $user): array
+    {
+        return $this->evaluateAndUnlock($user);
+    }
+
     public function evaluateAndUnlock(
         User $user,
         ?Prediction $triggerPrediction = null,
@@ -87,6 +96,40 @@ class AchievementService
                 $this->evaluateAndUnlock($user, contextMatch: $match->fresh());
             }
         }
+
+        $this->evaluateRankingForAllUsers();
+    }
+
+    public function evaluateRankingForAllUsers(): void
+    {
+        $ranking = app(RankingService::class)->getRanking();
+        $scoredUsers = $ranking->filter(fn ($row) => (int) $row->scored_predictions >= 1)->count();
+
+        foreach ($ranking as $index => $row) {
+            $user = User::find($row->id);
+            if ($user === null) {
+                continue;
+            }
+
+            $position = $index + 1;
+            $previousPosition = $user->last_ranking_position;
+
+            $this->evaluator->clearRankingContext();
+            $this->evaluator->setRankingContext(
+                $position,
+                $scoredUsers,
+                (int) $row->scored_predictions,
+            );
+
+            if ($previousPosition !== null) {
+                $this->evaluator->markRecuperacaoEligible((int) $previousPosition, $position);
+            }
+
+            $this->evaluator->updateRankingStreak($user, $position);
+            $user->save();
+
+            $this->evaluateAndUnlock($user->fresh());
+        }
     }
 
     private function isAlreadyUnlocked(User $user, Achievement $achievement): bool
@@ -103,8 +146,8 @@ class AchievementService
         ?Prediction $triggerPrediction,
         ?FootballMatch $contextMatch,
     ): bool {
-        if ($achievement->slug === 'last_call' && $triggerPrediction && $contextMatch) {
-            return $this->evaluator->qualifiesLastCall($triggerPrediction, $contextMatch);
+        if ($achievement->slug === 'bem-vindo') {
+            return true;
         }
 
         return $this->evaluator->isUnlocked($user, $achievement);

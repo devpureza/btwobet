@@ -13,7 +13,10 @@ class AchievementController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $payload = $this->achievements->catalogForUser($request->user());
+        $user = $request->user();
+        $newlyUnlocked = $this->achievements->evaluateForUser($user);
+        $payload = $this->achievements->catalogForUser($user);
+        $payload['newly_unlocked'] = $newlyUnlocked;
 
         return response()->json(['data' => $payload]);
     }

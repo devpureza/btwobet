@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\FootballMatch;
+use App\Models\Prediction;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\BolaoSettings;
@@ -14,6 +15,8 @@ use Tests\TestCase;
 class AchievementApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    private static int $teamSeq = 0;
 
     protected function setUp(): void
     {
@@ -29,12 +32,38 @@ class AchievementApiTest extends TestCase
         $response = $this->getJson('/api/me/achievements');
 
         $response->assertOk()
-            ->assertJsonCount(8, 'data.catalog')
-            ->assertJsonPath('data.catalog.0.slug', 'first_prediction')
+            ->assertJsonCount(33, 'data.catalog')
+            ->assertJsonPath('data.catalog.0.slug', 'primeiro-palpite')
             ->assertJsonPath('data.catalog.0.unlocked', false);
     }
 
-    public function test_prediction_unlocks_first_prediction_and_returns_in_response(): void
+    public function test_catalog_fetch_unlocks_existing_prediction_retroactively(): void
+    {
+        $user = User::factory()->create(['approval_status' => User::STATUS_APPROVED]);
+        $match = $this->makeOpenMatch();
+        Prediction::create([
+            'user_id' => $user->id,
+            'match_id' => $match->id,
+            'home_score' => 1,
+            'away_score' => 0,
+            'points' => 0,
+        ]);
+
+        $this->assertDatabaseMissing('user_achievements', ['user_id' => $user->id]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/me/achievements');
+
+        $response->assertOk()
+            ->assertJsonPath('data.catalog.0.slug', 'primeiro-palpite')
+            ->assertJsonPath('data.catalog.0.unlocked', true)
+            ->assertJsonPath('data.newly_unlocked.0.slug', 'primeiro-palpite');
+
+        $this->assertDatabaseHas('user_achievements', ['user_id' => $user->id]);
+    }
+
+    public function test_prediction_unlocks_primeiro_palpite_and_returns_in_response(): void
     {
         $user = User::factory()->create(['approval_status' => User::STATUS_APPROVED]);
         $match = $this->makeOpenMatch();
@@ -46,8 +75,9 @@ class AchievementApiTest extends TestCase
             'away_score' => 0,
         ]);
 
-        $response->assertCreated()
-            ->assertJsonPath('new_achievements.0.slug', 'first_prediction');
+        $response->assertCreated();
+        $slugs = collect($response->json('new_achievements'))->pluck('slug');
+        $this->assertTrue($slugs->contains('primeiro-palpite'));
 
         $this->assertDatabaseHas('user_achievements', [
             'user_id' => $user->id,
@@ -57,30 +87,36 @@ class AchievementApiTest extends TestCase
         $list->assertJsonPath('data.catalog.0.unlocked', true);
     }
 
-    public function test_last_call_unlocks_when_prediction_within_one_hour(): void
+    public function test_em_campo_progress_after_three_predictions(): void
     {
         $user = User::factory()->create(['approval_status' => User::STATUS_APPROVED]);
-        $kickoff = Carbon::now('UTC')->addMinutes(45);
-        $match = $this->makeOpenMatch($kickoff, stage: 'group');
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/predictions', [
-            'match_id' => $match->id,
-            'home_score' => 2,
-            'away_score' => 2,
-        ]);
+        foreach (range(1, 3) as $i) {
+            $match = $this->makeOpenMatch(Carbon::now('UTC')->addDays($i));
+            $this->postJson('/api/predictions', [
+                'match_id' => $match->id,
+                'home_score' => 1,
+                'away_score' => 0,
+            ])->assertCreated();
+        }
 
-        $response->assertCreated();
-        $slugs = collect($response->json('new_achievements'))->pluck('slug');
-        $this->assertTrue($slugs->contains('first_prediction'));
-        $this->assertTrue($slugs->contains('last_call'));
+        $list = $this->getJson('/api/me/achievements');
+        $emCampo = collect($list->json('data.catalog'))->firstWhere('slug', 'em-campo');
+
+        $this->assertNotNull($emCampo);
+        $this->assertSame(3, $emCampo['progress']['current']);
+        $this->assertSame(5, $emCampo['progress']['target']);
     }
 
     private function makeOpenMatch(?Carbon $kickoff = null, string $stage = 'group'): FootballMatch
     {
         $kickoff ??= Carbon::now('UTC')->addDay();
-        $home = Team::create(['code' => 'HOM', 'name' => 'Home', 'group_name' => 'A']);
-        $away = Team::create(['code' => 'AWY', 'name' => 'Away', 'group_name' => 'A']);
+        self::$teamSeq++;
+        $homeCode = strtoupper(substr(base_convert((string) self::$teamSeq, 10, 36), 0, 3));
+        $awayCode = strtoupper(substr(base_convert((string) (self::$teamSeq + 500), 10, 36), 0, 3));
+        $home = Team::create(['code' => $homeCode, 'name' => 'Home', 'group_name' => 'A']);
+        $away = Team::create(['code' => $awayCode, 'name' => 'Away', 'group_name' => 'A']);
 
         return FootballMatch::create([
             'home_team_id' => $home->id,

@@ -1,8 +1,29 @@
 # Conquistas (Achievements) — Bolão Copa do Mundo 2026
 
-**Status**: Draft (spec)  
+**Status**: MVP + v2 (33 no catálogo, regras live para dados existentes)  
 **Criado**: 2026-06-02  
+**Atualizado**: 2026-06-02  
 **Relacionado**: [spec.md](./spec.md), [data-model.md](./data-model.md), `ScoreCalculator`, `RankingService`, `PredictionWindow`
+
+---
+
+## Status de implementação
+
+| Conjunto | Qtd | Status |
+|----------|-----|--------|
+| Catálogo completo (slugs PT-BR) | 33 | **Live** — seed em `2026_06_02_000002_expand_achievements_catalog.php` |
+| Regras avaliadas automaticamente | 33 | **Live** — `AchievementEvaluator` + hooks em palpite/jogo/ranking |
+| `bem-vindo` | 1 | **Live** — desbloqueio na primeira avaliação via API (sem duplicar regra de palpite no evaluator) |
+
+### Regras live (por gatilho)
+
+**Palpite (`on_prediction`)**: `primeiro-palpite`, `em-campo`, `dez-palpites`, `maratonista`, `presenca-confirmada`, `meia-centuria`, `mata-mata-chegou`, `fase-grupos-firme`, `estreia-da-copa`, `jogo-decisivo`, `grande-final`, `perfil-com-cara`, `semana-ativa`, `sem-miss-no-fds`, `bem-vindo` (via `AchievementService`)
+
+**Jogo finalizado (`on_match_finished`)**: `placar-na-mosca`, `trio-perfeito`, `pontuador`, `artilheiro-de-acertos`, `sequencia-de-resultado`, `dupla-exata`, `empate-certeiro`, `zerinho`, `goleada-prevista`, `underdog-do-dia`, `oraculo`
+
+**Ranking (`on_ranking_update`)**: `no-topo`, `podio`, `top-10`, `recuperacao`, `invicto-no-topo`, `vice-campeao`*, `campeao-do-bolao`*
+
+\* `vice-campeao` e `campeao-do-bolao` exigem `tournament.tournament_closed = true` (setting admin).
 
 ---
 
@@ -57,7 +78,49 @@
 **Lendário**  
 `oraculo`, `invicto-no-topo`
 
-**Total**: 8 (MVP) + 17 (v2) = **25 conquistas**.
+**Total no documento**: 8 (MVP) + 17 (v2) = **25 conquistas** (resumo); **33 slugs** no catálogo completo das seções detalhadas abaixo.
+
+### Status de implementação (backend)
+
+| Slug | Status | Notas |
+|------|--------|-------|
+| `primeiro-palpite` | ✅ | `on_prediction` |
+| `em-campo` | ✅ | progresso 5 palpites |
+| `placar-na-mosca` | ✅ | `on_match_finished` |
+| `trio-perfeito` | ✅ | progresso 3 exatos |
+| `pontuador` | ✅ | progresso 10 pts |
+| `no-topo` | ✅ | `on_ranking_update`, ≥2 usuários pontuados |
+| `podio` | ✅ | top 3, ≥3 usuários pontuados |
+| `presenca-confirmada` | ✅ | 3 dias UTC de `kickoff_at` |
+| `bem-vindo` | ✅ | desbloqueio no fluxo de avaliação (API) |
+| `perfil-com-cara` | ✅ | `users.avatar_url`; reavalia no upload |
+| `dez-palpites` | ✅ | progresso 10 |
+| `meia-centuria` | ✅ | progresso 50 |
+| `maratonista` | ✅ | 10 dias de kickoff distintos |
+| `fase-grupos-firme` | ✅ | cobertura grupos após 1º palpite, min 8 jogos |
+| `mata-mata-chegou` | ✅ | `stage != group` |
+| `artilheiro-de-acertos` | ✅ | 10 exatos |
+| `sequencia-de-resultado` | ✅ | 5 acertos seguidos |
+| `dupla-exata` | ✅ | 2 exatos consecutivos |
+| `empate-certeiro` | ✅ | empate previsto e real |
+| `zerinho` | ✅ | 0x0 exato |
+| `goleada-prevista` | ✅ | exato com ≥5 gols |
+| `top-10` | ✅ | top 10, ≥10 usuários pontuados |
+| `vice-campeao` | ✅ | `tournament_closed` + 2º + ≥20 jogos pontuados |
+| `campeao-do-bolao` | ✅ | `tournament_closed` + 1º + ≥20 jogos pontuados |
+| `recuperacao` | ✅ | sobe ≥5 posições entre snapshots |
+| `semana-ativa` | ✅ | 7 dias seguidos com palpite |
+| `sem-miss-no-fds` | ✅ | todos jogos sáb/dom de um fim de semana (≥4) |
+| `estreia-da-copa` | ✅ | `matches.is_opening` ou menor `kickoff_at` |
+| `jogo-decisivo` | ✅ | semifinal (`knockout_round = semi`) |
+| `grande-final` | ✅ | palpite na final |
+| `underdog-do-dia` | ✅ | vitória visitante + `home_is_favorite` no jogo |
+| `oraculo` | ✅ | 15 placares exatos |
+| `invicto-no-topo` | ✅ | 5 updates em 1º (`users.ranking_first_streak`) |
+
+**Operação admin**: `settings.tournament_closed = 1` libera campeão/vice ao fechar a Copa.  
+**Backfill**: `php artisan achievements:backfill`  
+**Flags de jogo**: `matches.is_opening`, `matches.home_is_favorite` (seed/admin).
 
 ---
 

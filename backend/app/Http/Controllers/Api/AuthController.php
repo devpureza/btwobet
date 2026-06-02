@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AchievementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -103,9 +104,12 @@ class AuthController extends Controller
         $user->avatar_url = '/storage/'.$path.'?v='.time();
         $user->save();
 
+        $newAchievements = app(AchievementService::class)->evaluateForUser($user->fresh());
+
         return response()->json([
             'message' => 'Foto de perfil atualizada.',
             'user' => $user->fresh(),
+            'new_achievements' => $newAchievements,
         ]);
     }
 }

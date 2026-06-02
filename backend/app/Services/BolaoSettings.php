@@ -14,6 +14,8 @@ class BolaoSettings
 
     public const KEY_LOCK_ALL = 'predictions.lock_all';
 
+    public const KEY_TOURNAMENT_CLOSED = 'tournament.tournament_closed';
+
     private const CACHE_KEY = 'bolao.settings.all';
 
     public function all(): array
@@ -25,6 +27,7 @@ class BolaoSettings
                 'group_deadline' => $rows[self::KEY_GROUP_DEADLINE] ?? $this->defaultGroupDeadlineIso(),
                 'knockout_hours_before' => (int) ($rows[self::KEY_KNOCKOUT_HOURS] ?? 24),
                 'lock_all' => filter_var($rows[self::KEY_LOCK_ALL] ?? false, FILTER_VALIDATE_BOOL),
+                'tournament_closed' => filter_var($rows[self::KEY_TOURNAMENT_CLOSED] ?? false, FILTER_VALIDATE_BOOL),
             ];
         });
     }
@@ -42,6 +45,11 @@ class BolaoSettings
     public function lockAll(): bool
     {
         return (bool) $this->all()['lock_all'];
+    }
+
+    public function tournamentClosed(): bool
+    {
+        return (bool) $this->all()['tournament_closed'];
     }
 
     public function update(array $data): array
@@ -91,6 +99,13 @@ class BolaoSettings
         if (! Setting::query()->where('key', self::KEY_LOCK_ALL)->exists()) {
             Setting::create([
                 'key' => self::KEY_LOCK_ALL,
+                'value' => '0',
+            ]);
+        }
+
+        if (! Setting::query()->where('key', self::KEY_TOURNAMENT_CLOSED)->exists()) {
+            Setting::create([
+                'key' => self::KEY_TOURNAMENT_CLOSED,
                 'value' => '0',
             ]);
         }

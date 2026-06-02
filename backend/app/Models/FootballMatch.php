@@ -17,6 +17,8 @@ class FootballMatch extends Model
         'kickoff_at',
         'stage',
         'knockout_round',
+        'is_opening',
+        'home_is_favorite',
         'group_name',
         'venue',
         'status',
@@ -28,6 +30,8 @@ class FootballMatch extends Model
     {
         return [
             'kickoff_at' => 'datetime',
+            'is_opening' => 'boolean',
+            'home_is_favorite' => 'boolean',
         ];
     }
 
