@@ -36,6 +36,11 @@ class User extends Authenticatable
         return $this->hasMany(Prediction::class);
     }
 
+    public function achievements(): HasMany
+    {
+        return $this->hasMany(UserAchievement::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

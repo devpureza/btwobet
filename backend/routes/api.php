@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BolaoFundController;
 use App\Http\Controllers\Api\HealthController;
@@ -35,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/predictions', [PredictionController::class, 'store']);
         Route::get('/ranking', [RankingController::class, 'index']);
         Route::get('/me/history', HistoryController::class);
+        Route::get('/me/achievements', [AchievementController::class, 'index']);
 
         Route::middleware('admin')->prefix('admin')->group(function () {
             Route::get('/users', [UserAdminController::class, 'index']);

@@ -68,6 +68,28 @@ class _MatchesScreenState extends State<MatchesScreen> {
     return map;
   }
 
+  Future<void> _submitPrediction(BuildContext context, int matchId, int home, int away) async {
+    try {
+      final unlocked = await widget.session.matches.upsertPrediction(
+        matchId: matchId,
+        homeScore: home,
+        awayScore: away,
+      );
+      await _load();
+      if (!context.mounted) return;
+      showSnack(context, 'Palpite salvo. Não será possível alterar.');
+      for (final achievement in unlocked) {
+        final name = achievement['name'] as String? ?? 'Conquista';
+        showSnack(context, 'Conquista desbloqueada: $name');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showSnack(context, dioErrorMessage(e), error: true);
+      }
+      rethrow;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -238,24 +260,12 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                         return MatchCard(
                                           key: ValueKey(m['id']),
                                           match: m,
-                                          onSave: (home, away) async {
-                                            try {
-                                              await widget.session.matches.upsertPrediction(
-                                                matchId: m['id'] as int,
-                                                homeScore: home,
-                                                awayScore: away,
-                                              );
-                                              await _load();
-                                              if (context.mounted) {
-                                                showSnack(context, 'Palpite salvo. Não será possível alterar.');
-                                              }
-                                            } catch (e) {
-                                              if (context.mounted) {
-                                                showSnack(context, dioErrorMessage(e), error: true);
-                                              }
-                                              rethrow;
-                                            }
-                                          },
+                                          onSave: (home, away) => _submitPrediction(
+                                            context,
+                                            m['id'] as int,
+                                            home,
+                                            away,
+                                          ),
                                         );
                                       },
                                       childCount: grouped[dateKey]!.length,
@@ -270,24 +280,12 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                           child: MatchCard(
                                             key: ValueKey(m['id']),
                                             match: m,
-                                            onSave: (home, away) async {
-                                              try {
-                                                await widget.session.matches.upsertPrediction(
-                                                  matchId: m['id'] as int,
-                                                  homeScore: home,
-                                                  awayScore: away,
-                                                );
-                                                await _load();
-                                                if (context.mounted) {
-                                                  showSnack(context, 'Palpite salvo. Não será possível alterar.');
-                                                }
-                                              } catch (e) {
-                                                if (context.mounted) {
-                                                  showSnack(context, dioErrorMessage(e), error: true);
-                                                }
-                                                rethrow;
-                                              }
-                                            },
+                                            onSave: (home, away) => _submitPrediction(
+                                              context,
+                                              m['id'] as int,
+                                              home,
+                                              away,
+                                            ),
                                           ),
                                         );
                                       },

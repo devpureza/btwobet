@@ -15,6 +15,7 @@ class ApiClient {
       BaseOptions(
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 20),
         headers: {
           'Accept': 'application/json',
@@ -43,8 +44,13 @@ class ApiClient {
 
   static String _defaultBaseUrl() {
     if (kIsWeb) {
+      final base = Uri.base;
+      // `flutter run -d chrome` (:5173) não faz proxy de /api; backend local fica em :8080.
+      if (base.port == 5173) {
+        return 'http://${base.host}:8080/api';
+      }
       // Mesma origem (http ou https) — evita mixed content quando a página é HTTPS.
-      return '${Uri.base.origin}/api';
+      return '${base.origin}/api';
     }
 
     const fromEnv = String.fromEnvironment('API_BASE_URL');

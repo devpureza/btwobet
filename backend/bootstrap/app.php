@@ -14,6 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // API usa Bearer token (Flutter web/mobile), não sessão + CSRF de SPA.
+        // Sem rota web `login`, redirecionar convidados quebra /api/* com 500; devolver 401 JSON.
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return null;
+            }
+
+            return null;
+        });
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'approved' => \App\Http\Middleware\EnsureUserApproved::class,

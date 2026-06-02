@@ -16,6 +16,7 @@ class FootballMatch extends Model
         'away_team_id',
         'kickoff_at',
         'stage',
+        'knockout_round',
         'group_name',
         'venue',
         'status',

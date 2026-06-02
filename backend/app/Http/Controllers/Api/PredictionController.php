@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\FootballMatch;
 use App\Models\Prediction;
+use App\Services\AchievementService;
 use App\Services\PredictionWindow;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PredictionController extends Controller
 {
-    public function __construct(private readonly PredictionWindow $window) {}
+    public function __construct(
+        private readonly PredictionWindow $window,
+        private readonly AchievementService $achievements,
+    ) {}
 
     public function store(Request $request): JsonResponse
     {
@@ -44,9 +48,16 @@ class PredictionController extends Controller
             'points' => 0,
         ]);
 
+        $newAchievements = $this->achievements->evaluateAndUnlock(
+            $request->user(),
+            $prediction->fresh(),
+            $match,
+        );
+
         return response()->json([
             'message' => 'Palpite salvo. Não será possível alterar.',
             'data' => $prediction,
+            'new_achievements' => $newAchievements,
         ], 201);
     }
 }

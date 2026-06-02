@@ -50,5 +50,7 @@ class RankingService
 
             $prediction->update(['points' => $points]);
         });
+
+        app(AchievementService::class)->evaluateUsersForFinishedMatch($match->fresh());
     }
 }

@@ -27,6 +27,7 @@ class ShellHeader extends StatelessWidget {
     if (location == '/ranking') return 'Ranking';
     if (location == '/history') return 'Histórico';
     if (location == '/profile') return 'Minha Conta';
+    if (location == '/achievements') return 'Conquistas';
     if (location == '/') return 'Palpites';
     return null;
   }

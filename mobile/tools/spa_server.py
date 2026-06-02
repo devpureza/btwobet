@@ -132,6 +132,7 @@ def main() -> int:
 
     os.chdir(root)
     SpaFallbackHandler.backend_origin = args.backend
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", args.port), SpaFallbackHandler) as httpd:
         print(f"Serving SPA from {root} at http://localhost:{args.port}")
         print(f"Proxying /api, /storage, /flags -> {args.backend}")

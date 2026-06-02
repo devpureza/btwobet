@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/session_controller.dart';
 import '../../ui/admin_helpers.dart';
@@ -260,6 +261,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ],
                                   ),
                                 ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Glass(
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(20),
+                              padding: EdgeInsets.zero,
+                              child: ListTile(
+                                leading: Icon(Icons.emoji_events, color: scheme.primary),
+                                title: const Text('Conquistas'),
+                                subtitle: const Text('Medalhas e progresso no bolão'),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () => context.go('/achievements'),
                               ),
                             ),
                             const SizedBox(height: 16),

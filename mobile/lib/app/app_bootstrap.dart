@@ -28,19 +28,24 @@ class _AppBootstrapState extends State<AppBootstrap> {
 
   Future<void> _init() async {
     try {
-      await initializeDateFormatting('pt_BR');
+      try {
+        await initializeDateFormatting('pt_BR')
+            .timeout(const Duration(seconds: 8));
+      } catch (e) {
+        debugPrint('initializeDateFormatting(pt_BR) ignorado: $e');
+      }
       Intl.defaultLocale = 'pt_BR';
 
-      final theme = await AppTheme.load();
-      if (!mounted) return;
-      setState(() => _theme = theme);
-
       final tokenStore = await TokenStore.create();
-      final session = await SessionController.create(tokenStore);
-
+      final results = await Future.wait([
+        AppTheme.load(),
+        SessionController.create(tokenStore),
+      ]);
       if (!mounted) return;
+
       setState(() {
-        _session = session;
+        _theme = results[0] as ThemeData;
+        _session = results[1] as SessionController;
         _error = null;
       });
     } catch (e, st) {

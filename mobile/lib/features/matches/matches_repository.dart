@@ -11,15 +11,17 @@ class MatchesRepository {
     return data;
   }
 
-  Future<void> upsertPrediction({
+  Future<List<Map<String, dynamic>>> upsertPrediction({
     required int matchId,
     required int homeScore,
     required int awayScore,
   }) async {
-    await _dio.post('/predictions', data: {
+    final res = await _dio.post('/predictions', data: {
       'match_id': matchId,
       'home_score': homeScore,
       'away_score': awayScore,
     });
+    final raw = res.data['new_achievements'] as List<dynamic>? ?? [];
+    return raw.map((e) => (e as Map).cast<String, dynamic>()).toList();
   }
 }

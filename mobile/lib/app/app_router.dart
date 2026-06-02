@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/achievements/achievements_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/admin/admin_palpites_history_screen.dart';
@@ -74,6 +75,10 @@ class AppRouter {
               builder: (context, state) => ProfileScreen(session: session),
             ),
             GoRoute(
+              path: '/achievements',
+              builder: (context, state) => AchievementsScreen(session: session),
+            ),
+            GoRoute(
               path: '/admin',
               builder: (context, state) => AdminScreen(session: session),
             ),
@@ -121,6 +126,7 @@ class HomeShell extends StatelessWidget {
       _NavItem(route: '/', icon: Icons.sports_soccer, label: 'Palpites'),
       _NavItem(route: '/ranking', icon: Icons.leaderboard, label: 'Ranking'),
       _NavItem(route: '/history', icon: Icons.history, label: 'Histórico'),
+      _NavItem(route: '/achievements', icon: Icons.emoji_events, label: 'Conquistas'),
       _NavItem(route: '/profile', icon: Icons.account_circle, label: 'Conta'),
     ];
 
@@ -148,6 +154,19 @@ class HomeShell extends StatelessWidget {
     context.go(items[i].route);
   }
 
+  Widget _navIcon(_NavItem item) {
+    if (item.route != '/achievements' || session.achievementsTotal <= 0) {
+      return Icon(item.icon);
+    }
+
+    final label = session.achievementsUnlocked > 0 ? '${session.achievementsUnlocked}' : null;
+    return Badge(
+      label: label != null ? Text(label) : null,
+      isLabelVisible: label != null,
+      child: Icon(item.icon),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
@@ -156,7 +175,9 @@ class HomeShell extends StatelessWidget {
     final isDesktop = _isDesktop(context);
     final extendedRail = MediaQuery.sizeOf(context).width >= 1100;
 
-    return Scaffold(
+    return ListenableBuilder(
+      listenable: session,
+      builder: (context, _) => Scaffold(
       body: SafeArea(
         child: isDesktop
             ? Row(
@@ -174,7 +195,7 @@ class HomeShell extends StatelessWidget {
                       destinations: items
                           .map(
                             (it) => NavigationRailDestination(
-                              icon: Icon(it.icon),
+                              icon: _navIcon(it),
                               label: Text(it.label),
                             ),
                           )
@@ -218,11 +239,12 @@ class HomeShell extends StatelessWidget {
                 onDestinationSelected: (i) => _goForIndex(context, i),
                 destinations: items
                     .map(
-                      (it) => NavigationDestination(icon: Icon(it.icon), label: it.label),
+                      (it) => NavigationDestination(icon: _navIcon(it), label: it.label),
                     )
                     .toList(growable: false),
               ),
             ),
+      ),
     );
   }
 }
