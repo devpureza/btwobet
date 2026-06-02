@@ -75,7 +75,7 @@ class _AdminTeamsScreenState extends State<AdminTeamsScreen> {
                     decoration: const InputDecoration(labelText: 'Nome'),
                   ),
                   DropdownButtonFormField<String?>(
-                    value: group,
+                    initialValue: group,
                     decoration: const InputDecoration(labelText: 'Grupo'),
                     items: [
                       const DropdownMenuItem(value: null, child: Text('—')),
@@ -197,7 +197,7 @@ class _AdminTeamsScreenState extends State<AdminTeamsScreen> {
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String?>(
-                        value: _group,
+                        initialValue: _group,
                         decoration: const InputDecoration(labelText: 'Grupo'),
                         items: [
                           const DropdownMenuItem(value: null, child: Text('Todos')),

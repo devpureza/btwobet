@@ -5,10 +5,15 @@ class AdminRepository {
 
   AdminRepository(this._dio);
 
+  Future<Map<String, dynamic>> clearUserPredictions(int userId, {String? status}) async {
+    final res = await _dio.post('/admin/users/$userId/predictions/clear', data: status == null ? null : {'status': status});
+    return (res.data['data'] as Map).cast<String, dynamic>();
+  }
+
   Future<List<dynamic>> listUsers({String? q, String? approvalStatus}) async {
     final params = <String, dynamic>{};
-    if (q != null && q.isNotEmpty) params['q'] = q;
-    if (approvalStatus != null && approvalStatus.isNotEmpty) {
+    if (q?.isNotEmpty ?? false) params['q'] = q;
+    if (approvalStatus?.isNotEmpty ?? false) {
       params['approval_status'] = approvalStatus;
     }
     final res = await _dio.get(
@@ -52,9 +57,9 @@ class AdminRepository {
 
   Future<List<dynamic>> listMatches({String? group, String? stage, String? status}) async {
     final params = <String, dynamic>{};
-    if (group != null && group.isNotEmpty) params['group'] = group;
-    if (stage != null && stage.isNotEmpty) params['stage'] = stage;
-    if (status != null && status.isNotEmpty) params['status'] = status;
+    if (group?.isNotEmpty ?? false) params['group'] = group;
+    if (stage?.isNotEmpty ?? false) params['stage'] = stage;
+    if (status?.isNotEmpty ?? false) params['status'] = status;
     final res = await _dio.get('/admin/matches', queryParameters: params.isEmpty ? null : params);
     return res.data['data'] as List<dynamic>;
   }
@@ -66,15 +71,15 @@ class AdminRepository {
   Future<void> updateMatchResult(int id, {required String status, int? homeScore, int? awayScore}) async {
     await _dio.patch('/admin/matches/$id/result', data: {
       'status': status,
-      if (homeScore != null) 'home_score': homeScore,
-      if (awayScore != null) 'away_score': awayScore,
+      ...?(homeScore == null ? null : {'home_score': homeScore}),
+      ...?(awayScore == null ? null : {'away_score': awayScore}),
     });
   }
 
   Future<List<dynamic>> listTeams({String? q, String? group}) async {
     final params = <String, dynamic>{};
-    if (q != null && q.isNotEmpty) params['q'] = q;
-    if (group != null && group.isNotEmpty) params['group'] = group;
+    if (q?.isNotEmpty ?? false) params['q'] = q;
+    if (group?.isNotEmpty ?? false) params['group'] = group;
     final res = await _dio.get('/admin/teams', queryParameters: params.isEmpty ? null : params);
     return res.data['data'] as List<dynamic>;
   }
@@ -119,7 +124,7 @@ class AdminRepository {
       'page': page,
       'per_page': perPage,
     };
-    if (q != null && q.isNotEmpty) params['q'] = q;
+    if (q?.isNotEmpty ?? false) params['q'] = q;
     final res = await _dio.get('/admin/predictions', queryParameters: params);
     return res.data as Map<String, dynamic>;
   }

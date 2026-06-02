@@ -33,7 +33,7 @@ class AppTheme {
 
       final scheme = ColorScheme(
         brightness: Brightness.light,
-        primary: primaryContainer,
+        primary: primary,
         onPrimary: onPrimary,
         primaryContainer: primaryContainer,
         onPrimaryContainer: onPrimaryContainer,
@@ -150,12 +150,11 @@ class AppTheme {
     const outlineVariant = Color(0xFFBFC9BF);
     const onPrimary = Color(0xFFFFFFFF);
     const onPrimaryContainer = Color(0xFF7BBD93);
-    const onSurfaceVariant = Color(0xFF404942);
     const surfaceHighest = Color(0xFFE1E3E4);
 
     final scheme = ColorScheme(
       brightness: Brightness.light,
-      primary: primaryContainer,
+      primary: primary,
       onPrimary: onPrimary,
       primaryContainer: primaryContainer,
       onPrimaryContainer: onPrimaryContainer,

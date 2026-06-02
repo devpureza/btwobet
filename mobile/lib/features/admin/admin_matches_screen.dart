@@ -100,7 +100,7 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: stage,
+                    initialValue: stage,
                     decoration: const InputDecoration(labelText: 'Fase'),
                     items: const [
                       DropdownMenuItem(value: 'group', child: Text('Fase de grupos')),
@@ -111,7 +111,7 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                   if (stage == 'group') ...[
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
-                      value: group,
+                      initialValue: group,
                       decoration: const InputDecoration(labelText: 'Grupo'),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
@@ -125,7 +125,7 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                   ],
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items: const [
                       DropdownMenuItem(value: 'scheduled', child: Text('Agendado')),
@@ -205,7 +205,7 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: status,
+                  initialValue: status,
                   decoration: const InputDecoration(labelText: 'Status'),
                   items: const [
                     DropdownMenuItem(value: 'scheduled', child: Text('Agendado (sem placar)')),
@@ -313,7 +313,7 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String?>(
-                        value: _status,
+                        initialValue: _status,
                         decoration: const InputDecoration(labelText: 'Status'),
                         items: const [
                           DropdownMenuItem(value: null, child: Text('Todos')),

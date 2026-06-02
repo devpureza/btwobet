@@ -70,6 +70,68 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     var isAdmin = (user?['is_admin'] as bool?) ?? false;
     var avatarChanged = false;
 
+    Future<void> clearPredictions(BuildContext ctx) async {
+      if (!isEdit) return;
+
+      var onlyScheduled = true;
+      final ok = await showDialog<bool>(
+        context: ctx,
+        builder: (dialogCtx) => StatefulBuilder(
+          builder: (dialogCtx, setDialogState) => AlertDialog(
+            title: const Text('Zerar palpites'),
+            content: SizedBox(
+              width: 420,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Remover palpites de ${user['name']} (${user['email']})?'),
+                  const SizedBox(height: 12),
+                  RadioGroup<bool>(
+                    groupValue: onlyScheduled,
+                    onChanged: (v) => setDialogState(() => onlyScheduled = v ?? true),
+                    child: Column(
+                      children: const [
+                        RadioListTile<bool>(
+                          value: true,
+                          title: Text('Apenas jogos agendados (scheduled)'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        RadioListTile<bool>(
+                          value: false,
+                          title: Text('Todos os palpites'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(dialogCtx, false), child: const Text('Cancelar')),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: Theme.of(dialogCtx).colorScheme.error),
+                onPressed: () => Navigator.pop(dialogCtx, true),
+                child: const Text('Zerar'),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (ok != true) return;
+
+      try {
+        final data = await widget.session.admin.clearUserPredictions(
+          user['id'] as int,
+          status: onlyScheduled ? 'scheduled' : null,
+        );
+        final deleted = (data['deleted'] as num?)?.toInt() ?? 0;
+        if (ctx.mounted) showSnack(ctx, '$deleted palpites removidos.');
+      } catch (e) {
+        if (ctx.mounted) showSnack(ctx, dioErrorMessage(e), error: true);
+      }
+    }
+
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -140,6 +202,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             ),
           ),
           actions: [
+            if (isEdit)
+              TextButton(
+                onPressed: () => clearPredictions(ctx),
+                style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
+                child: const Text('Zerar palpites'),
+              ),
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
             FilledButton(
               onPressed: () async {
