@@ -1,11 +1,11 @@
 {
-    "name": "mobile",
-    "short_name": "mobile",
+    "name": "Bol\u00e3o Copa 2026",
+    "short_name": "Bol\u00e3o 2026",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#00341c",
+    "theme_color": "#00341c",
+    "description": "Bol\u00e3o Copa do Mundo 2026",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
