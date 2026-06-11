@@ -110,6 +110,7 @@ class MatchController extends Controller
             'group_name' => $match->group_name,
             'venue' => $this->translateVenue($match->venue),
             'status' => $match->status,
+            'is_live' => $this->isLive($match),
             'home_team' => $this->teamPayload($match->homeTeam),
             'away_team' => $this->teamPayload($match->awayTeam),
             'result' => $match->status === 'finished' ? [
@@ -129,6 +130,21 @@ class MatchController extends Controller
         ];
     }
 
+    private function isLive(FootballMatch $match): bool
+    {
+        if ($match->status === 'live') {
+            return true;
+        }
+
+        if ($match->status !== 'scheduled'
+            || $match->home_score === null
+            || $match->away_score === null) {
+            return false;
+        }
+
+        return $match->kickoff_at->isPast();
+    }
+
     /**
      * @return array{home_score: int, away_score: int}|null
      */
@@ -140,14 +156,7 @@ class MatchController extends Controller
             return null;
         }
 
-        if ($match->status === 'live') {
-            return [
-                'home_score' => $match->home_score,
-                'away_score' => $match->away_score,
-            ];
-        }
-
-        if ($match->status === 'scheduled' && $match->kickoff_at->isPast()) {
+        if ($this->isLive($match)) {
             return [
                 'home_score' => $match->home_score,
                 'away_score' => $match->away_score,

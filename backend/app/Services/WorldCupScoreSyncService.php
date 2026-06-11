@@ -49,7 +49,12 @@ class WorldCupScoreSyncService
 
             $stats['matched']++;
 
-            $changed = $this->applyScores($match, $game['home_score'], $game['away_score'], $game['kickoff_at']);
+            $changed = $this->applyScores(
+                $match,
+                $game['home_score'],
+                $game['away_score'],
+                (bool) ($game['started'] ?? false),
+            );
             if ($changed) {
                 $stats['updated']++;
                 if ($match->status === 'finished') {
@@ -104,7 +109,7 @@ class WorldCupScoreSyncService
         FootballMatch $match,
         ?int $homeScore,
         ?int $awayScore,
-        Carbon $kickoff,
+        bool $geStarted,
     ): bool {
         $scoresChanged = false;
 
@@ -117,6 +122,8 @@ class WorldCupScoreSyncService
         }
 
         $hasScores = $match->home_score !== null && $match->away_score !== null;
+        // Usa kickoff do banco (openfootball); horário do GE pode divergir por fuso.
+        $kickoff = $match->kickoff_at;
         $shouldFinish = $hasScores && $kickoff->copy()->addMinutes(105)->isPast();
 
         $statusChanged = false;
@@ -126,7 +133,7 @@ class WorldCupScoreSyncService
         } elseif (
             ! $shouldFinish
             && $hasScores
-            && $kickoff->isPast()
+            && ($kickoff->isPast() || $geStarted)
             && $match->status === 'scheduled'
         ) {
             $match->status = 'live';

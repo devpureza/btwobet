@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../app/session_controller.dart';
+import 'match_live.dart';
 import '../../ui/achievement_tier_style.dart';
 import '../../ui/admin_helpers.dart';
 import '../../ui/bolao_fund_card.dart';
@@ -22,40 +25,86 @@ class MatchesScreen extends StatefulWidget {
   State<MatchesScreen> createState() => _MatchesScreenState();
 }
 
-class _MatchesScreenState extends State<MatchesScreen> {
+class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserver {
+  static const _pollInterval = Duration(seconds: 60);
+
   bool _loading = true;
+  bool _silentRefreshing = false;
   String? _error;
   List<dynamic> _matches = [];
   Map<String, dynamic>? _fund;
   String? _group;
   String? _stage;
   bool _onlyOpen = false;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stopPolling();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && hasLiveMatchesInList(_matches)) {
+      _load(silent: true);
+    }
+  }
+
+  void _syncPolling() {
+    if (!hasLiveMatchesInList(_matches)) {
+      _stopPolling();
+      return;
+    }
+    _pollTimer ??= Timer.periodic(_pollInterval, (_) => _load(silent: true));
+  }
+
+  void _stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    } else if (mounted) {
+      setState(() => _silentRefreshing = true);
+    }
 
     try {
       final results = await Future.wait([
         widget.session.matches.listMatches(),
         widget.session.bolaoFund.getFund(),
       ]);
+      if (!mounted) return;
       setState(() {
         _matches = results[0] as List<dynamic>;
         _fund = (results[1] as Map).cast<String, dynamic>();
       });
+      widget.session.setLiveMatchPresence(_matches);
+      _syncPolling();
     } catch (e) {
-      setState(() => _error = 'Falha ao carregar jogos.');
+      if (!silent && mounted) {
+        setState(() => _error = 'Falha ao carregar jogos.');
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _silentRefreshing = false;
+        });
+      }
     }
   }
 
@@ -113,6 +162,25 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                     slivers: [
+                      if (_silentRefreshing)
+                        SliverToBoxAdapter(
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 1280),
+                                child: Text(
+                                  'Atualizando...',
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       if (unreadUnlocks.isNotEmpty)
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -513,13 +581,11 @@ class _MatchCardState extends State<MatchCard> {
     final deadline = deadlineRaw != null ? DateTime.tryParse(deadlineRaw)?.toLocal() : null;
     final hasPrediction = widget.match['my_prediction'] != null;
 
-    final status = widget.match['status'] as String? ?? 'scheduled';
     final result = widget.match['result'] as Map<String, dynamic>?;
     final liveScore = widget.match['live_score'] as Map<String, dynamic>?;
     final venue = widget.match['venue'] as String?;
     final group = widget.match['group_name'] as String?;
-    final isLive = status == 'live' ||
-        (status == 'scheduled' && kickoff.isBefore(DateTime.now()) && liveScore != null);
+    final isLive = isMatchLive(widget.match);
 
     return Glass(
       blur: 12,

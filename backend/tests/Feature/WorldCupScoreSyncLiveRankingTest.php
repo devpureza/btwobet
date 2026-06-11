@@ -116,6 +116,55 @@ class WorldCupScoreSyncLiveRankingTest extends TestCase
         $this->assertSame(1, (int) $ranking->firstWhere('name', 'Bob')->total_points);
     }
 
+    public function test_sync_marks_live_when_ge_kickoff_is_ahead_of_match_schedule(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 6, 11, 19, 35, 0, 'UTC'));
+
+        $home = Team::create(['code' => 'MEX', 'name' => 'México', 'group_name' => 'A']);
+        $away = Team::create(['code' => 'RSA', 'name' => 'África do Sul', 'group_name' => 'A']);
+
+        $matchKickoff = Carbon::create(2026, 6, 11, 19, 0, 0, 'UTC');
+        $geKickoff = Carbon::create(2026, 6, 11, 20, 0, 0, 'UTC');
+
+        $match = FootballMatch::create([
+            'home_team_id' => $home->id,
+            'away_team_id' => $away->id,
+            'kickoff_at' => $matchKickoff,
+            'stage' => 'group',
+            'group_name' => 'A',
+            'venue' => 'Mexico City',
+            'status' => 'scheduled',
+            'home_score' => null,
+            'away_score' => null,
+        ]);
+
+        $user = User::factory()->create(['approval_status' => User::STATUS_APPROVED]);
+        Prediction::create([
+            'user_id' => $user->id,
+            'match_id' => $match->id,
+            'home_score' => 1,
+            'away_score' => 0,
+            'points' => 0,
+        ]);
+
+        $this->mockGloboGames([
+            [
+                'home_name' => 'México',
+                'away_name' => 'África do Sul',
+                'kickoff_at' => $geKickoff,
+                'home_score' => 1,
+                'away_score' => 0,
+                'started' => true,
+            ],
+        ]);
+
+        app(WorldCupScoreSyncService::class)->syncFromGloboEsporte();
+
+        $match->refresh();
+        $this->assertSame('live', $match->status);
+        $this->assertSame(2, Prediction::where('match_id', $match->id)->value('points'));
+    }
+
     public function test_sync_finalizes_match_after_105_minutes_and_recalculates_idempotently(): void
     {
         $home = Team::create(['code' => 'FRA', 'name' => 'França', 'group_name' => 'B']);
@@ -149,7 +198,7 @@ class WorldCupScoreSyncLiveRankingTest extends TestCase
             [
                 'home_name' => 'França',
                 'away_name' => 'Alemanha',
-                'kickoff_at' => $kickoff,
+                'kickoff_at' => $kickoff->copy()->addHour(),
                 'home_score' => 2,
                 'away_score' => 1,
             ],

@@ -8,6 +8,7 @@ import '../features/admin/admin_repository.dart';
 import '../features/auth/auth_repository.dart';
 import '../features/history/history_repository.dart';
 import '../features/matches/bolao_fund_repository.dart';
+import '../features/matches/match_live.dart';
 import '../features/matches/matches_repository.dart';
 import '../features/matches/score_sync_repository.dart';
 import '../features/ranking/ranking_repository.dart';
@@ -31,8 +32,10 @@ class SessionController extends ChangeNotifier {
   final Set<String> _knownUnlockedSlugs = {};
   final Set<String> _bannerDismissedSlugs = {};
   final List<Map<String, dynamic>> _recentUnlocks = [];
+  bool _hasLiveMatches = false;
 
   bool get isLoggedIn => _isLoggedIn;
+  bool get hasLiveMatches => _hasLiveMatches;
   Map<String, dynamic>? get user => _user;
   bool get isAdmin => (_user?['is_admin'] as bool?) ?? false;
   int get achievementsUnlocked => _achievementsUnlocked;
@@ -81,6 +84,25 @@ class SessionController extends ChangeNotifier {
 
     await controller.refresh().timeout(const Duration(seconds: 12));
     return controller;
+  }
+
+  void setLiveMatchPresence(Iterable<dynamic> matches) {
+    final next = hasLiveMatchesInList(matches);
+    if (_hasLiveMatches == next) return;
+    _hasLiveMatches = next;
+    notifyListeners();
+  }
+
+  /// Consulta /matches quando ainda não sabemos se há jogos ao vivo (ex.: abrir ranking direto).
+  Future<bool> ensureLiveMatchPresence() async {
+    if (_hasLiveMatches) return true;
+    try {
+      final matches = await this.matches.listMatches().timeout(const Duration(seconds: 8));
+      setLiveMatchPresence(matches);
+      return _hasLiveMatches;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> refresh() async {

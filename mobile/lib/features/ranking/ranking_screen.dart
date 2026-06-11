@@ -17,23 +17,55 @@ class RankingScreen extends StatefulWidget {
   State<RankingScreen> createState() => _RankingScreenState();
 }
 
-class _RankingScreenState extends State<RankingScreen> {
+class _RankingScreenState extends State<RankingScreen> with WidgetsBindingObserver {
+  static const _pollInterval = Duration(seconds: 60);
+
   bool _loading = true;
+  bool _silentRefreshing = false;
   String? _error;
   List<dynamic> _ranking = [];
-  Timer? _refresh;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    widget.session.addListener(_syncPolling);
     _load();
-    _refresh = Timer.periodic(const Duration(seconds: 60), (_) => _load(silent: true));
+    _bootstrapPolling();
   }
 
   @override
   void dispose() {
-    _refresh?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    widget.session.removeListener(_syncPolling);
+    _stopPolling();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && widget.session.hasLiveMatches) {
+      _load(silent: true);
+    }
+  }
+
+  Future<void> _bootstrapPolling() async {
+    await widget.session.ensureLiveMatchPresence();
+    if (mounted) _syncPolling();
+  }
+
+  void _syncPolling() {
+    if (!widget.session.hasLiveMatches) {
+      _stopPolling();
+      return;
+    }
+    _pollTimer ??= Timer.periodic(_pollInterval, (_) => _load(silent: true));
+  }
+
+  void _stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
   }
 
   Future<void> _load({bool silent = false}) async {
@@ -42,16 +74,23 @@ class _RankingScreenState extends State<RankingScreen> {
         _loading = true;
         _error = null;
       });
+    } else if (mounted) {
+      setState(() => _silentRefreshing = true);
     }
 
     try {
       final data = await widget.session.ranking.getRanking();
-      setState(() => _ranking = data);
+      if (mounted) setState(() => _ranking = data);
     } catch (e) {
-      setState(() => _error = 'Falha ao carregar ranking.');
-    } finally {
       if (!silent && mounted) {
-        setState(() => _loading = false);
+        setState(() => _error = 'Falha ao carregar ranking.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          if (!silent) _loading = false;
+          _silentRefreshing = false;
+        });
       }
     }
   }
@@ -71,6 +110,18 @@ class _RankingScreenState extends State<RankingScreen> {
                   child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   children: [
+                    if (_silentRefreshing)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          'Atualizando...',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
                     SizedBox(
                       height: 200,
                       child: ClipRRect(
