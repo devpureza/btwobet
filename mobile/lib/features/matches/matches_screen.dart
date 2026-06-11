@@ -9,11 +9,10 @@ import '../../ui/achievement_tier_style.dart';
 import '../../ui/admin_helpers.dart';
 import '../../ui/bolao_fund_card.dart';
 import '../../ui/bolao_rules_card.dart';
-import '../../ui/careca_da_rodada_card.dart';
 import '../../ui/flag_image.dart';
 import '../../ui/glass.dart';
 import 'hall_entry.dart';
-import '../../ui/hall_sections.dart';
+import '../../ui/hall_highlights_row.dart';
 import '../../ui/match_filters.dart';
 import '../../ui/score_sync_banner.dart';
 import '../../ui/shell_header.dart';
@@ -253,23 +252,11 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           child: Center(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 1280),
-                              child: HallSections(data: _hall),
+                              child: HallHighlightsRow(data: _hall),
                             ),
                           ),
                         ),
                       ),
-                      if (_hall.careca != null)
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                          sliver: SliverToBoxAdapter(
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 1280),
-                                child: CarecaDaRodadaCard(data: _hall.careca!),
-                              ),
-                            ),
-                          ),
-                        ),
                       if (_fund != null)
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),

@@ -42,6 +42,28 @@ class ApiClient {
     return ApiClient._(dio);
   }
 
+  /// Origem do backend (sem `/api`) para `/storage`, `/flags`, etc.
+  static String mediaOrigin() {
+    final apiBase = _defaultBaseUrl();
+    final uri = Uri.parse(apiBase);
+    if (uri.path.endsWith('/api')) {
+      final originPath = uri.path.substring(0, uri.path.length - 4);
+      return uri.replace(path: originPath.isEmpty ? '/' : originPath).origin;
+    }
+    return uri.origin;
+  }
+
+  /// Resolve caminhos relativos (`/storage/...`) para URL absoluta em todas as plataformas.
+  static String? resolveMediaUrl(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    if (raw.startsWith('/')) {
+      if (kIsWeb) return '${Uri.base.origin}$raw';
+      return '${mediaOrigin()}$raw';
+    }
+    return raw;
+  }
+
   static String _defaultBaseUrl() {
     if (kIsWeb) {
       final base = Uri.base;
