@@ -48,16 +48,16 @@ class CarecaDaRodadaServiceTest extends TestCase
         Carbon::setTestNow(Carbon::create(2026, 6, 11, 12, 0, 0, 'UTC'));
 
         User::factory()->create([
-            'email' => 'limirio.neto@b2agencia.com.br',
-            'name' => 'Limírio Neto',
+            'email' => 'limirio.oliveira@b2agencia.com.br',
+            'name' => 'Limirio',
             'avatar_url' => '/storage/avatars/limirio.png',
         ]);
 
         $careca = $this->service->getCarecaOfWeek();
 
         $this->assertNotNull($careca);
-        $this->assertSame('limirio.neto@b2agencia.com.br', $careca['email']);
-        $this->assertSame('Limírio Neto', $careca['display_name']);
+        $this->assertSame('limirio.oliveira@b2agencia.com.br', $careca['email']);
+        $this->assertSame('Limirio', $careca['display_name']);
         $this->assertSame('/storage/avatars/limirio.png', $careca['avatar_url']);
         $this->assertSame(24, $careca['iso_week']);
         $this->assertSame(0, $careca['rotation_index']);

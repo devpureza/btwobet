@@ -5,7 +5,7 @@ return [
 
     /** Ordem fixa: índice 0 = primeiro da rotação semanal (ISO week % count). */
     'careca_emails' => [
-        'limirio.neto@b2agencia.com.br',
+        'limirio.oliveira@b2agencia.com.br',
         'guilherme.fernandes@b2agencia.com.br',
         'igor.fraga@b2agencia.com.br',
     ],
