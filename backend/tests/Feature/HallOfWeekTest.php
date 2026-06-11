@@ -108,6 +108,10 @@ class HallOfWeekTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('period_label', 'Esta semana')
+            ->assertJsonPath('careca.key', 'careca_da_rodada')
+            ->assertJsonPath('careca.email', 'limirio.neto@b2agencia.com.br')
+            ->assertJsonPath('careca.iso_week', 24)
+            ->assertJsonPath('careca.rotation_index', 0)
             ->assertJsonPath('fame.0.key', 'rodada_ouro')
             ->assertJsonPath('fame.0.display_name', 'Ana Ouro')
             ->assertJsonPath('fame.0.subtitle', '3 pts na semana')
@@ -130,7 +134,9 @@ class HallOfWeekTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('fame', [])
-            ->assertJsonPath('shame', []);
+            ->assertJsonPath('shame', [])
+            ->assertJsonPath('careca.key', 'careca_da_rodada')
+            ->assertJsonPath('careca.email', 'limirio.neto@b2agencia.com.br');
     }
 
     private function makeMatch(

@@ -14,6 +14,10 @@ class HallOfWeekService
 {
     private const CACHE_TTL_SECONDS = 300;
 
+    public function __construct(
+        private readonly CarecaDaRodadaService $carecaDaRodada,
+    ) {}
+
     /**
      * Semana corrente em UTC (segunda 00:00 — domingo 23:59:59), ISO-8601.
      */
@@ -37,6 +41,7 @@ class HallOfWeekService
                 'week_end' => $end->toIso8601String(),
                 'fame' => $this->buildFame($start, $end),
                 'shame' => $this->buildShame($start, $end),
+                'careca' => $this->carecaDaRodada->getCarecaOfWeek($start),
             ];
         });
     }
