@@ -21,7 +21,7 @@ class RankingService
                 'users.avatar_url',
                 DB::raw('COALESCE(SUM(predictions.points), 0) as total_points'),
                 DB::raw('COUNT(predictions.id) as total_predictions'),
-                DB::raw("SUM(CASE WHEN matches.status = 'finished' THEN 1 ELSE 0 END) as scored_predictions"),
+                DB::raw("SUM(CASE WHEN matches.status IN ('live', 'finished') THEN 1 ELSE 0 END) as scored_predictions"),
                 DB::raw('SUM(CASE WHEN predictions.points = 2 THEN 1 ELSE 0 END) as exact_hits'),
                 DB::raw('SUM(CASE WHEN predictions.points >= 1 THEN 1 ELSE 0 END) as result_hits'),
                 'users.created_at',
@@ -36,7 +36,9 @@ class RankingService
 
     public function recalculateForMatch(FootballMatch $match, ScoreCalculator $calculator): void
     {
-        if ($match->status !== 'finished' || $match->home_score === null || $match->away_score === null) {
+        if (! in_array($match->status, ['live', 'finished'], true)
+            || $match->home_score === null
+            || $match->away_score === null) {
             return;
         }
 
@@ -51,6 +53,8 @@ class RankingService
             $prediction->update(['points' => $points]);
         });
 
-        app(AchievementService::class)->evaluateUsersForFinishedMatch($match->fresh());
+        if ($match->status === 'finished') {
+            app(AchievementService::class)->evaluateUsersForFinishedMatch($match->fresh());
+        }
     }
 }

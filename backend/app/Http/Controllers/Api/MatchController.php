@@ -116,14 +116,7 @@ class MatchController extends Controller
                 'home_score' => $match->home_score,
                 'away_score' => $match->away_score,
             ] : null,
-            'live_score' => $match->status === 'scheduled'
-                && $match->home_score !== null
-                && $match->away_score !== null
-                ? [
-                    'home_score' => $match->home_score,
-                    'away_score' => $match->away_score,
-                ]
-                : null,
+            'live_score' => $this->liveScorePayload($match),
             'teams_defined' => $this->window->teamsAreDefined($match),
             'open_for_predictions' => $access['can_submit'],
             'prediction_deadline_at' => $access['deadline_at'],
@@ -134,6 +127,34 @@ class MatchController extends Controller
                 'points' => $prediction->points,
             ] : null,
         ];
+    }
+
+    /**
+     * @return array{home_score: int, away_score: int}|null
+     */
+    private function liveScorePayload(FootballMatch $match): ?array
+    {
+        if ($match->status === 'finished'
+            || $match->home_score === null
+            || $match->away_score === null) {
+            return null;
+        }
+
+        if ($match->status === 'live') {
+            return [
+                'home_score' => $match->home_score,
+                'away_score' => $match->away_score,
+            ];
+        }
+
+        if ($match->status === 'scheduled' && $match->kickoff_at->isPast()) {
+            return [
+                'home_score' => $match->home_score,
+                'away_score' => $match->away_score,
+            ];
+        }
+
+        return null;
     }
 
     private function teamPayload($team): array

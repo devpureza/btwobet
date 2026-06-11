@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../app/session_controller.dart';
@@ -19,18 +21,28 @@ class _RankingScreenState extends State<RankingScreen> {
   bool _loading = true;
   String? _error;
   List<dynamic> _ranking = [];
+  Timer? _refresh;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _refresh = Timer.periodic(const Duration(seconds: 60), (_) => _load(silent: true));
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  @override
+  void dispose() {
+    _refresh?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
 
     try {
       final data = await widget.session.ranking.getRanking();
@@ -38,7 +50,9 @@ class _RankingScreenState extends State<RankingScreen> {
     } catch (e) {
       setState(() => _error = 'Falha ao carregar ranking.');
     } finally {
-      setState(() => _loading = false);
+      if (!silent && mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 

@@ -513,10 +513,13 @@ class _MatchCardState extends State<MatchCard> {
     final deadline = deadlineRaw != null ? DateTime.tryParse(deadlineRaw)?.toLocal() : null;
     final hasPrediction = widget.match['my_prediction'] != null;
 
+    final status = widget.match['status'] as String? ?? 'scheduled';
     final result = widget.match['result'] as Map<String, dynamic>?;
     final liveScore = widget.match['live_score'] as Map<String, dynamic>?;
     final venue = widget.match['venue'] as String?;
     final group = widget.match['group_name'] as String?;
+    final isLive = status == 'live' ||
+        (status == 'scheduled' && kickoff.isBefore(DateTime.now()) && liveScore != null);
 
     return Glass(
       blur: 12,
@@ -550,6 +553,25 @@ class _MatchCardState extends State<MatchCard> {
                     ),
                   ),
                 ),
+                if (isLive) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: scheme.errorContainer.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: scheme.error.withValues(alpha: 0.35)),
+                    ),
+                    child: Text(
+                      'Ao vivo',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.error,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 if (group != null && group.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

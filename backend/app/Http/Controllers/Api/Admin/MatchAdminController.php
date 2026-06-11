@@ -57,7 +57,7 @@ class MatchAdminController extends Controller
     public function updateResult(Request $request, FootballMatch $match): JsonResponse
     {
         $validated = $request->validate([
-            'status' => ['required', 'string', 'in:scheduled,finished'],
+            'status' => ['required', 'string', 'in:scheduled,live,finished'],
             'home_score' => ['nullable', 'integer', 'min:0', 'max:30'],
             'away_score' => ['nullable', 'integer', 'min:0', 'max:30'],
         ]);
@@ -66,13 +66,18 @@ class MatchAdminController extends Controller
         $home = $validated['home_score'] ?? null;
         $away = $validated['away_score'] ?? null;
 
-        if ($status === 'finished' && ($home === null || $away === null)) {
-            return response()->json(['message' => 'Informe o placar para finalizar o jogo.'], 422);
+        if (in_array($status, ['live', 'finished'], true) && ($home === null || $away === null)) {
+            return response()->json(['message' => 'Informe o placar para marcar o jogo ao vivo ou finalizado.'], 422);
         }
 
         $match->status = $status;
-        $match->home_score = $status === 'finished' ? $home : null;
-        $match->away_score = $status === 'finished' ? $away : null;
+        if ($status === 'scheduled') {
+            $match->home_score = null;
+            $match->away_score = null;
+        } else {
+            $match->home_score = $home;
+            $match->away_score = $away;
+        }
         $match->save();
 
         // Recalcula pontos dos palpites do jogo (idempotente).
@@ -88,7 +93,7 @@ class MatchAdminController extends Controller
             'stage' => ['sometimes', 'string', 'in:group,knockout'],
             'group_name' => ['nullable', 'string', 'size:1', 'regex:/^[A-L]$/i'],
             'venue' => ['nullable', 'string', 'max:255'],
-            'status' => ['sometimes', 'string', 'in:scheduled,finished'],
+            'status' => ['sometimes', 'string', 'in:scheduled,live,finished'],
         ]);
 
         if (array_key_exists('group_name', $validated) && $validated['group_name'] !== null) {

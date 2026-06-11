@@ -106,32 +106,40 @@ class WorldCupScoreSyncService
         ?int $awayScore,
         Carbon $kickoff,
     ): bool {
-        $changed = false;
+        $scoresChanged = false;
 
         if ($homeScore !== null && $awayScore !== null) {
             if ($match->home_score !== $homeScore || $match->away_score !== $awayScore) {
                 $match->home_score = $homeScore;
                 $match->away_score = $awayScore;
-                $changed = true;
+                $scoresChanged = true;
             }
         }
 
-        $shouldFinish = $homeScore !== null
-            && $awayScore !== null
-            && $kickoff->copy()->addMinutes(105)->isPast();
+        $hasScores = $match->home_score !== null && $match->away_score !== null;
+        $shouldFinish = $hasScores && $kickoff->copy()->addMinutes(105)->isPast();
 
+        $statusChanged = false;
         if ($shouldFinish && $match->status !== 'finished') {
             $match->status = 'finished';
-            $changed = true;
+            $statusChanged = true;
+        } elseif (
+            ! $shouldFinish
+            && $hasScores
+            && $kickoff->isPast()
+            && $match->status === 'scheduled'
+        ) {
+            $match->status = 'live';
+            $statusChanged = true;
         }
 
-        if (! $changed) {
+        if (! $scoresChanged && ! $statusChanged) {
             return false;
         }
 
         $match->save();
 
-        if ($match->status === 'finished') {
+        if (in_array($match->status, ['live', 'finished'], true)) {
             $this->rankingService->recalculateForMatch($match->fresh(), new ScoreCalculator());
         }
 
