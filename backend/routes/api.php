@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Admin\PredictionRulesAdminController;
 use App\Http\Controllers\Api\Admin\UserAdminController;
 use App\Http\Controllers\Api\Admin\MatchAdminController;
 use App\Http\Controllers\Api\Admin\TeamAdminController;
+use App\Http\Controllers\Api\Admin\WorldCupSyncScoresAdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
@@ -63,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/predictions/export', PredictionExportAdminController::class);
 
             Route::post('/reset', BolaoResetAdminController::class);
+            Route::post('/worldcup/sync-scores', WorldCupSyncScoresAdminController::class);
         });
     });
 });

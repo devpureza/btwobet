@@ -6,10 +6,43 @@ import '../../ui/glass.dart';
 import '../../ui/shell_header.dart';
 import '../../utils/download_file/download_file.dart';
 
-class AdminScreen extends StatelessWidget {
+class AdminScreen extends StatefulWidget {
   final SessionController session;
 
   const AdminScreen({super.key, required this.session});
+
+  @override
+  State<AdminScreen> createState() => _AdminScreenState();
+}
+
+class _AdminScreenState extends State<AdminScreen> {
+  bool _syncingScores = false;
+
+  Future<void> _syncScores() async {
+    if (_syncingScores) return;
+
+    setState(() => _syncingScores = true);
+    try {
+      final payload = await widget.session.admin.syncWorldCupScores();
+      final stats = (payload['data'] as Map?)?.cast<String, dynamic>() ?? {};
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Placares sincronizados: ${stats['matched'] ?? 0} casados, '
+            '${stats['updated'] ?? 0} atualizados, ${stats['finished'] ?? 0} finalizados.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Falha ao sincronizar placares (GE): $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _syncingScores = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +87,7 @@ class AdminScreen extends StatelessWidget {
                     subtitle: const Text('Baixar CSV para planilha'),
                     onTap: () async {
                       try {
-                        final payload = await session.admin.exportPredictions(format: 'csv');
+                        final payload = await widget.session.admin.exportPredictions(format: 'csv');
                         final filename = payload.filename ?? 'palpites.csv';
                         downloadFile(bytes: payload.bytes, filename: filename, mimeType: payload.mimeType);
                         if (context.mounted) {
@@ -70,6 +103,19 @@ class AdminScreen extends StatelessWidget {
                         }
                       }
                     },
+                  ),
+                  ListTile(
+                    leading: _syncingScores
+                        ? SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: scheme.primary),
+                          )
+                        : const Icon(Icons.sync),
+                    title: const Text('Sincronizar placares (GE)'),
+                    subtitle: const Text('Buscar placares atuais no ge.globo'),
+                    enabled: !_syncingScores,
+                    onTap: _syncingScores ? null : _syncScores,
                   ),
                   ListTile(
                     leading: const Icon(Icons.sports_soccer),
@@ -115,4 +161,3 @@ class AdminScreen extends StatelessWidget {
     );
   }
 }
-

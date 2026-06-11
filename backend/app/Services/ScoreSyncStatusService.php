@@ -44,7 +44,7 @@ class ScoreSyncStatusService
      */
     public function toArray(): array
     {
-        $interval = max(1, (int) config('services.globo_esporte.sync_interval_minutes', 30));
+        $interval = max(1, (int) config('services.globo_esporte.sync_interval_minutes', 5));
         $source = (string) config('services.globo_esporte.source_label', 'ge.globo');
 
         $payload = $this->lastRunPayload();
@@ -90,13 +90,15 @@ class ScoreSyncStatusService
 
     private function nextScheduledSlot(Carbon $from): Carbon
     {
-        $base = $from->copy()->startOfMinute();
+        $interval = max(1, (int) config('services.globo_esporte.sync_interval_minutes', 5));
+        $base = $from->copy()->startOfMinute()->addMinute();
         $minute = (int) $base->format('i');
+        $remainder = $minute % $interval;
 
-        if ($minute < 30) {
-            return $base->startOfHour()->addMinutes(30);
+        if ($remainder !== 0) {
+            $base->addMinutes($interval - $remainder);
         }
 
-        return $base->startOfHour()->addHour();
+        return $base->startOfMinute();
     }
 }

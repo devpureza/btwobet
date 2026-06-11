@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Str;
 
 Schedule::command('worldcup:sync-scores')
-    ->everyThirtyMinutes()
-    ->withoutOverlapping(25)
+    ->everyFiveMinutes()
+    ->withoutOverlapping(4)
     ->runInBackground();
 
 Artisan::command('inspire', function () {

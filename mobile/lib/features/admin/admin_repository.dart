@@ -160,4 +160,9 @@ class AdminRepository {
 
     return _downloadPayloadFromResponse(res);
   }
+
+  Future<Map<String, dynamic>> syncWorldCupScores() async {
+    final res = await _dio.post('/admin/worldcup/sync-scores');
+    return (res.data as Map).cast<String, dynamic>();
+  }
 }
