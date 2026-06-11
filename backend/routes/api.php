@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BolaoFundController;
+use App\Http\Controllers\Api\HallOfWeekController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\MatchController;
@@ -34,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('approved')->group(function () {
         Route::get('/bolao/fund', BolaoFundController::class);
         Route::get('/matches', [MatchController::class, 'index']);
+        Route::get('/hall-of-week', HallOfWeekController::class);
         Route::post('/predictions', [PredictionController::class, 'store']);
         Route::get('/ranking', [RankingController::class, 'index']);
         Route::get('/me/history', HistoryController::class);

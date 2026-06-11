@@ -2,13 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../features/matches/hall_mock_data.dart';
+import '../features/matches/hall_entry.dart';
 import 'avatar_image.dart';
 import 'glass.dart';
 
-/// Hall da Fama e Hall da Vergonha na home (dados mock até a API existir).
+/// Hall da Fama e Hall da Vergonha na home (dados reais da API).
 class HallSections extends StatefulWidget {
-  const HallSections({super.key});
+  final HallOfWeekData data;
+
+  const HallSections({super.key, required this.data});
 
   @override
   State<HallSections> createState() => _HallSectionsState();
@@ -27,10 +29,25 @@ class _HallSectionsState extends State<HallSections> {
     _timer = Timer.periodic(_rotateInterval, (_) {
       if (!mounted) return;
       setState(() {
-        _fameIndex = (_fameIndex + 1) % HallMockData.hallOfFame.length;
-        _shameIndex = (_shameIndex + 1) % HallMockData.hallOfShame.length;
+        if (widget.data.fame.isNotEmpty) {
+          _fameIndex = (_fameIndex + 1) % widget.data.fame.length;
+        }
+        if (widget.data.shame.isNotEmpty) {
+          _shameIndex = (_shameIndex + 1) % widget.data.shame.length;
+        }
       });
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant HallSections oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data.fame.length != widget.data.fame.length) {
+      _fameIndex = 0;
+    }
+    if (oldWidget.data.shame.length != widget.data.shame.length) {
+      _shameIndex = 0;
+    }
   }
 
   @override
@@ -51,16 +68,18 @@ class _HallSectionsState extends State<HallSections> {
           Expanded(
             child: _HallCard(
               kind: _HallKind.fame,
-              entries: HallMockData.hallOfFame,
+              entries: widget.data.fame,
               highlightedIndex: _fameIndex,
+              periodLabel: widget.data.periodLabel,
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: _HallCard(
               kind: _HallKind.shame,
-              entries: HallMockData.hallOfShame,
+              entries: widget.data.shame,
               highlightedIndex: _shameIndex,
+              periodLabel: widget.data.periodLabel,
             ),
           ),
         ],
@@ -71,14 +90,16 @@ class _HallSectionsState extends State<HallSections> {
       children: [
         _HallCard(
           kind: _HallKind.fame,
-          entries: HallMockData.hallOfFame,
+          entries: widget.data.fame,
           highlightedIndex: _fameIndex,
+          periodLabel: widget.data.periodLabel,
         ),
         const SizedBox(height: 12),
         _HallCard(
           kind: _HallKind.shame,
-          entries: HallMockData.hallOfShame,
+          entries: widget.data.shame,
           highlightedIndex: _shameIndex,
+          periodLabel: widget.data.periodLabel,
         ),
       ],
     );
@@ -89,13 +110,15 @@ enum _HallKind { fame, shame }
 
 class _HallCard extends StatelessWidget {
   final _HallKind kind;
-  final List<MockHallEntry> entries;
+  final List<HallEntry> entries;
   final int highlightedIndex;
+  final String periodLabel;
 
   const _HallCard({
     required this.kind,
     required this.entries,
     required this.highlightedIndex,
+    required this.periodLabel,
   });
 
   @override
@@ -103,7 +126,7 @@ class _HallCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isFame = kind == _HallKind.fame;
-    final entry = entries[highlightedIndex.clamp(0, entries.length - 1)];
+    final isEmpty = entries.isEmpty;
 
     final accent = isFame ? const Color(0xFFFCD400) : scheme.error.withValues(alpha: 0.85);
     final icon = isFame ? Icons.emoji_events_rounded : Icons.sentiment_dissatisfied_rounded;
@@ -129,13 +152,13 @@ class _HallCard extends StatelessWidget {
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
-              _PreviewChip(label: HallMockData.previewLabel),
+              if (!isEmpty) _PeriodChip(label: periodLabel),
             ],
           ),
           if (!isFame) ...[
             const SizedBox(height: 6),
             Text(
-              'Em breve dados reais — entrada opcional',
+              'Métrica divertida — opt-out em breve',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.onSurfaceVariant.withValues(alpha: 0.85),
                 fontStyle: FontStyle.italic,
@@ -143,56 +166,87 @@ class _HallCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 420),
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.04, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-              );
-            },
-            child: _HighlightedEntry(
-              key: ValueKey('${kind.name}_${entry.id}'),
-              entry: entry,
-              accent: accent,
-              isFame: isFame,
-            ),
-          ),
-          const SizedBox(height: 10),
-          _EntryDots(
-            count: entries.length,
-            activeIndex: highlightedIndex,
-            activeColor: accent,
-          ),
-          const SizedBox(height: 10),
-          ...entries.map(
-            (e) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: _CompactEntryRow(
-                entry: e,
-                isActive: e.id == entry.id,
+          if (isEmpty)
+            _EmptyHallState(isFame: isFame)
+          else ...[
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 420),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.04, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: _HighlightedEntry(
+                key: ValueKey('${kind.name}_${entries[highlightedIndex.clamp(0, entries.length - 1)].key}'),
+                entry: entries[highlightedIndex.clamp(0, entries.length - 1)],
                 accent: accent,
+                isFame: isFame,
               ),
             ),
-          ),
+            if (entries.length > 1) ...[
+              const SizedBox(height: 10),
+              _EntryDots(
+                count: entries.length,
+                activeIndex: highlightedIndex,
+                activeColor: accent,
+              ),
+              const SizedBox(height: 10),
+              ...entries.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: _CompactEntryRow(
+                    entry: e,
+                    isActive: e.key == entries[highlightedIndex.clamp(0, entries.length - 1)].key,
+                    accent: accent,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ],
       ),
     );
   }
 }
 
-class _PreviewChip extends StatelessWidget {
+class _EmptyHallState extends StatelessWidget {
+  final bool isFame;
+
+  const _EmptyHallState({required this.isFame});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final message = isFame
+        ? 'Ninguém ainda — palpite nos jogos!'
+        : 'Ninguém se destacou (ainda) — sorte!';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        message,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
+  }
+}
+
+class _PeriodChip extends StatelessWidget {
   final String label;
 
-  const _PreviewChip({required this.label});
+  const _PeriodChip({required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +270,7 @@ class _PreviewChip extends StatelessWidget {
 }
 
 class _HighlightedEntry extends StatelessWidget {
-  final MockHallEntry entry;
+  final HallEntry entry;
   final Color accent;
   final bool isFame;
 
@@ -233,7 +287,11 @@ class _HighlightedEntry extends StatelessWidget {
 
     return Row(
       children: [
-        _MockAvatar(entry: entry, size: 52),
+        AvatarImage(
+          url: entry.avatarUrl,
+          size: 52,
+          fallbackLetter: entry.fallbackLetter,
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -246,6 +304,13 @@ class _HighlightedEntry extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 entry.title,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: accent.withValues(alpha: 0.95),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                entry.subtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -264,7 +329,7 @@ class _HighlightedEntry extends StatelessWidget {
 }
 
 class _CompactEntryRow extends StatelessWidget {
-  final MockHallEntry entry;
+  final HallEntry entry;
   final bool isActive;
   final Color accent;
 
@@ -284,7 +349,11 @@ class _CompactEntryRow extends StatelessWidget {
       opacity: isActive ? 1 : 0.55,
       child: Row(
         children: [
-          _MockAvatar(entry: entry, size: 32),
+          AvatarImage(
+            url: entry.avatarUrl,
+            size: 32,
+            fallbackLetter: entry.fallbackLetter,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -340,36 +409,6 @@ class _EntryDots extends StatelessWidget {
           ),
         );
       }),
-    );
-  }
-}
-
-class _MockAvatar extends StatelessWidget {
-  final MockHallEntry entry;
-  final double size;
-
-  const _MockAvatar({required this.entry, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    if (entry.avatarColor != null) {
-      return CircleAvatar(
-        radius: size / 2,
-        backgroundColor: entry.avatarColor!.withValues(alpha: 0.55),
-        child: Text(
-          entry.fallbackLetter.toUpperCase(),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                fontSize: size * 0.38,
-              ),
-        ),
-      );
-    }
-
-    return AvatarImage(
-      url: null,
-      size: size,
-      fallbackLetter: entry.fallbackLetter,
     );
   }
 }

@@ -8,6 +8,7 @@ import '../features/admin/admin_repository.dart';
 import '../features/auth/auth_repository.dart';
 import '../features/history/history_repository.dart';
 import '../features/matches/bolao_fund_repository.dart';
+import '../features/matches/hall_repository.dart';
 import '../features/matches/match_live.dart';
 import '../features/matches/matches_repository.dart';
 import '../features/matches/score_sync_repository.dart';
@@ -18,6 +19,7 @@ class SessionController extends ChangeNotifier {
   final TokenStore tokenStore;
   final AuthRepository auth;
   final MatchesRepository matches;
+  final HallRepository hall;
   final BolaoFundRepository bolaoFund;
   final ScoreSyncRepository scoreSync;
   final RankingRepository ranking;
@@ -50,6 +52,7 @@ class SessionController extends ChangeNotifier {
     required this.tokenStore,
     required this.auth,
     required this.matches,
+    required this.hall,
     required this.bolaoFund,
     required this.scoreSync,
     required this.ranking,
@@ -63,6 +66,7 @@ class SessionController extends ChangeNotifier {
 
     final auth = AuthRepository(api.dio, tokenStore);
     final matches = MatchesRepository(api.dio);
+    final hall = HallRepository(api.dio);
     final bolaoFund = BolaoFundRepository(api.dio);
     final scoreSync = ScoreSyncRepository(api.dio);
     final ranking = RankingRepository(api.dio);
@@ -74,6 +78,7 @@ class SessionController extends ChangeNotifier {
       tokenStore: tokenStore,
       auth: auth,
       matches: matches,
+      hall: hall,
       bolaoFund: bolaoFund,
       scoreSync: scoreSync,
       ranking: ranking,

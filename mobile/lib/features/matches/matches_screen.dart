@@ -11,6 +11,7 @@ import '../../ui/bolao_fund_card.dart';
 import '../../ui/bolao_rules_card.dart';
 import '../../ui/flag_image.dart';
 import '../../ui/glass.dart';
+import 'hall_entry.dart';
 import '../../ui/hall_sections.dart';
 import '../../ui/match_filters.dart';
 import '../../ui/score_sync_banner.dart';
@@ -33,6 +34,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
   String? _error;
   List<dynamic> _matches = [];
   Map<String, dynamic>? _fund;
+  HallOfWeekData _hall = HallOfWeekData.empty;
   String? _group;
   String? _stage;
   bool _onlyOpen = false;
@@ -86,11 +88,13 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
       final results = await Future.wait([
         widget.session.matches.listMatches(),
         widget.session.bolaoFund.getFund(),
+        widget.session.hall.getHallOfWeek(),
       ]);
       if (!mounted) return;
       setState(() {
         _matches = results[0] as List<dynamic>;
         _fund = (results[1] as Map).cast<String, dynamic>();
+        _hall = results[2] as HallOfWeekData;
       });
       widget.session.setLiveMatchPresence(_matches);
       _syncPolling();
@@ -248,7 +252,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           child: Center(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 1280),
-                              child: const HallSections(),
+                              child: HallSections(data: _hall),
                             ),
                           ),
                         ),
