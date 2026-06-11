@@ -66,9 +66,19 @@ class HallOfWeekService
      */
     private function buildShame(Carbon $start, Carbon $end): array
     {
-        $inverted = $this->profeciaInvertida($start, $end);
+        $entries = [];
 
-        return $inverted !== null ? [$inverted] : [];
+        $inverted = $this->profeciaInvertida($start, $end);
+        if ($inverted !== null) {
+            $entries[] = $inverted;
+        }
+
+        $worst = $this->errouPorMuito($start, $end);
+        if ($worst !== null) {
+            $entries[] = $worst;
+        }
+
+        return $entries;
     }
 
     /**
@@ -183,6 +193,57 @@ class HallOfWeekService
             avatarUrl: $worst->user->avatar_url,
             matchId: $worst->match_id,
         );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function errouPorMuito(Carbon $start, Carbon $end): ?array
+    {
+        $predictions = Prediction::query()
+            ->with(['user', 'match.homeTeam', 'match.awayTeam'])
+            ->whereHas('user', fn ($q) => $q->where('approval_status', User::STATUS_APPROVED))
+            ->whereHas('match', function ($q) use ($start, $end) {
+                $q->where('status', 'finished')
+                    ->whereBetween('kickoff_at', [$start, $end])
+                    ->whereNotNull('home_score')
+                    ->whereNotNull('away_score');
+            })
+            ->get();
+
+        $worst = $predictions
+            ->filter(fn (Prediction $p) => $this->goalError($p) > 0 && $p->match !== null && $p->user !== null)
+            ->sortBy(fn (Prediction $p) => [-$this->goalError($p), $p->user->name])
+            ->first();
+
+        if ($worst === null) {
+            return null;
+        }
+
+        $predicted = sprintf('%d×%d', $worst->home_score, $worst->away_score);
+        $actual = sprintf('%d×%d', $worst->match->home_score, $worst->match->away_score);
+        $error = $this->goalError($worst);
+
+        return $this->entry(
+            key: 'errou_por_muito',
+            title: 'Errou por muito',
+            subtitle: sprintf('Errou %d gols — previu %s, saiu %s', $error, $predicted, $actual),
+            userId: $worst->user_id,
+            name: $worst->user->name,
+            avatarUrl: $worst->user->avatar_url,
+            matchId: $worst->match_id,
+        );
+    }
+
+    private function goalError(Prediction $prediction): int
+    {
+        $match = $prediction->match;
+        if ($match === null || $match->home_score === null || $match->away_score === null) {
+            return 0;
+        }
+
+        return abs($prediction->home_score - $match->home_score)
+            + abs($prediction->away_score - $match->away_score);
     }
 
     private function isInvertedBigMiss(Prediction $prediction): bool

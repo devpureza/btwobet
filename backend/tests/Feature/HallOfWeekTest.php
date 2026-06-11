@@ -48,6 +48,10 @@ class HallOfWeekTest extends TestCase
             'name' => 'Diego Invertido',
             'approval_status' => User::STATUS_APPROVED,
         ]);
+        $worstPlayer = User::factory()->create([
+            'name' => 'Carla Errou',
+            'approval_status' => User::STATUS_APPROVED,
+        ]);
 
         $kickoff = Carbon::now('UTC')->startOfWeek(Carbon::MONDAY)->addDays(1)->setTime(20, 0);
 
@@ -84,6 +88,13 @@ class HallOfWeekTest extends TestCase
             'points' => 0,
         ]);
         Prediction::create([
+            'user_id' => $worstPlayer->id,
+            'match_id' => $finishedB->id,
+            'home_score' => 6,
+            'away_score' => 6,
+            'points' => 0,
+        ]);
+        Prediction::create([
             'user_id' => $shamePlayer->id,
             'match_id' => $oldMatch->id,
             'home_score' => 5,
@@ -104,7 +115,10 @@ class HallOfWeekTest extends TestCase
             ->assertJsonPath('fame.1.display_name', 'Bruno Exato')
             ->assertJsonPath('shame.0.key', 'profecia_invertida')
             ->assertJsonPath('shame.0.display_name', 'Diego Invertido')
-            ->assertJsonPath('shame.0.subtitle', 'Previu 4×0, saiu 0×3');
+            ->assertJsonPath('shame.0.subtitle', 'Previu 4×0, saiu 0×3')
+            ->assertJsonPath('shame.1.key', 'errou_por_muito')
+            ->assertJsonPath('shame.1.display_name', 'Carla Errou')
+            ->assertJsonPath('shame.1.subtitle', 'Errou 9 gols — previu 6×6, saiu 0×3');
     }
 
     public function test_hall_of_week_returns_empty_lists_when_no_qualifying_data(): void
