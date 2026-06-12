@@ -208,9 +208,9 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 1280),
                               child: Text(
-                                'Seus Palpites',
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
+                                'Meus Palpites',
+                                style: theme.textTheme.headlineLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
@@ -224,12 +224,20 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                             child: Center(
                               child: ConstrainedBox(
                                 constraints: const BoxConstraints(maxWidth: 1280),
-                                child: Text(
-                                  'Os palpites da primeira fase estão encerrados.',
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  decoration: BoxDecoration(
                                     color: theme.colorScheme.error,
-                                    fontWeight: FontWeight.w600,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'Os palpites da primeira fase estão encerrados.',
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onError,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -594,14 +602,23 @@ class _MatchCardState extends State<MatchCard> {
     final awaitingTeams = !teamsDefined;
     final deadlineRaw = widget.match['prediction_deadline_at'] as String?;
     final deadline = deadlineRaw != null ? DateTime.tryParse(deadlineRaw)?.toLocal() : null;
-    final hasPrediction = widget.match['my_prediction'] != null;
-    final closed = !open && !awaitingTeams;
+    final canEditPrediction = open && !awaitingTeams;
 
+    final status = widget.match['status'] as String? ?? 'scheduled';
+    final isFinished = status == 'finished';
     final result = widget.match['result'] as Map<String, dynamic>?;
     final liveScore = widget.match['live_score'] as Map<String, dynamic>?;
     final venue = widget.match['venue'] as String?;
     final group = widget.match['group_name'] as String?;
     final isLive = isMatchLive(widget.match);
+    final officialScoreHeader = _buildOfficialScoreHeader(
+      theme: theme,
+      scheme: scheme,
+      isFinished: isFinished,
+      result: result,
+      liveScore: liveScore,
+      isLive: isLive,
+    );
 
     return Glass(
       blur: 12,
@@ -689,79 +706,33 @@ class _MatchCardState extends State<MatchCard> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                if (closed) ...[
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Encerrado',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: scheme.error,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        if (hasPrediction) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            '${_home.text.isEmpty ? '0' : _home.text} × ${_away.text.isEmpty ? '0' : _away.text}',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              height: 1,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                if (officialScoreHeader != null) ...[
+                  officialScoreHeader,
                   const SizedBox(height: 14),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(child: _teamName(homeTeam, alignRight: true)),
-                      const SizedBox(width: 6),
-                      _teamFlag(homeTeam),
-                      const SizedBox(width: 12),
-                      Text(
-                        '×',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: scheme.outline,
-                          fontWeight: FontWeight.w700,
-                          height: 1,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      _teamFlag(awayTeam),
-                      const SizedBox(width: 6),
-                      Expanded(child: _teamName(awayTeam)),
-                    ],
-                  ),
-                ] else ...[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: _teamName(homeTeam, alignRight: true),
-                      ),
-                      const SizedBox(width: 6),
-                      _teamFlag(homeTeam),
-                      const SizedBox(width: 6),
-                      _scoreInputs(
-                        theme: theme,
-                        scheme: scheme,
-                        homeEnabled: open && !awaitingTeams,
-                        awayEnabled: open && !awaitingTeams,
-                      ),
-                      const SizedBox(width: 6),
-                      _teamFlag(awayTeam),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: _teamName(awayTeam),
-                      ),
-                    ],
-                  ),
                 ],
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: _teamName(homeTeam, alignRight: true),
+                    ),
+                    const SizedBox(width: 6),
+                    _teamFlag(homeTeam),
+                    const SizedBox(width: 6),
+                    _scoreInputs(
+                      theme: theme,
+                      scheme: scheme,
+                      homeEnabled: canEditPrediction,
+                      awayEnabled: canEditPrediction,
+                    ),
+                    const SizedBox(width: 6),
+                    _teamFlag(awayTeam),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: _teamName(awayTeam),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 if (deadline != null && open)
                   Text(
@@ -777,31 +748,19 @@ class _MatchCardState extends State<MatchCard> {
                       fontStyle: FontStyle.italic,
                     ),
                   ),
-                ] else if (lockReason != null && open) ...[
+                ] else if (lockReason != null && !canEditPrediction) ...[
                   const SizedBox(height: 8),
                   Text(
                     lockReason,
-                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: lockReason.contains('registrado')
+                          ? scheme.onSurfaceVariant
+                          : scheme.error,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 12),
-                if (result != null) ...[
-                  Text(
-                    'Resultado: ${result['home_score']} x ${result['away_score']}',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 8),
-                ] else if (liveScore != null) ...[
-                  Text(
-                    'Ao vivo: ${liveScore['home_score']} x ${liveScore['away_score']}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                if (open)
+                if (canEditPrediction)
                   Align(
                     alignment: Alignment.centerRight,
                     child: FilledButton(
@@ -840,6 +799,56 @@ class _MatchCardState extends State<MatchCard> {
         ],
       ),
     );
+  }
+
+  Widget? _buildOfficialScoreHeader({
+    required ThemeData theme,
+    required ColorScheme scheme,
+    required bool isFinished,
+    required Map<String, dynamic>? result,
+    required Map<String, dynamic>? liveScore,
+    required bool isLive,
+  }) {
+    if (isFinished && result != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Encerrado',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: scheme.error,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${result['home_score']} × ${result['away_score']}',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                height: 1,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (isLive && liveScore != null) {
+      return Center(
+        child: Text(
+          '${liveScore['home_score']} × ${liveScore['away_score']}',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: scheme.primary,
+            fontWeight: FontWeight.w800,
+            height: 1,
+          ),
+        ),
+      );
+    }
+
+    return null;
   }
 
   Widget _scoreInputs({
