@@ -149,6 +149,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
     final grouped = _groupByDate(filtered);
     final dateKeys = grouped.keys.toList()..sort();
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
+    final groupPhaseClosed = _isGroupPhasePredictionsClosed(_matches);
 
     return ShellPage(
       body: ListenableBuilder(
@@ -206,46 +207,35 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           child: Center(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 1280),
-                              child: SizedBox(
-                                height: isDesktop ? 168 : 128,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: StadiumGradient(
-                                    assetPath: 'assets/images/hero-stadium.png',
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-                                      child: Align(
-                                        alignment: Alignment.bottomLeft,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Seus Palpites',
-                                              style: theme.textTheme.titleLarge?.copyWith(
-                                                color: theme.colorScheme.onPrimary,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Preveja os placares e suba no ranking global.',
-                                              style: theme.textTheme.bodySmall?.copyWith(
-                                                color: theme.colorScheme.onPrimary.withValues(alpha: 0.90),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                              child: Text(
+                                'Seus Palpites',
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
+                      if (groupPhaseClosed)
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 1280),
+                                child: Text(
+                                  'Os palpites da primeira fase estão encerrados.',
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.error,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       SliverPadding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                         sliver: SliverToBoxAdapter(
@@ -428,6 +418,27 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
 
     return items.where(match).toList();
   }
+
+  bool _isGroupPhasePredictionsClosed(List<dynamic> matches) {
+    for (final raw in matches) {
+      final m = raw as Map<String, dynamic>;
+      if (m['stage'] != 'group') continue;
+
+      final reason = m['prediction_lock_reason'] as String?;
+      if (reason == 'Prazo da fase de grupos encerrado.') {
+        return true;
+      }
+
+      final deadlineRaw = m['prediction_deadline_at'] as String?;
+      if (deadlineRaw != null) {
+        final deadline = DateTime.tryParse(deadlineRaw)?.toLocal();
+        if (deadline != null && !DateTime.now().isBefore(deadline)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
 
 class _RecentUnlocksBanner extends StatelessWidget {
@@ -584,6 +595,7 @@ class _MatchCardState extends State<MatchCard> {
     final deadlineRaw = widget.match['prediction_deadline_at'] as String?;
     final deadline = deadlineRaw != null ? DateTime.tryParse(deadlineRaw)?.toLocal() : null;
     final hasPrediction = widget.match['my_prediction'] != null;
+    final closed = !open && !awaitingTeams;
 
     final result = widget.match['result'] as Map<String, dynamic>?;
     final liveScore = widget.match['live_score'] as Map<String, dynamic>?;
@@ -677,29 +689,79 @@ class _MatchCardState extends State<MatchCard> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: _teamName(homeTeam, alignRight: true),
+                if (closed) ...[
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Encerrado',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: scheme.error,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                        if (hasPrediction) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            '${_home.text.isEmpty ? '0' : _home.text} × ${_away.text.isEmpty ? '0' : _away.text}',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              height: 1,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    _teamFlag(homeTeam),
-                    const SizedBox(width: 6),
-                    _scoreInputs(
-                      theme: theme,
-                      scheme: scheme,
-                      homeEnabled: open && !awaitingTeams,
-                      awayEnabled: open && !awaitingTeams,
-                    ),
-                    const SizedBox(width: 6),
-                    _teamFlag(awayTeam),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: _teamName(awayTeam),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: _teamName(homeTeam, alignRight: true)),
+                      const SizedBox(width: 6),
+                      _teamFlag(homeTeam),
+                      const SizedBox(width: 12),
+                      Text(
+                        '×',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: scheme.outline,
+                          fontWeight: FontWeight.w700,
+                          height: 1,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      _teamFlag(awayTeam),
+                      const SizedBox(width: 6),
+                      Expanded(child: _teamName(awayTeam)),
+                    ],
+                  ),
+                ] else ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: _teamName(homeTeam, alignRight: true),
+                      ),
+                      const SizedBox(width: 6),
+                      _teamFlag(homeTeam),
+                      const SizedBox(width: 6),
+                      _scoreInputs(
+                        theme: theme,
+                        scheme: scheme,
+                        homeEnabled: open && !awaitingTeams,
+                        awayEnabled: open && !awaitingTeams,
+                      ),
+                      const SizedBox(width: 6),
+                      _teamFlag(awayTeam),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: _teamName(awayTeam),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 12),
                 if (deadline != null && open)
                   Text(
@@ -715,18 +777,11 @@ class _MatchCardState extends State<MatchCard> {
                       fontStyle: FontStyle.italic,
                     ),
                   ),
-                ] else if (lockReason != null && !open) ...[
+                ] else if (lockReason != null && open) ...[
                   const SizedBox(height: 8),
                   Text(
                     lockReason,
                     style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
-                  ),
-                ],
-                if (hasPrediction && !open && lockReason == null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Palpite registrado.',
-                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ],
                 const SizedBox(height: 12),
@@ -746,30 +801,39 @@ class _MatchCardState extends State<MatchCard> {
                   ),
                   const SizedBox(height: 8),
                 ],
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: FilledButton(
-                    onPressed: (!open || awaitingTeams || _saving)
-                        ? null
-                        : () async {
-                            final hs = int.tryParse(_home.text) ?? 0;
-                            final as = int.tryParse(_away.text) ?? 0;
-                            setState(() => _saving = true);
-                            try {
-                              await widget.onSave(hs, as);
-                            } finally {
-                              if (mounted) setState(() => _saving = false);
-                            }
-                          },
-                    child: _saving
-                        ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : Text(
-                            awaitingTeams
-                                ? 'Times pendentes'
-                                : (hasPrediction ? 'Registrado' : (open ? 'Salvar palpite' : 'Fechado')),
-                          ),
+                if (open)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FilledButton(
+                      onPressed: awaitingTeams || _saving
+                          ? null
+                          : () async {
+                              final hs = int.tryParse(_home.text) ?? 0;
+                              final as = int.tryParse(_away.text) ?? 0;
+                              setState(() => _saving = true);
+                              try {
+                                await widget.onSave(hs, as);
+                              } finally {
+                                if (mounted) setState(() => _saving = false);
+                              }
+                            },
+                      child: _saving
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(awaitingTeams ? 'Times pendentes' : 'Salvar palpite'),
+                    ),
+                  )
+                else if (awaitingTeams)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FilledButton(
+                      onPressed: null,
+                      child: const Text('Times pendentes'),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
