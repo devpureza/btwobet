@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../app/session_controller.dart';
 import 'match_live.dart';
+import 'match_predictions_sheet.dart';
+import 'matches_repository.dart';
 import '../../ui/achievement_tier_style.dart';
 import '../../ui/admin_helpers.dart';
 import '../../ui/bolao_fund_card.dart';
@@ -360,6 +362,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                                         return MatchCard(
                                           key: ValueKey(m['id']),
                                           match: m,
+                                          matches: widget.session.matches,
                                           onSave: (home, away) => _submitPrediction(
                                             context,
                                             m['id'] as int,
@@ -380,6 +383,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                                           child: MatchCard(
                                             key: ValueKey(m['id']),
                                             match: m,
+                                            matches: widget.session.matches,
                                             onSave: (home, away) => _submitPrediction(
                                               context,
                                               m['id'] as int,
@@ -548,9 +552,15 @@ class _DateHeader extends StatelessWidget {
 
 class MatchCard extends StatefulWidget {
   final Map<String, dynamic> match;
+  final MatchesRepository matches;
   final Future<void> Function(int homeScore, int awayScore) onSave;
 
-  const MatchCard({super.key, required this.match, required this.onSave});
+  const MatchCard({
+    super.key,
+    required this.match,
+    required this.matches,
+    required this.onSave,
+  });
 
   @override
   State<MatchCard> createState() => _MatchCardState();
@@ -611,6 +621,7 @@ class _MatchCardState extends State<MatchCard> {
     final venue = widget.match['venue'] as String?;
     final group = widget.match['group_name'] as String?;
     final isLive = isMatchLive(widget.match);
+    final showCommunityPredictions = isCommunityPredictionsAvailable(widget.match);
     final officialScoreHeader = _buildOfficialScoreHeader(
       theme: theme,
       scheme: scheme,
@@ -760,6 +771,21 @@ class _MatchCardState extends State<MatchCard> {
                   ),
                 ],
                 const SizedBox(height: 12),
+                if (showCommunityPredictions)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () => showMatchPredictionsSheet(
+                        context,
+                        matches: widget.matches,
+                        matchId: widget.match['id'] as int,
+                        homeTeamName: homeTeam['name'] as String? ?? '—',
+                        awayTeamName: awayTeam['name'] as String? ?? '—',
+                      ),
+                      icon: const Icon(Icons.groups_outlined, size: 18),
+                      label: const Text('Ver palpites'),
+                    ),
+                  ),
                 if (canEditPrediction)
                   Align(
                     alignment: Alignment.centerRight,

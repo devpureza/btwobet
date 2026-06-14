@@ -9,7 +9,20 @@ use Carbon\Carbon;
 
 class PredictionWindow
 {
+    public const COMMUNITY_REVEAL_HOURS_BEFORE_KICKOFF = 2;
+
     public function __construct(private readonly BolaoSettings $settings) {}
+
+    public function communityPredictionsVisible(FootballMatch $match): bool
+    {
+        if (in_array($match->status, ['live', 'finished'], true)) {
+            return true;
+        }
+
+        return now()->gte(
+            $match->kickoff_at->copy()->subHours(self::COMMUNITY_REVEAL_HOURS_BEFORE_KICKOFF)
+        );
+    }
 
     /**
      * @return array{can_submit: bool, reason: string|null, deadline_at: string|null}

@@ -127,6 +127,7 @@ class MatchController extends Controller
                 'away_score' => $prediction->away_score,
                 'points' => $prediction->points,
             ] : null,
+            'community_predictions_available' => $this->window->communityPredictionsVisible($match),
         ];
     }
 

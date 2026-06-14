@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\HallOfWeekController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\MatchController;
+use App\Http\Controllers\Api\MatchPredictionsController;
 use App\Http\Controllers\Api\PredictionController;
 use App\Http\Controllers\Api\RankingController;
 use App\Http\Controllers\Api\ScoreSyncController;
@@ -35,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('approved')->group(function () {
         Route::get('/bolao/fund', BolaoFundController::class);
         Route::get('/matches', [MatchController::class, 'index']);
+        Route::get('/matches/{match}/predictions', [MatchPredictionsController::class, 'index']);
         Route::get('/hall-of-week', HallOfWeekController::class);
         Route::post('/predictions', [PredictionController::class, 'store']);
         Route::get('/ranking', [RankingController::class, 'index']);

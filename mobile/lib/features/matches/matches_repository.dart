@@ -24,4 +24,10 @@ class MatchesRepository {
     final raw = res.data['new_achievements'] as List<dynamic>? ?? [];
     return raw.map((e) => (e as Map).cast<String, dynamic>()).toList();
   }
+
+  Future<List<Map<String, dynamic>>> listMatchPredictions(int matchId) async {
+    final res = await _dio.get('/matches/$matchId/predictions');
+    final data = res.data['data'] as List<dynamic>? ?? [];
+    return data.map((e) => (e as Map).cast<String, dynamic>()).toList();
+  }
 }
