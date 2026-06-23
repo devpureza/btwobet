@@ -8,7 +8,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Services\BolaoSettings;
 use App\Services\RankingService;
-use App\Services\ScoreSync\GloboEsporteScoreProvider;
+use App\Services\ScoreSync\FootballDataScoreProvider;
 use App\Services\WorldCupScoreSyncService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -165,13 +165,13 @@ class WorldCupScoreSyncLiveRankingTest extends TestCase
         $this->assertSame(2, Prediction::where('match_id', $match->id)->value('points'));
     }
 
-    public function test_sync_finalizes_match_after_105_minutes_and_recalculates_idempotently(): void
+    public function test_sync_finalizes_match_after_150_minutes_and_recalculates_idempotently(): void
     {
         $home = Team::create(['code' => 'FRA', 'name' => 'França', 'group_name' => 'B']);
         $away = Team::create(['code' => 'GER', 'name' => 'Alemanha', 'group_name' => 'B']);
 
         $kickoff = Carbon::create(2026, 6, 20, 16, 0, 0, 'UTC');
-        Carbon::setTestNow($kickoff->copy()->addMinutes(106));
+        Carbon::setTestNow($kickoff->copy()->addMinutes(151));
 
         $match = FootballMatch::create([
             'home_team_id' => $home->id,
@@ -221,7 +221,7 @@ class WorldCupScoreSyncLiveRankingTest extends TestCase
             'external_id' => null,
         ]), $games);
 
-        $this->mock(GloboEsporteScoreProvider::class, function ($mock) use ($payload) {
+        $this->mock(FootballDataScoreProvider::class, function ($mock) use ($payload) {
             $mock->shouldReceive('fetch')->andReturn($payload);
         });
     }

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\FootballMatch;
-use App\Services\ScoreSync\GloboEsporteScoreProvider;
+use App\Services\ScoreSync\FootballDataScoreProvider;
 use App\Support\TeamNameMatcher;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class WorldCupScoreSyncService
 {
     public function __construct(
-        private readonly GloboEsporteScoreProvider $globo,
+        private readonly FootballDataScoreProvider $globo,
         private readonly RankingService $rankingService,
         private readonly ScoreSyncStatusService $syncStatus,
     ) {}
@@ -54,6 +54,7 @@ class WorldCupScoreSyncService
                 $game['home_score'],
                 $game['away_score'],
                 (bool) ($game['started'] ?? false),
+                (bool) ($game['finished'] ?? false),
             );
             if ($changed) {
                 $stats['updated']++;
@@ -110,6 +111,7 @@ class WorldCupScoreSyncService
         ?int $homeScore,
         ?int $awayScore,
         bool $geStarted,
+        bool $geFinished,
     ): bool {
         $scoresChanged = false;
 
@@ -124,7 +126,7 @@ class WorldCupScoreSyncService
         $hasScores = $match->home_score !== null && $match->away_score !== null;
         // Usa kickoff do banco (openfootball); horário do GE pode divergir por fuso.
         $kickoff = $match->kickoff_at;
-        $shouldFinish = $hasScores && $kickoff->copy()->addMinutes(105)->isPast();
+        $shouldFinish = $geFinished || ($hasScores && $kickoff->copy()->addMinutes(150)->isPast());
 
         $statusChanged = false;
         if ($shouldFinish && $match->status !== 'finished') {

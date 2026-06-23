@@ -1,0 +1,2 @@
+usage: spa_server.py [-h] [--dir DIR] [--port PORT] [--backend BACKEND]
+spa_server.py: error: unrecognized arguments: --directory mobile/build/web

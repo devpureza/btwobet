@@ -20,6 +20,13 @@ return [
         'source_label' => env('GE_SOURCE_LABEL', 'ge.globo'),
     ],
 
+    'football_data' => [
+        'api_token' => env('FOOTBALL_DATA_API_TOKEN', 'afea58ba01cb4678886819722a0edf63'),
+        'api_url' => env('FOOTBALL_DATA_API_URL', 'https://api.football-data.org/v4/competitions/WC/matches'),
+        'sync_interval_minutes' => (int) env('FOOTBALL_DATA_SYNC_INTERVAL_MINUTES', 5),
+        'source_label' => env('FOOTBALL_DATA_SOURCE_LABEL', 'football-data.org'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

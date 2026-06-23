@@ -44,8 +44,8 @@ class ScoreSyncStatusService
      */
     public function toArray(): array
     {
-        $interval = max(1, (int) config('services.globo_esporte.sync_interval_minutes', 5));
-        $source = (string) config('services.globo_esporte.source_label', 'ge.globo');
+        $interval = max(1, (int) config('services.football_data.sync_interval_minutes', 5));
+        $source = (string) config('services.football_data.source_label', 'football-data.org');
 
         $payload = $this->lastRunPayload();
         $lastAt = isset($payload['at']) ? Carbon::parse($payload['at']) : null;

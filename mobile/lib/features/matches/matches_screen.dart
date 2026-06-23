@@ -158,6 +158,16 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
         listenable: widget.session,
         builder: (context, _) {
           final unreadUnlocks = widget.session.unreadRecentUnlocks;
+          final next4 = _matches
+              .whereType<Map<String, dynamic>>()
+              .where((m) => m['status'] == 'scheduled')
+              .toList();
+          next4.sort((a, b) {
+            final ta = DateTime.parse(a['kickoff_at'] as String);
+            final tb = DateTime.parse(b['kickoff_at'] as String);
+            return ta.compareTo(tb);
+          });
+          final next4Limited = next4.take(4).toList();
 
           return _loading
           ? const Center(child: CircularProgressIndicator())
@@ -219,6 +229,57 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           ),
                         ),
                       ),
+                      if (next4Limited.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 1280),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 4, bottom: 10),
+                                      child: Text(
+                                        'Próximos Jogos',
+                                        style: theme.textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: theme.colorScheme.onBackground,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 290,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: next4Limited.length,
+                                        itemBuilder: (context, index) {
+                                          final m = next4Limited[index];
+                                          return Container(
+                                            width: 320,
+                                            margin: const EdgeInsets.only(right: 12),
+                                            child: MatchCard(
+                                              key: ValueKey('next-${m['id']}'),
+                                              match: m,
+                                              matches: widget.session.matches,
+                                              onSave: (home, away) => _submitPrediction(
+                                                context,
+                                                m['id'] as int,
+                                                home,
+                                                away,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       if (groupPhaseClosed)
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -352,7 +413,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                                 ? SliverGrid(
                                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                                       maxCrossAxisExtent: 620,
-                                      mainAxisExtent: 296,
+                                      mainAxisExtent: 280,
                                       crossAxisSpacing: 16,
                                       mainAxisSpacing: 16,
                                     ),
@@ -567,8 +628,8 @@ class MatchCard extends StatefulWidget {
 }
 
 class _MatchCardState extends State<MatchCard> {
-  static const double _flagSize = 56;
-  static const double _scoreSize = 56;
+  static const double _flagSize = 48;
+  static const double _scoreSize = 52;
 
   late final TextEditingController _home;
   late final TextEditingController _away;
@@ -622,6 +683,13 @@ class _MatchCardState extends State<MatchCard> {
     final group = widget.match['group_name'] as String?;
     final isLive = isMatchLive(widget.match);
     final showCommunityPredictions = isCommunityPredictionsAvailable(widget.match);
+    final myPrediction = widget.match['my_prediction'] as Map<String, dynamic>?;
+    final hasRegisteredPrediction = myPrediction != null;
+    final showLockReason = lockReason != null &&
+        !canEditPrediction &&
+        !(hasRegisteredPrediction && lockReason.contains('registrado'));
+    final myPoints = isFinished ? (myPrediction?['points'] as num?)?.toInt() : null;
+
     final officialScoreHeader = _buildOfficialScoreHeader(
       theme: theme,
       scheme: scheme,
@@ -629,6 +697,7 @@ class _MatchCardState extends State<MatchCard> {
       result: result,
       liveScore: liveScore,
       isLive: isLive,
+      myPoints: myPoints,
     );
 
     return Glass(
@@ -639,117 +708,59 @@ class _MatchCardState extends State<MatchCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: 0.65),
-              border: Border(
-                bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.20)),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.location_on, size: 16),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    venue ?? '—',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onSurfaceVariant,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ),
-                if (isLive) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: scheme.errorContainer.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: scheme.error.withValues(alpha: 0.35)),
-                    ),
-                    child: Text(
-                      'Ao vivo',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.error,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                if (group != null && group.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer.withValues(alpha: 0.20),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: scheme.primaryContainer.withValues(alpha: 0.25)),
-                    ),
-                    child: Text(
-                      'Grupo $group',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          _buildCardHeader(
+            theme: theme,
+            scheme: scheme,
+            venue: venue,
+            group: group,
+            kickoff: kickoff,
+            isLive: isLive,
           ),
+          if (officialScoreHeader != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isFinished
+                    ? scheme.surfaceContainerHighest.withValues(alpha: 0.45)
+                    : scheme.primaryContainer.withValues(alpha: 0.12),
+                border: Border(
+                  bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.18)),
+                ),
+              ),
+              child: Center(child: officialScoreHeader),
+            ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  DateFormat('HH:mm', 'pt_BR').format(kickoff),
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                if (officialScoreHeader != null) ...[
-                  officialScoreHeader,
-                  const SizedBox(height: 14),
-                ],
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: _teamName(homeTeam, alignRight: true),
-                    ),
-                    const SizedBox(width: 6),
-                    _teamFlag(homeTeam),
-                    const SizedBox(width: 6),
+                    Expanded(child: _teamColumn(homeTeam, alignRight: true)),
+                    const SizedBox(width: 8),
                     _scoreInputs(
                       theme: theme,
                       scheme: scheme,
                       homeEnabled: canEditPrediction,
                       awayEnabled: canEditPrediction,
                     ),
-                    const SizedBox(width: 6),
-                    _teamFlag(awayTeam),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: _teamName(awayTeam),
-                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: _teamColumn(awayTeam)),
                   ],
                 ),
-                const SizedBox(height: 12),
-                if (deadline != null && open)
+                if (deadline != null && open) ...[
+                  const SizedBox(height: 10),
                   Text(
                     'Prazo: ${DateFormat('dd/MM/yyyy HH:mm', 'pt_BR').format(deadline)}',
-                    style: theme.textTheme.labelSmall?.copyWith(color: scheme.primary),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                ],
                 if (awaitingTeams) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -759,71 +770,156 @@ class _MatchCardState extends State<MatchCard> {
                       fontStyle: FontStyle.italic,
                     ),
                   ),
-                ] else if (lockReason != null && !canEditPrediction) ...[
+                ] else if (showLockReason) ...[
                   const SizedBox(height: 8),
                   Text(
                     lockReason,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: lockReason.contains('registrado')
-                          ? scheme.onSurfaceVariant
-                          : scheme.error,
+                      color: scheme.error,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
-                if (showCommunityPredictions)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: () => showMatchPredictionsSheet(
-                        context,
-                        matches: widget.matches,
-                        matchId: widget.match['id'] as int,
-                        homeTeamName: homeTeam['name'] as String? ?? '—',
-                        awayTeamName: awayTeam['name'] as String? ?? '—',
-                      ),
-                      icon: const Icon(Icons.groups_outlined, size: 18),
-                      label: const Text('Ver palpites'),
-                    ),
+                if (showCommunityPredictions || canEditPrediction || awaitingTeams) ...[
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      if (showCommunityPredictions)
+                        OutlinedButton.icon(
+                          onPressed: () => showMatchPredictionsSheet(
+                            context,
+                            matches: widget.matches,
+                            matchId: widget.match['id'] as int,
+                            homeTeamName: homeTeam['name'] as String? ?? '—',
+                            awayTeamName: awayTeam['name'] as String? ?? '—',
+                            isFinished: isFinished,
+                          ),
+                          icon: const Icon(Icons.groups_outlined, size: 18),
+                          label: const Text('Ver palpites'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                      const Spacer(),
+                      if (canEditPrediction)
+                        FilledButton(
+                          onPressed: awaitingTeams || _saving
+                              ? null
+                              : () async {
+                                  final hs = int.tryParse(_home.text) ?? 0;
+                                  final as = int.tryParse(_away.text) ?? 0;
+                                  setState(() => _saving = true);
+                                  try {
+                                    await widget.onSave(hs, as);
+                                  } finally {
+                                    if (mounted) setState(() => _saving = false);
+                                  }
+                                },
+                          child: _saving
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(awaitingTeams ? 'Times pendentes' : 'Salvar palpite'),
+                        )
+                      else if (awaitingTeams)
+                        const FilledButton(
+                          onPressed: null,
+                          child: Text('Times pendentes'),
+                        ),
+                    ],
                   ),
-                if (canEditPrediction)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: FilledButton(
-                      onPressed: awaitingTeams || _saving
-                          ? null
-                          : () async {
-                              final hs = int.tryParse(_home.text) ?? 0;
-                              final as = int.tryParse(_away.text) ?? 0;
-                              setState(() => _saving = true);
-                              try {
-                                await widget.onSave(hs, as);
-                              } finally {
-                                if (mounted) setState(() => _saving = false);
-                              }
-                            },
-                      child: _saving
-                          ? const SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(awaitingTeams ? 'Times pendentes' : 'Salvar palpite'),
-                    ),
-                  )
-                else if (awaitingTeams)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: FilledButton(
-                      onPressed: null,
-                      child: const Text('Times pendentes'),
-                    ),
-                  ),
+                ],
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCardHeader({
+    required ThemeData theme,
+    required ColorScheme scheme,
+    required String? venue,
+    required String? group,
+    required DateTime kickoff,
+    required bool isLive,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: scheme.surface.withValues(alpha: 0.55),
+        border: Border(
+          bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.18)),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.schedule, size: 15, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Text(
+            DateFormat('HH:mm', 'pt_BR').format(kickoff),
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+            ),
+          ),
+          if (venue != null && venue.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                '·',
+                style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline),
+              ),
+            ),
+            Icon(Icons.location_on_outlined, size: 14, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                venue,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ] else
+            const Spacer(),
+          if (isLive) ...[
+            _StatusChip(
+              label: 'Ao vivo',
+              background: scheme.errorContainer.withValues(alpha: 0.35),
+              foreground: scheme.error,
+              border: scheme.error.withValues(alpha: 0.35),
+            ),
+            const SizedBox(width: 6),
+          ],
+          if (group != null && group.isNotEmpty)
+            _StatusChip(
+              label: 'Grupo $group',
+              background: scheme.primaryContainer.withValues(alpha: 0.22),
+              foreground: scheme.onPrimaryContainer,
+              border: scheme.primaryContainer.withValues(alpha: 0.30),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _teamColumn(Map<String, dynamic> team, {bool alignRight = false}) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        _teamFlag(team),
+        const SizedBox(height: 8),
+        _teamName(team, alignRight: alignRight),
+      ],
     );
   }
 
@@ -834,43 +930,90 @@ class _MatchCardState extends State<MatchCard> {
     required Map<String, dynamic>? result,
     required Map<String, dynamic>? liveScore,
     required bool isLive,
+    int? myPoints,
   }) {
     if (isFinished && result != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: scheme.error.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: scheme.error.withValues(alpha: 0.25)),
+            ),
+            child: Text(
               'Encerrado',
-              style: theme.textTheme.labelLarge?.copyWith(
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.error,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.6,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              '${result['home_score']} × ${result['away_score']}',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                height: 1,
-              ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Placar oficial',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${result['home_score']} × ${result['away_score']}',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              height: 1,
+              letterSpacing: 1,
+            ),
+          ),
+          if (myPoints != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Seu palpite',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                PredictionPointsBadge(points: myPoints),
+              ],
             ),
           ],
-        ),
+        ],
       );
     }
 
     if (isLive && liveScore != null) {
-      return Center(
-        child: Text(
-          '${liveScore['home_score']} × ${liveScore['away_score']}',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: scheme.primary,
-            fontWeight: FontWeight.w800,
-            height: 1,
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Placar ao vivo',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.primary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+            ),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text(
+            '${liveScore['home_score']} × ${liveScore['away_score']}',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: scheme.primary,
+              fontWeight: FontWeight.w900,
+              height: 1,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
       );
     }
 
@@ -944,5 +1087,41 @@ class _MatchCardState extends State<MatchCard> {
       return SizedBox(width: _flagSize, height: _flagSize);
     }
     return FlagImage(url: team['flag_url'] as String?, size: _flagSize);
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final Color background;
+  final Color foreground;
+  final Color border;
+
+  const _StatusChip({
+    required this.label,
+    required this.background,
+    required this.foreground,
+    required this.border,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: border),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: foreground,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.4,
+        ),
+      ),
+    );
   }
 }

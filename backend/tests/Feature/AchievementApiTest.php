@@ -22,6 +22,13 @@ class AchievementApiTest extends TestCase
     {
         parent::setUp();
         app(BolaoSettings::class)->seedDefaultsIfMissing();
+        Carbon::setTestNow(Carbon::create(2026, 6, 1, 12, 0, 0, 'UTC'));
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow(null);
+        parent::tearDown();
     }
 
     public function test_user_can_list_achievements_catalog(): void

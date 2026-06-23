@@ -9,11 +9,11 @@ class SyncWorldCupScoresCommand extends Command
 {
     protected $signature = 'worldcup:sync-scores';
 
-    protected $description = 'Sincroniza placares da Copa a partir do ge.globo (JSON embutido na página)';
+    protected $description = 'Sincroniza placares da Copa a partir de api.football-data.org';
 
     public function handle(WorldCupScoreSyncService $sync): int
     {
-        $this->info('Buscando jogos no ge.globo...');
+        $this->info('Buscando jogos na api.football-data.org...');
 
         try {
             $stats = $sync->syncFromGloboEsporte();

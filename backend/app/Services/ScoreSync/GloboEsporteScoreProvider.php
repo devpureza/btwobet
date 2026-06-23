@@ -218,6 +218,7 @@ class GloboEsporteScoreProvider
             'home_score' => $homeScore !== null ? (int) $homeScore : null,
             'away_score' => $awayScore !== null ? (int) $awayScore : null,
             'started' => (bool) ($game['jogo_ja_comecou'] ?? false),
+            'finished' => ($game['transmissao']['broadcast']['id'] ?? null) === 'ENCERRADA',
             'external_id' => isset($game['id']) ? (int) $game['id'] : null,
         ];
     }
