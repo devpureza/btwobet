@@ -114,6 +114,7 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
             child: Container(
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
+                color: const Color(0xFF06130D),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: const [
                   BoxShadow(color: Color(0x99000000), blurRadius: 40, spreadRadius: 2),
@@ -122,7 +123,7 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
               child: hasPhoto
                   ? Image.network(
                       ApiClient.resolveMediaUrl(url) ?? '',
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       errorBuilder: (context, _, _) => _fallbackBg(scheme, initial),
                     )
                   : _balloonBg(),
