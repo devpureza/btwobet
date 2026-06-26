@@ -24,6 +24,9 @@ class FootballMatch extends Model
         'status',
         'home_score',
         'away_score',
+        'external_id',
+        'teams_locked',
+        'teams_defined_at',
     ];
 
     protected function casts(): array
@@ -32,6 +35,9 @@ class FootballMatch extends Model
             'kickoff_at' => 'datetime',
             'is_opening' => 'boolean',
             'home_is_favorite' => 'boolean',
+            'teams_locked' => 'boolean',
+            'teams_defined_at' => 'datetime',
+            'external_id' => 'integer',
         ];
     }
 
