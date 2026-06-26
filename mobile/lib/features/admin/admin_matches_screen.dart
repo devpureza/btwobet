@@ -60,6 +60,19 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
     var group = m['group_name'] as String?;
     var status = m['status'] as String? ?? 'scheduled';
 
+    // Load teams for dropdowns.
+    List<dynamic> teams = [];
+    try {
+      teams = await widget.session.admin.listTeams();
+    } catch (_) {
+      // Proceed without team selection if fetch fails.
+    }
+
+    // Initialise with current team ids when present.
+    int? homeTeamId = (m['home_team'] as Map?)?.cast<String, dynamic>()['id'] as int?;
+    int? awayTeamId = (m['away_team'] as Map?)?.cast<String, dynamic>()['id'] as int?;
+
+    if (!mounted) return;
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -133,6 +146,34 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                     ],
                     onChanged: (v) => setLocal(() => status = v ?? 'scheduled'),
                   ),
+                  if (teams.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      initialValue: homeTeamId,
+                      decoration: const InputDecoration(labelText: 'Mandante'),
+                      items: teams.map((t) {
+                        final team = (t as Map).cast<String, dynamic>();
+                        return DropdownMenuItem<int>(
+                          value: team['id'] as int,
+                          child: Text(team['name'] as String? ?? '—'),
+                        );
+                      }).toList(),
+                      onChanged: (v) => setLocal(() => homeTeamId = v),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      initialValue: awayTeamId,
+                      decoration: const InputDecoration(labelText: 'Visitante'),
+                      items: teams.map((t) {
+                        final team = (t as Map).cast<String, dynamic>();
+                        return DropdownMenuItem<int>(
+                          value: team['id'] as int,
+                          child: Text(team['name'] as String? ?? '—'),
+                        );
+                      }).toList(),
+                      onChanged: (v) => setLocal(() => awayTeamId = v),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -155,13 +196,18 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
                     int.parse(timeParts[0]),
                     int.parse(timeParts[1]),
                   );
-                  await widget.session.admin.updateMatch(m['id'] as int, {
-                    'kickoff_at': dt.toUtc().toIso8601String(),
-                    'venue': venueCtrl.text.trim().isEmpty ? null : venueCtrl.text.trim(),
-                    'stage': stage,
-                    'group_name': stage == 'group' ? group : null,
-                    'status': status,
-                  });
+                  await widget.session.admin.updateMatch(
+                    m['id'] as int,
+                    {
+                      'kickoff_at': dt.toUtc().toIso8601String(),
+                      'venue': venueCtrl.text.trim().isEmpty ? null : venueCtrl.text.trim(),
+                      'stage': stage,
+                      'group_name': stage == 'group' ? group : null,
+                      'status': status,
+                    },
+                    homeTeamId: homeTeamId,
+                    awayTeamId: awayTeamId,
+                  );
                   if (ctx.mounted) Navigator.pop(ctx, true);
                 } catch (e) {
                   if (ctx.mounted) showSnack(ctx, dioErrorMessage(e), error: true);
