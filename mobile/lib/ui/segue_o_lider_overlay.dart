@@ -4,8 +4,8 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
+import '../api/api_client.dart';
 import '../features/ranking/ranking_repository.dart';
-import 'avatar_image.dart';
 
 /// "Segue o líder" — gracinha: a cada 40s sobe a foto/nome do líder do ranking,
 /// com fade subindo do canto inferior direito. Decorativo (não bloqueia toque).
@@ -31,7 +31,7 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2600),
+      duration: const Duration(milliseconds: 5000),
     );
     _loadLeader();
     _timer = Timer.periodic(_interval, (_) => _play());
@@ -133,17 +133,39 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
         ),
         const SizedBox(height: 10),
         if (hasPhoto)
-          DecoratedBox(
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(color: Color(0x66000000), blurRadius: 18, offset: Offset(0, 8)),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(color: Color(0x66000000), blurRadius: 22, offset: Offset(0, 10)),
               ],
             ),
-            child: AvatarImage(url: url, size: 140, fallbackLetter: initial),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                ApiClient.resolveMediaUrl(url) ?? '',
+                width: 220,
+                height: 220,
+                fit: BoxFit.cover,
+                errorBuilder: (context, _, __) => Container(
+                  width: 220,
+                  height: 220,
+                  alignment: Alignment.center,
+                  color: Theme.of(context).colorScheme.secondary,
+                  child: Text(
+                    initial,
+                    style: const TextStyle(
+                      fontSize: 96,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           )
         else
-          const Text('🎈', style: TextStyle(fontSize: 120)),
+          const Text('🎈', style: TextStyle(fontSize: 140)),
         const SizedBox(height: 8),
         if (name != null && name.isNotEmpty)
           Container(
