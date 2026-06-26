@@ -30,7 +30,7 @@ class MatchesScreen extends StatefulWidget {
 
 class _MatchesScreenState extends State<MatchesScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
-  static const _pollInterval = Duration(seconds: 60);
+  static const _pollInterval = Duration(minutes: 5);
 
   bool _loading = true;
   bool _silentRefreshing = false;
