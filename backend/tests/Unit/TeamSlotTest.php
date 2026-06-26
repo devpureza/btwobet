@@ -1,35 +1,22 @@
-<?php
-
+<?php // backend/tests/Unit/TeamSlotTest.php
 namespace Tests\Unit;
-
-use App\Models\Team;
 use App\Support\TeamSlot;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class TeamSlotTest extends TestCase
 {
-    #[DataProvider('placeholderNamesProvider')]
-    public function test_detects_openfootball_slot_placeholders(string $name): void
+    public function test_winner_loser_slots_are_placeholders(): void
     {
-        $team = new Team(['code' => $name, 'name' => $name]);
-
-        $this->assertTrue(TeamSlot::isPlaceholder($team));
+        $this->assertTrue(TeamSlot::looksLikeSlot('W73'));
+        $this->assertTrue(TeamSlot::looksLikeSlot('L101'));
+        $this->assertTrue(TeamSlot::looksLikeSlot('w12'));
     }
 
-    public static function placeholderNamesProvider(): array
+    public function test_group_slots_still_work_and_real_names_dont(): void
     {
-        return [
-            ['2A'],
-            ['1E'],
-            ['3A/B/C/D/F'],
-        ];
-    }
-
-    public function test_real_team_is_not_placeholder(): void
-    {
-        $team = new Team(['code' => 'BRA', 'name' => 'Brazil']);
-
-        $this->assertFalse(TeamSlot::isPlaceholder($team));
+        $this->assertTrue(TeamSlot::looksLikeSlot('2A'));
+        $this->assertTrue(TeamSlot::looksLikeSlot('3A/B/C/D/F'));
+        $this->assertFalse(TeamSlot::looksLikeSlot('Brasil'));
+        $this->assertFalse(TeamSlot::looksLikeSlot('Wales')); // não confundir W+letras
     }
 }
