@@ -10,6 +10,7 @@ use Carbon\Carbon;
 class PredictionWindow
 {
     public const COMMUNITY_REVEAL_HOURS_BEFORE_KICKOFF = 2;
+    public const LATE_DEFINE_MIN_HOURS = 3;
 
     public function __construct(private readonly BolaoSettings $settings) {}
 
@@ -104,7 +105,13 @@ class PredictionWindow
         }
 
         if ($match->stage === 'knockout') {
-            return $match->kickoff_at->copy()->subHours($this->settings->knockoutHoursBefore());
+            $normal = $match->kickoff_at->copy()->subHours($this->settings->knockoutHoursBefore());
+            $definedAt = $match->teams_defined_at;
+            if ($definedAt !== null && $definedAt->gt($normal)) {
+                // Times definidos tarde: garante janela mínima.
+                return $match->kickoff_at->copy()->subHours(self::LATE_DEFINE_MIN_HOURS);
+            }
+            return $normal;
         }
 
         return null;
