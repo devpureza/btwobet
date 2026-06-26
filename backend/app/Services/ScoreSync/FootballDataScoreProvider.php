@@ -118,4 +118,45 @@ class FootballDataScoreProvider
             'external_id' => isset($game['id']) ? (int) $game['id'] : null,
         ];
     }
+
+    public function fetchAll(): array
+    {
+        $url = (string) config('services.football_data.api_url');
+        $token = (string) config('services.football_data.api_token');
+        if (empty($token)) { Log::warning('football_data.bracket.no_token'); return []; }
+        $response = Http::timeout(25)
+            ->withHeaders(['X-Auth-Token' => $token, 'Accept' => 'application/json'])->get($url);
+        if (! $response->successful()) {
+            Log::warning('football_data.bracket.http_failed', ['status' => $response->status()]);
+            return [];
+        }
+        return $this->parseAll($response->json());
+    }
+
+    /** @return list<array{external_id:int, stage:string, home_name:?string, away_name:?string, kickoff_at:\Carbon\Carbon}> */
+    public function parseAll(array $payload): array
+    {
+        $out = [];
+        foreach (($payload['matches'] ?? []) as $g) {
+            if (! isset($g['id'], $g['utcDate'])) { continue; }
+            try { $kickoff = Carbon::parse((string) $g['utcDate'])->utc(); }
+            catch (\Throwable) { continue; }
+            $stage = strtoupper((string) ($g['stage'] ?? '')) === 'GROUP_STAGE' ? 'group' : 'knockout';
+            $out[] = [
+                'external_id' => (int) $g['id'],
+                'stage' => $stage,
+                'home_name' => $this->teamName($g['homeTeam'] ?? null),
+                'away_name' => $this->teamName($g['awayTeam'] ?? null),
+                'kickoff_at' => $kickoff,
+            ];
+        }
+        return $out;
+    }
+
+    private function teamName(?array $team): ?string
+    {
+        if (! is_array($team)) { return null; }
+        $name = trim((string) (($team['shortName'] ?? '') ?: ($team['name'] ?? '')));
+        return $name === '' ? null : $name;
+    }
 }
