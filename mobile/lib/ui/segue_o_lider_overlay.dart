@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
 import '../api/api_client.dart';
 import '../features/ranking/ranking_repository.dart';
 
-/// "Segue o líder" — gracinha: a cada 40s sobe a foto/nome do líder do ranking,
-/// com fade subindo do canto inferior direito. Decorativo (não bloqueia toque).
+/// "Segue o líder" — gracinha em modo SUSTO: a cada 40s a foto do líder toma
+/// a tela INTEIRA por alguns segundos, com "SEGUE O LÍDER" e o nome.
+/// Decorativo (não bloqueia toque).
 class SegueOLiderOverlay extends StatefulWidget {
   final RankingRepository ranking;
 
@@ -20,7 +20,7 @@ class SegueOLiderOverlay extends StatefulWidget {
 
 class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
     with SingleTickerProviderStateMixin {
-  static const _interval = Duration(seconds: 40);
+  static const _interval = Duration(seconds: 20);
 
   late final AnimationController _ctrl;
   Timer? _timer;
@@ -31,7 +31,7 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 5000),
+      duration: const Duration(milliseconds: 4000),
     );
     _loadLeader();
     _timer = Timer.periodic(_interval, (_) => _play());
@@ -60,9 +60,10 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
     super.dispose();
   }
 
-  double _fade(double t) {
-    if (t < 0.18) return t / 0.18;
-    if (t > 0.82) return (1 - t) / 0.18;
+  /// Aparece quase instantâneo (o susto), segura, e some.
+  double _opacity(double t) {
+    if (t < 0.04) return t / 0.04;
+    if (t > 0.70) return ((1 - t) / 0.30).clamp(0.0, 1.0);
     return 1;
   }
 
@@ -70,7 +71,6 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
   Widget build(BuildContext context) {
     final leader = _leader;
     if (leader == null) return const SizedBox.shrink();
-    final size = MediaQuery.sizeOf(context);
 
     return Positioned.fill(
       child: IgnorePointer(
@@ -79,22 +79,12 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
           builder: (context, _) {
             final t = _ctrl.value;
             if (t == 0) return const SizedBox.shrink();
-            final rise = Curves.easeOutCubic.transform(t);
-            final bottom = lerpDouble(-80, size.height * 0.46, rise)!;
-            final right = lerpDouble(4, size.width * 0.5 - 220, rise)!;
-            final scale =
-                0.45 + 0.7 * Curves.easeOutBack.transform(math.min(1.0, t * 1.25));
-            return Stack(
-              children: [
-                Positioned(
-                  right: right,
-                  bottom: bottom,
-                  child: Opacity(
-                    opacity: _fade(t).clamp(0.0, 1.0),
-                    child: Transform.scale(scale: scale, child: _content(leader)),
-                  ),
-                ),
-              ],
+            // "pop" de escala pra reforçar o susto.
+            final pop =
+                1.0 + 0.18 * (1 - Curves.easeOut.transform(math.min(1.0, t * 5)));
+            return Opacity(
+              opacity: _opacity(t).clamp(0.0, 1.0),
+              child: Transform.scale(scale: pop, child: _fullScreen(leader)),
             );
           },
         ),
@@ -102,87 +92,88 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
     );
   }
 
-  Widget _content(Map<String, dynamic> leader) {
+  Widget _fullScreen(Map<String, dynamic> leader) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final name = (leader['name'] as String?)?.trim();
     final url = leader['avatar_url'] as String?;
     final hasPhoto = url != null && url.isNotEmpty;
     final initial =
         (name == null || name.isEmpty) ? '?' : name.substring(0, 1).toUpperCase();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFCD400),
-            borderRadius: BorderRadius.circular(999),
-            boxShadow: const [
-              BoxShadow(color: Color(0x55000000), blurRadius: 12, offset: Offset(0, 4)),
-            ],
-          ),
-          child: Text(
-            'SEGUE O LÍDER',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF00341C),
-              letterSpacing: 0.5,
+        // Foto do líder tomando a tela inteira (ou fundo + inicial/balão).
+        if (hasPhoto)
+          Image.network(
+            ApiClient.resolveMediaUrl(url) ?? '',
+            fit: BoxFit.cover,
+            errorBuilder: (context, _, _) => _fallbackBg(scheme, initial),
+          )
+        else
+          _balloonBg(),
+        // Escurece um pouco pra dar drama e legibilidade do texto.
+        ColoredBox(color: Colors.black.withValues(alpha: 0.38)),
+        // "SEGUE O LÍDER" no topo, nome embaixo — a cara fica no meio (susto).
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'SEGUE O LÍDER',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFFCD400),
+                    letterSpacing: 1,
+                    shadows: const [
+                      Shadow(color: Colors.black, blurRadius: 18, offset: Offset(0, 4)),
+                    ],
+                  ),
+                ),
+                if (name != null && name.isNotEmpty)
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(color: Colors.black, blurRadius: 14, offset: Offset(0, 3)),
+                      ],
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        if (hasPhoto)
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(color: Color(0x66000000), blurRadius: 22, offset: Offset(0, 10)),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                ApiClient.resolveMediaUrl(url) ?? '',
-                width: 440,
-                height: 440,
-                fit: BoxFit.cover,
-                errorBuilder: (context, _, _) => Container(
-                  width: 440,
-                  height: 440,
-                  alignment: Alignment.center,
-                  color: Theme.of(context).colorScheme.secondary,
-                  child: Text(
-                    initial,
-                    style: const TextStyle(
-                      fontSize: 180,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          )
-        else
-          const Text('🎈', style: TextStyle(fontSize: 140)),
-        const SizedBox(height: 8),
-        if (name != null && name.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              name,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
-          ),
       ],
+    );
+  }
+
+  Widget _fallbackBg(ColorScheme scheme, String initial) {
+    return ColoredBox(
+      color: scheme.secondary,
+      child: Center(
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 240,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _balloonBg() {
+    return const ColoredBox(
+      color: Color(0xFF00341C),
+      child: Center(child: Text('🎈', style: TextStyle(fontSize: 240))),
     );
   }
 }
