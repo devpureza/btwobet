@@ -81,7 +81,7 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
             if (t == 0) return const SizedBox.shrink();
             final rise = Curves.easeOutCubic.transform(t);
             final bottom = lerpDouble(-80, size.height * 0.46, rise)!;
-            final right = lerpDouble(4, size.width * 0.5 - 110, rise)!;
+            final right = lerpDouble(4, size.width * 0.5 - 220, rise)!;
             final scale =
                 0.45 + 0.7 * Curves.easeOutBack.transform(math.min(1.0, t * 1.25));
             return Stack(
@@ -144,18 +144,18 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
                 ApiClient.resolveMediaUrl(url) ?? '',
-                width: 220,
-                height: 220,
+                width: 440,
+                height: 440,
                 fit: BoxFit.cover,
-                errorBuilder: (context, _, __) => Container(
-                  width: 220,
-                  height: 220,
+                errorBuilder: (context, _, _) => Container(
+                  width: 440,
+                  height: 440,
                   alignment: Alignment.center,
                   color: Theme.of(context).colorScheme.secondary,
                   child: Text(
                     initial,
                     style: const TextStyle(
-                      fontSize: 96,
+                      fontSize: 180,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
