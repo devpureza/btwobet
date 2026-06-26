@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app/session_controller.dart';
 import 'avatar_image.dart';
+import 'bug_troll.dart';
 import 'glass.dart';
 
 class ShellHeader extends StatelessWidget {
@@ -95,6 +96,11 @@ class ShellHeader extends StatelessWidget {
                     ),
                   ),
                 ),
+              IconButton(
+                tooltip: 'Reportar bug',
+                onPressed: () => showBugTrollDialog(context),
+                icon: const Icon(Icons.bug_report_outlined),
+              ),
               IconButton(
                 tooltip: 'Regras do bolão',
                 onPressed: () => Scaffold.of(context).openEndDrawer(),

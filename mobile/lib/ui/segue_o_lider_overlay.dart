@@ -20,7 +20,7 @@ class SegueOLiderOverlay extends StatefulWidget {
 
 class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
     with SingleTickerProviderStateMixin {
-  static const _interval = Duration(seconds: 20);
+  static const _interval = Duration(seconds: 30);
 
   late final AnimationController _ctrl;
   Timer? _timer;
