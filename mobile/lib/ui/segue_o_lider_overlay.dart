@@ -104,18 +104,32 @@ class _SegueOLiderOverlayState extends State<SegueOLiderOverlay>
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Foto do líder tomando a tela inteira (ou fundo + inicial/balão).
-        if (hasPhoto)
-          Image.network(
-            ApiClient.resolveMediaUrl(url) ?? '',
-            fit: BoxFit.cover,
-            errorBuilder: (context, _, _) => _fallbackBg(scheme, initial),
-          )
-        else
-          _balloonBg(),
-        // Escurece um pouco pra dar drama e legibilidade do texto.
-        ColoredBox(color: Colors.black.withValues(alpha: 0.38)),
-        // "SEGUE O LÍDER" no topo, nome embaixo — a cara fica no meio (susto).
+        // Fundo escuro cobrindo tudo (tampa a tela).
+        ColoredBox(color: Colors.black.withValues(alpha: 0.82)),
+        // Foto do líder centralizada, com ~20% de margem (60% da tela).
+        Center(
+          child: FractionallySizedBox(
+            widthFactor: 0.6,
+            heightFactor: 0.6,
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x99000000), blurRadius: 40, spreadRadius: 2),
+                ],
+              ),
+              child: hasPhoto
+                  ? Image.network(
+                      ApiClient.resolveMediaUrl(url) ?? '',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, _, _) => _fallbackBg(scheme, initial),
+                    )
+                  : _balloonBg(),
+            ),
+          ),
+        ),
+        // "SEGUE O LÍDER" no topo, nome embaixo.
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
