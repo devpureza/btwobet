@@ -178,7 +178,7 @@ class _RankingScreenState extends State<RankingScreen> with WidgetsBindingObserv
                           const badgeSize = 26.0;
 
                           return InkWell(
-                            onTap: () => showRankingUserDetailSheet(context, row: row),
+                            onTap: () => showRankingUserDetailSheet(context, row: row, ranking: widget.session.ranking),
                             child: Container(
                             decoration: BoxDecoration(
                               color: zebra,
