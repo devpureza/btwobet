@@ -24,7 +24,7 @@ void showRankingUserDetailSheet(
   final resultHits = (row['result_hits'] as num?)?.toInt() ?? 0;
   final exactPercent = (row['exact_hit_percent'] as num?)?.toInt() ?? 0;
   final resultPercent = (row['result_hit_percent'] as num?)?.toInt() ?? 0;
-  final userId = (row['user_id'] as num).toInt();
+  final userId = (row['user_id'] as num?)?.toInt() ?? 0;
 
   showModalBottomSheet<void>(
     context: context,
@@ -196,10 +196,10 @@ class _UserPredictionsTabState extends State<_UserPredictionsTab>
       separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final p = _predictions[index] as Map<String, dynamic>;
-        final home = p['home_team'] as Map<String, dynamic>;
-        final away = p['away_team'] as Map<String, dynamic>;
-        final pred = p['prediction'] as Map<String, dynamic>;
-        final result = p['result'] as Map<String, dynamic>;
+        final home = (p['home_team'] as Map?)?.cast<String, dynamic>() ?? {};
+        final away = (p['away_team'] as Map?)?.cast<String, dynamic>() ?? {};
+        final pred = (p['prediction'] as Map?)?.cast<String, dynamic>() ?? {};
+        final result = (p['result'] as Map?)?.cast<String, dynamic>() ?? {};
         final points = (p['points'] as num?)?.toInt() ?? 0;
 
         final homeName = home['name'] as String? ?? '—';
@@ -211,8 +211,8 @@ class _UserPredictionsTabState extends State<_UserPredictionsTab>
         final resH = (result['home_score'] as num?)?.toInt() ?? 0;
         final resA = (result['away_score'] as num?)?.toInt() ?? 0;
 
-        final scheme = Theme.of(context).colorScheme;
         final theme = Theme.of(context);
+        final scheme = theme.colorScheme;
 
         return Container(
           padding: const EdgeInsets.all(12),
