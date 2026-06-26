@@ -22,3 +22,7 @@ deploy/keys/
 deploy/caddy/certs/
 deploy/domain-contact.env
 *.pem
+
+# dev-only (não vai pro repo/prod)
+backend/app/Console/Commands/MirrorImport.php
+.local-spa-server.pid

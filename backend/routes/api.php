@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\MatchPredictionsController;
 use App\Http\Controllers\Api\PredictionController;
 use App\Http\Controllers\Api\RankingController;
+use App\Http\Controllers\Api\RankingUserPredictionsController;
 use App\Http\Controllers\Api\ScoreSyncController;
 use App\Http\Controllers\Api\Admin\BolaoResetAdminController;
 use App\Http\Controllers\Api\Admin\UserPredictionsAdminController;
@@ -40,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/hall-of-week', HallOfWeekController::class);
         Route::post('/predictions', [PredictionController::class, 'store']);
         Route::get('/ranking', [RankingController::class, 'index']);
+        Route::get('/ranking/{user}/predictions', RankingUserPredictionsController::class);
         Route::get('/me/history', HistoryController::class);
         Route::get('/me/achievements', [AchievementController::class, 'index']);
 
