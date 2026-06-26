@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\FootballMatch;
 use App\Services\ScoreSync\FootballDataScoreProvider;
 use App\Support\TeamNameMatcher;
+use App\Support\TeamSlot;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -22,6 +23,7 @@ class WorldCupScoreSyncService
     public function syncFromGloboEsporte(): array
     {
         TeamNameMatcher::resetIndex();
+        $this->mirrorBracketTeams();
 
         $games = $this->globo->fetch();
         $stats = [
@@ -82,6 +84,39 @@ class WorldCupScoreSyncService
             'finished' => 0,
             'unmatched' => [],
         ]);
+    }
+
+    /** @return array{filled:int} */
+    public function mirrorBracketTeams(): array
+    {
+        TeamNameMatcher::resetIndex();
+        $filled = 0;
+        foreach ($this->globo->fetchAll() as $g) {
+            if ($g['home_name'] === null || $g['away_name'] === null) { continue; }
+            $home = TeamNameMatcher::findTeam($g['home_name']);
+            $away = TeamNameMatcher::findTeam($g['away_name']);
+            if (! $home || ! $away || TeamSlot::isPlaceholder($home) || TeamSlot::isPlaceholder($away)) { continue; }
+
+            $match = FootballMatch::where('external_id', $g['external_id'])->first();
+            if (! $match || $match->teams_locked) { continue; }
+            $match->loadMissing(['homeTeam', 'awayTeam']);
+
+            $changed = false;
+            if (TeamSlot::isPlaceholder($match->homeTeam) && $match->home_team_id !== $home->id) {
+                $match->home_team_id = $home->id; $match->setRelation('homeTeam', $home); $changed = true;
+            }
+            if (TeamSlot::isPlaceholder($match->awayTeam) && $match->away_team_id !== $away->id) {
+                $match->away_team_id = $away->id; $match->setRelation('awayTeam', $away); $changed = true;
+            }
+            if ($changed) {
+                if (! TeamSlot::isPlaceholder($match->homeTeam) && ! TeamSlot::isPlaceholder($match->awayTeam) && $match->teams_defined_at === null) {
+                    $match->teams_defined_at = now();
+                }
+                $match->save();
+                $filled++;
+            }
+        }
+        return ['filled' => $filled];
     }
 
     private function findMatch(int $homeId, int $awayId, Carbon $kickoff): ?FootballMatch
