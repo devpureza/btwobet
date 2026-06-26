@@ -94,6 +94,8 @@ class MatchAdminController extends Controller
             'group_name' => ['nullable', 'string', 'size:1', 'regex:/^[A-L]$/i'],
             'venue' => ['nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'string', 'in:scheduled,live,finished'],
+            'home_team_id' => ['sometimes', 'integer', 'exists:teams,id'],
+            'away_team_id' => ['sometimes', 'integer', 'exists:teams,id'],
         ]);
 
         if (array_key_exists('group_name', $validated) && $validated['group_name'] !== null) {
@@ -106,8 +108,20 @@ class MatchAdminController extends Controller
             $match->away_score = null;
         }
 
+        if (array_key_exists('home_team_id', $validated) || array_key_exists('away_team_id', $validated)) {
+            $validated['teams_locked'] = true;
+        }
+
         $match->fill($validated);
         $match->save();
+
+        $match->loadMissing(['homeTeam', 'awayTeam']);
+        if ($match->teams_defined_at === null
+            && ! \App\Support\TeamSlot::isPlaceholder($match->homeTeam)
+            && ! \App\Support\TeamSlot::isPlaceholder($match->awayTeam)) {
+            $match->teams_defined_at = now();
+            $match->save();
+        }
 
         return response()->json(['message' => 'Jogo atualizado.', 'data' => ['id' => $match->id]]);
     }

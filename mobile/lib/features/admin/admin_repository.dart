@@ -64,8 +64,11 @@ class AdminRepository {
     return res.data['data'] as List<dynamic>;
   }
 
-  Future<void> updateMatch(int id, Map<String, dynamic> data) async {
-    await _dio.patch('/admin/matches/$id', data: data);
+  Future<void> updateMatch(int id, Map<String, dynamic> data, {int? homeTeamId, int? awayTeamId}) async {
+    final body = Map<String, dynamic>.from(data);
+    if (homeTeamId != null) body['home_team_id'] = homeTeamId;
+    if (awayTeamId != null) body['away_team_id'] = awayTeamId;
+    await _dio.patch('/admin/matches/$id', data: body);
   }
 
   Future<void> updateMatchResult(int id, {required String status, int? homeScore, int? awayScore}) async {

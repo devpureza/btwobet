@@ -223,6 +223,7 @@ class WorldCupScoreSyncLiveRankingTest extends TestCase
 
         $this->mock(FootballDataScoreProvider::class, function ($mock) use ($payload) {
             $mock->shouldReceive('fetch')->andReturn($payload);
+            $mock->shouldReceive('fetchAll')->andReturn([]);
         });
     }
 

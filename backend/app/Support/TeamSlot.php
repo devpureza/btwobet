@@ -53,6 +53,11 @@ final class TeamSlot
             return true;
         }
 
+        // Vencedor/perdedor do jogo N (football-data: W73, L101).
+        if (preg_match('/^[WL]\d+$/i', $value)) {
+            return true;
+        }
+
         return false;
     }
 }

@@ -43,6 +43,8 @@ echo ">> Rebuild app/scheduler (sem cache de imagem) e subir stack web"
 docker compose -f docker-compose.prod.yml --env-file .env.production build --no-cache app scheduler
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-deps app scheduler nginx caddy
 docker compose -f docker-compose.prod.yml --env-file .env.production exec -T app php artisan migrate --force
+# Liga matches ao football-data (external_id) + reconcilia 3º lugar; ativa o auto-preenchimento do mata-mata. Idempotente.
+docker compose -f docker-compose.prod.yml --env-file .env.production exec -T app php artisan worldcup:link-external-ids || true
 docker compose -f docker-compose.prod.yml --env-file .env.production exec -T app php artisan optimize:clear
 docker compose -f docker-compose.prod.yml --env-file .env.production restart scheduler
 
