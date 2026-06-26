@@ -16,6 +16,7 @@ import 'hall_entry.dart';
 import '../../ui/hall_highlights_row.dart';
 import '../../ui/match_filters.dart';
 import '../../ui/score_sync_banner.dart';
+import '../../ui/segue_o_lider_overlay.dart';
 import '../../ui/shell_header.dart';
 
 class MatchesScreen extends StatefulWidget {
@@ -162,7 +163,10 @@ class _MatchesScreenState extends State<MatchesScreen>
     final groupPhaseClosed = _isGroupPhasePredictionsClosed(_matches);
 
     return ShellPage(
-      body: ListenableBuilder(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          ListenableBuilder(
         listenable: widget.session,
         builder: (context, _) {
           final unreadUnlocks = widget.session.unreadRecentUnlocks;
@@ -433,6 +437,9 @@ class _MatchesScreenState extends State<MatchesScreen>
                   ),
                 );
         },
+      ),
+          SegueOLiderOverlay(ranking: widget.session.ranking),
+        ],
       ),
     );
   }
