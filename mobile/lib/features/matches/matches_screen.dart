@@ -10,7 +10,6 @@ import 'matches_repository.dart';
 import '../../ui/achievement_tier_style.dart';
 import '../../ui/admin_helpers.dart';
 import '../../ui/bolao_fund_card.dart';
-import '../../ui/bolao_rules_card.dart';
 import '../../ui/flag_image.dart';
 import '../../ui/glass.dart';
 import 'hall_entry.dart';
@@ -150,7 +149,6 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
     final filtered = _applyFilters(_matches);
     final grouped = _groupByDate(filtered);
     final dateKeys = grouped.keys.toList()..sort();
-    final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
     final groupPhaseClosed = _isGroupPhasePredictionsClosed(_matches);
 
     return ShellPage(
@@ -158,16 +156,24 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
         listenable: widget.session,
         builder: (context, _) {
           final unreadUnlocks = widget.session.unreadRecentUnlocks;
-          final next4 = _matches
+          final liveMatches = _matches
               .whereType<Map<String, dynamic>>()
-              .where((m) => m['status'] == 'scheduled')
+              .where(isMatchLive)
               .toList();
-          next4.sort((a, b) {
+          final upcoming = _matches
+              .whereType<Map<String, dynamic>>()
+              .where((m) => m['status'] == 'scheduled' && !isMatchLive(m))
+              .toList();
+          upcoming.sort((a, b) {
             final ta = DateTime.parse(a['kickoff_at'] as String);
             final tb = DateTime.parse(b['kickoff_at'] as String);
             return ta.compareTo(tb);
           });
-          final next4Limited = next4.take(4).toList();
+          // Jogos ao vivo sempre primeiro; completa com os próximos até no mínimo 4.
+          final next4Limited = <Map<String, dynamic>>[
+            ...liveMatches,
+            ...upcoming,
+          ].take(liveMatches.length > 4 ? liveMatches.length : 4).toList();
 
           return _loading
           ? const Center(child: CircularProgressIndicator())
@@ -357,17 +363,6 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           child: Center(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 1280),
-                              child: const BolaoRulesCard(),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        sliver: SliverToBoxAdapter(
-                          child: Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 1280),
                               child: Glass(
                                 blur: 12,
                                 borderRadius: BorderRadius.circular(20),
@@ -409,54 +404,41 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           ),
                           SliverPadding(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                            sliver: isDesktop
-                                ? SliverGrid(
-                                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: 620,
-                                      mainAxisExtent: 280,
-                                      crossAxisSpacing: 16,
-                                      mainAxisSpacing: 16,
-                                    ),
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) {
-                                        final m = grouped[dateKey]![index];
-                                        return MatchCard(
-                                          key: ValueKey(m['id']),
-                                          match: m,
-                                          matches: widget.session.matches,
-                                          onSave: (home, away) => _submitPrediction(
-                                            context,
-                                            m['id'] as int,
-                                            home,
-                                            away,
-                                          ),
-                                        );
-                                      },
-                                      childCount: grouped[dateKey]!.length,
-                                    ),
-                                  )
-                                : SliverList(
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) {
-                                        final m = grouped[dateKey]![index];
-                                        return Padding(
-                                          padding: const EdgeInsets.only(bottom: 12),
-                                          child: MatchCard(
-                                            key: ValueKey(m['id']),
-                                            match: m,
-                                            matches: widget.session.matches,
-                                            onSave: (home, away) => _submitPrediction(
-                                              context,
-                                              m['id'] as int,
-                                              home,
-                                              away,
+                            sliver: SliverToBoxAdapter(
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 1280),
+                                  child: LayoutBuilder(
+                                    builder: (context, c) {
+                                      final twoCol = c.maxWidth >= 760;
+                                      final cardWidth =
+                                          twoCol ? (c.maxWidth - 16) / 2 : c.maxWidth;
+                                      return Wrap(
+                                        spacing: 16,
+                                        runSpacing: 12,
+                                        children: [
+                                          for (final m in grouped[dateKey]!)
+                                            SizedBox(
+                                              width: cardWidth,
+                                              child: MatchCard(
+                                                key: ValueKey(m['id']),
+                                                match: m,
+                                                matches: widget.session.matches,
+                                                onSave: (home, away) => _submitPrediction(
+                                                  context,
+                                                  m['id'] as int,
+                                                  home,
+                                                  away,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                      childCount: grouped[dateKey]!.length,
-                                    ),
+                                        ],
+                                      );
+                                    },
                                   ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       SliverPadding(
@@ -634,6 +616,7 @@ class _MatchCardState extends State<MatchCard> {
   late final TextEditingController _home;
   late final TextEditingController _away;
   bool _saving = false;
+  bool _expanded = false;
 
   @override
   void initState() {
@@ -700,6 +683,20 @@ class _MatchCardState extends State<MatchCard> {
       myPoints: myPoints,
     );
 
+    final stage = widget.match['stage'] as String? ?? '';
+    final isGroupFinished = isFinished && stage == 'group';
+    if (isGroupFinished && !_expanded) {
+      return _buildCollapsedFinishedCard(
+        theme: theme,
+        scheme: scheme,
+        homeTeam: homeTeam,
+        awayTeam: awayTeam,
+        result: result,
+        myPrediction: myPrediction,
+        myPoints: myPoints,
+      );
+    }
+
     return Glass(
       blur: 12,
       borderRadius: BorderRadius.circular(20),
@@ -715,6 +712,7 @@ class _MatchCardState extends State<MatchCard> {
             group: group,
             kickoff: kickoff,
             isLive: isLive,
+            onCollapse: isGroupFinished ? () => setState(() => _expanded = false) : null,
           ),
           if (officialScoreHeader != null)
             Container(
@@ -847,6 +845,7 @@ class _MatchCardState extends State<MatchCard> {
     required String? group,
     required DateTime kickoff,
     required bool isLive,
+    VoidCallback? onCollapse,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -906,6 +905,17 @@ class _MatchCardState extends State<MatchCard> {
               foreground: scheme.onPrimaryContainer,
               border: scheme.primaryContainer.withValues(alpha: 0.30),
             ),
+          if (onCollapse != null) ...[
+            const SizedBox(width: 4),
+            InkWell(
+              onTap: onCollapse,
+              borderRadius: BorderRadius.circular(999),
+              child: const Padding(
+                padding: EdgeInsets.all(2),
+                child: Icon(Icons.expand_less, size: 18),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1087,6 +1097,97 @@ class _MatchCardState extends State<MatchCard> {
       return SizedBox(width: _flagSize, height: _flagSize);
     }
     return FlagImage(url: team['flag_url'] as String?, size: _flagSize);
+  }
+
+  Widget _buildCollapsedFinishedCard({
+    required ThemeData theme,
+    required ColorScheme scheme,
+    required Map<String, dynamic> homeTeam,
+    required Map<String, dynamic> awayTeam,
+    required Map<String, dynamic>? result,
+    required Map<String, dynamic>? myPrediction,
+    required int? myPoints,
+  }) {
+    final hScore = result?['home_score'];
+    final aScore = result?['away_score'];
+    final hasPrediction = myPrediction != null;
+    final ph = myPrediction?['home_score'];
+    final pa = myPrediction?['away_score'];
+
+    return Glass(
+      blur: 12,
+      borderRadius: BorderRadius.circular(16),
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () => setState(() => _expanded = true),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  FlagImage(url: homeTeam['flag_url'] as String?, size: 26),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _shortName(homeTeam),
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      '$hScore × $aScore',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      _shortName(awayTeam),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FlagImage(url: awayTeam['flag_url'] as String?, size: 26),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Text(
+                    hasPrediction ? 'Seu palpite: $ph × $pa' : 'Sem palpite',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (myPoints != null) PredictionPointsBadge(points: myPoints),
+                  const SizedBox(width: 6),
+                  Icon(Icons.expand_more, size: 18, color: scheme.outline),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _shortName(Map<String, dynamic> team) {
+    final isPlaceholder = team['is_placeholder'] as bool? ?? false;
+    if (isPlaceholder) return 'A definir';
+    return (team['name'] as String?) ?? '—';
   }
 }
 

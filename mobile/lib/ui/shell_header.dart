@@ -96,6 +96,11 @@ class ShellHeader extends StatelessWidget {
                   ),
                 ),
               IconButton(
+                tooltip: 'Regras do bolão',
+                onPressed: () => Scaffold.of(context).openEndDrawer(),
+                icon: const Icon(Icons.menu_book_outlined),
+              ),
+              IconButton(
                 tooltip: 'Minha conta',
                 onPressed: () => context.go('/profile'),
                 icon: AvatarImage(

@@ -19,6 +19,7 @@ import 'session_controller.dart';
 import '../ui/avatar_prompt_host.dart';
 import '../ui/glass.dart';
 import '../ui/shell_header.dart';
+import '../ui/bolao_rules_card.dart';
 
 class AppRouter {
   static GoRouter create(SessionController session) {
@@ -113,11 +114,22 @@ class AppRouter {
   }
 }
 
-class HomeShell extends StatelessWidget {
+class HomeShell extends StatefulWidget {
   final SessionController session;
   final Widget child;
 
   const HomeShell({super.key, required this.session, required this.child});
+
+  @override
+  State<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends State<HomeShell> {
+  /// null = segue o padrão por largura; true/false = escolha manual do usuário.
+  bool? _railExpanded;
+
+  SessionController get session => widget.session;
+  Widget get child => widget.child;
 
   bool _isDesktop(BuildContext context) => MediaQuery.sizeOf(context).width >= 900;
 
@@ -173,11 +185,12 @@ class HomeShell extends StatelessWidget {
     final items = _items();
     final index = _indexForLocation(location, items);
     final isDesktop = _isDesktop(context);
-    final extendedRail = MediaQuery.sizeOf(context).width >= 1100;
+    final extendedRail = _railExpanded ?? false;
 
     return ListenableBuilder(
       listenable: session,
       builder: (context, _) => Scaffold(
+      endDrawer: const BolaoRulesDrawer(),
       body: SafeArea(
         child: isDesktop
             ? Row(
@@ -192,6 +205,15 @@ class HomeShell extends StatelessWidget {
                       extended: extendedRail,
                       labelType: extendedRail ? null : NavigationRailLabelType.all,
                       groupAlignment: -0.75,
+                      leading: Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: IconButton(
+                          tooltip: extendedRail ? 'Recolher menu' : 'Expandir menu',
+                          onPressed: () =>
+                              setState(() => _railExpanded = !extendedRail),
+                          icon: Icon(extendedRail ? Icons.menu_open : Icons.menu),
+                        ),
+                      ),
                       destinations: items
                           .map(
                             (it) => NavigationRailDestination(

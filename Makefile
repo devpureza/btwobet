@@ -13,7 +13,7 @@ test:
 	docker compose exec app php artisan test
 
 chrome:
-	cd mobile && flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8080/api
+	cd mobile && flutter run -d chrome --web-port 5173 --dart-define=API_BASE_URL=http://localhost:8080/api
 
 build-web:
 	cd mobile && flutter build web --dart-define=API_BASE_URL=http://localhost:8080/api
