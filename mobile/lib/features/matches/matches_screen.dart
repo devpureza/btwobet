@@ -27,7 +27,8 @@ class MatchesScreen extends StatefulWidget {
   State<MatchesScreen> createState() => _MatchesScreenState();
 }
 
-class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserver {
+class _MatchesScreenState extends State<MatchesScreen>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   static const _pollInterval = Duration(seconds: 60);
 
   bool _loading = true;
@@ -40,11 +41,13 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
   String? _stage;
   bool _onlyOpen = false;
   Timer? _pollTimer;
+  late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _tabController = TabController(length: 2, vsync: this);
     _load();
   }
 
@@ -52,6 +55,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _stopPolling();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -147,6 +151,14 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final filtered = _applyFilters(_matches);
+    final notHappened = filtered
+        .whereType<Map<String, dynamic>>()
+        .where((m) => m['status'] != 'finished')
+        .toList();
+    final happened = filtered
+        .whereType<Map<String, dynamic>>()
+        .where((m) => m['status'] == 'finished')
+        .toList();
     final groupPhaseClosed = _isGroupPhasePredictionsClosed(_matches);
 
     return ShellPage(
@@ -252,29 +264,28 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      height: 290,
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: todayGames.length,
-                                        itemBuilder: (context, index) {
-                                          final m = todayGames[index];
-                                          return Container(
-                                            width: 320,
-                                            margin: const EdgeInsets.only(right: 12),
-                                            child: MatchCard(
-                                              key: ValueKey('next-${m['id']}'),
-                                              match: m,
-                                              matches: widget.session.matches,
-                                              onSave: (home, away) => _submitPrediction(
-                                                context,
-                                                m['id'] as int,
-                                                home,
-                                                away,
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          for (final m in todayGames)
+                                            Container(
+                                              width: 320,
+                                              margin: const EdgeInsets.only(right: 12),
+                                              child: MatchCard(
+                                                key: ValueKey('today-${m['id']}'),
+                                                match: m,
+                                                matches: widget.session.matches,
+                                                onSave: (home, away) => _submitPrediction(
+                                                  context,
+                                                  m['id'] as int,
+                                                  home,
+                                                  away,
+                                                ),
                                               ),
                                             ),
-                                          );
-                                        },
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -383,22 +394,37 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           child: Center(child: Text('Nenhum jogo encontrado com esses filtros.')),
                         )
                       else ...[
-                        ..._matchSection(
-                          context,
-                          'Jogos que não aconteceram',
-                          filtered
-                              .whereType<Map<String, dynamic>>()
-                              .where((m) => m['status'] != 'finished')
-                              .toList(),
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                          sliver: SliverToBoxAdapter(
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 1280),
+                                child: TabBar(
+                                  controller: _tabController,
+                                  onTap: (_) => setState(() {}),
+                                  tabs: const [
+                                    Tab(text: 'Não aconteceram'),
+                                    Tab(text: 'Aconteceram'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                        ..._matchSection(
-                          context,
-                          'Jogos finalizados',
-                          filtered
-                              .whereType<Map<String, dynamic>>()
-                              .where((m) => m['status'] == 'finished')
-                              .toList(),
-                        ),
+                        if ((_tabController.index == 0 ? notHappened : happened).isEmpty)
+                          const SliverPadding(
+                            padding: EdgeInsets.fromLTRB(16, 32, 16, 0),
+                            sliver: SliverToBoxAdapter(
+                              child: Center(child: Text('Nenhum jogo nesta aba.')),
+                            ),
+                          )
+                        else
+                          ..._matchSection(
+                            context,
+                            '',
+                            _tabController.index == 0 ? notHappened : happened,
+                          ),
                       ],
                       SliverPadding(
                         padding: EdgeInsets.only(bottom: 24 + MediaQuery.of(context).viewInsets.bottom),
@@ -422,7 +448,8 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
     final grouped = _groupByDate(items);
     final dateKeys = grouped.keys.toList()..sort();
     return [
-      SliverPadding(
+      if (title.isNotEmpty)
+        SliverPadding(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 4),
         sliver: SliverToBoxAdapter(
           child: Center(
