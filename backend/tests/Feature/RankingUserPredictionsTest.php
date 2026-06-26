@@ -64,6 +64,29 @@ class RankingUserPredictionsTest extends TestCase
         $this->assertEquals(0, $item['result']['away_score']);
         $this->assertEquals(2, $item['points']);
         $this->assertEquals('Home MEX', $item['home_team']['name']);
+        $this->assertNotEmpty($item['kickoff_at']);
+        $this->assertEquals('Away RSA', $item['away_team']['name']);
+        $this->assertNotNull($item['home_team']['flag_url']);
+    }
+
+    public function test_unapproved_user_cannot_view(): void
+    {
+        $unapprovedUser = User::factory()->create(['approval_status' => 'pending']);
+
+        $finishedMatch = $this->makeMatch('MEX', 'RSA', 'finished', 2, 0);
+        Prediction::create([
+            'user_id'    => $unapprovedUser->id,
+            'match_id'   => $finishedMatch->id,
+            'home_score' => 2,
+            'away_score' => 0,
+            'points'     => 2,
+        ]);
+
+        Sanctum::actingAs($unapprovedUser);
+
+        $response = $this->getJson("/api/ranking/{$unapprovedUser->id}/predictions");
+
+        $response->assertStatus(403);
     }
 
     private function makeMatch(
@@ -73,8 +96,8 @@ class RankingUserPredictionsTest extends TestCase
         ?int $homeScore = null,
         ?int $awayScore = null,
     ): FootballMatch {
-        $home = Team::create(['code' => $homeCode, 'name' => "Home {$homeCode}", 'group_name' => 'A']);
-        $away = Team::create(['code' => $awayCode, 'name' => "Away {$awayCode}", 'group_name' => 'A']);
+        $home = Team::create(['code' => $homeCode, 'name' => "Home {$homeCode}", 'group_name' => 'A', 'flag_url' => 'https://flagcdn.com/w80/br.png']);
+        $away = Team::create(['code' => $awayCode, 'name' => "Away {$awayCode}", 'group_name' => 'A', 'flag_url' => 'https://flagcdn.com/w80/za.png']);
 
         return FootballMatch::create([
             'home_team_id' => $home->id,

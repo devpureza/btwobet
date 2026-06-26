@@ -19,14 +19,14 @@ class RankingUserPredictionsController extends Controller
             ->values()
             ->map(fn (Prediction $p) => [
                 'match_id'   => $p->match_id,
-                'kickoff_at' => $p->match->kickoff_at->toIso8601String(),
+                'kickoff_at' => $p->match->kickoff_at?->toIso8601String(),
                 'home_team'  => [
-                    'name'     => $p->match->homeTeam->name,
-                    'flag_url' => $p->match->homeTeam->flag_url,
+                    'name'     => $p->match->homeTeam?->name,
+                    'flag_url' => $p->match->homeTeam?->flag_url,
                 ],
                 'away_team'  => [
-                    'name'     => $p->match->awayTeam->name,
-                    'flag_url' => $p->match->awayTeam->flag_url,
+                    'name'     => $p->match->awayTeam?->name,
+                    'flag_url' => $p->match->awayTeam?->flag_url,
                 ],
                 'prediction' => [
                     'home_score' => $p->home_score,
