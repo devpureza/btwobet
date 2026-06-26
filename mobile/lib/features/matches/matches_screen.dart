@@ -147,8 +147,6 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final filtered = _applyFilters(_matches);
-    final grouped = _groupByDate(filtered);
-    final dateKeys = grouped.keys.toList()..sort();
     final groupPhaseClosed = _isGroupPhasePredictionsClosed(_matches);
 
     return ShellPage(
@@ -156,24 +154,23 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
         listenable: widget.session,
         builder: (context, _) {
           final unreadUnlocks = widget.session.unreadRecentUnlocks;
-          final liveMatches = _matches
+          final now = DateTime.now();
+          bool isToday(Map<String, dynamic> m) {
+            final k = DateTime.parse(m['kickoff_at'] as String).toLocal();
+            return k.year == now.year && k.month == now.month && k.day == now.day;
+          }
+          // Jogos de hoje: ao vivo primeiro, depois por horário.
+          final todayGames = _matches
               .whereType<Map<String, dynamic>>()
-              .where(isMatchLive)
-              .toList();
-          final upcoming = _matches
-              .whereType<Map<String, dynamic>>()
-              .where((m) => m['status'] == 'scheduled' && !isMatchLive(m))
-              .toList();
-          upcoming.sort((a, b) {
-            final ta = DateTime.parse(a['kickoff_at'] as String);
-            final tb = DateTime.parse(b['kickoff_at'] as String);
-            return ta.compareTo(tb);
-          });
-          // Jogos ao vivo sempre primeiro; completa com os próximos até no mínimo 4.
-          final next4Limited = <Map<String, dynamic>>[
-            ...liveMatches,
-            ...upcoming,
-          ].take(liveMatches.length > 4 ? liveMatches.length : 4).toList();
+              .where(isToday)
+              .toList()
+            ..sort((a, b) {
+              final la = isMatchLive(a);
+              final lb = isMatchLive(b);
+              if (la != lb) return la ? -1 : 1;
+              return DateTime.parse(a['kickoff_at'] as String)
+                  .compareTo(DateTime.parse(b['kickoff_at'] as String));
+            });
 
           return _loading
           ? const Center(child: CircularProgressIndicator())
@@ -235,7 +232,7 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           ),
                         ),
                       ),
-                      if (next4Limited.isNotEmpty)
+                      if (todayGames.isNotEmpty)
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                           sliver: SliverToBoxAdapter(
@@ -259,9 +256,9 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                                       height: 290,
                                       child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
-                                        itemCount: next4Limited.length,
+                                        itemCount: todayGames.length,
                                         itemBuilder: (context, index) {
-                                          final m = next4Limited[index];
+                                          final m = todayGames[index];
                                           return Container(
                                             width: 320,
                                             margin: const EdgeInsets.only(right: 12),
@@ -385,62 +382,24 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
                           hasScrollBody: false,
                           child: Center(child: Text('Nenhum jogo encontrado com esses filtros.')),
                         )
-                      else
-                        for (final dateKey in dateKeys) ...[
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                            sliver: SliverToBoxAdapter(
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 1280),
-                                  child: _DateHeader(
-                                    label: DateFormat('EEEE, dd MMMM', 'pt_BR').format(
-                                      DateTime.parse('${dateKey}T12:00:00'),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                            sliver: SliverToBoxAdapter(
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 1280),
-                                  child: LayoutBuilder(
-                                    builder: (context, c) {
-                                      final twoCol = c.maxWidth >= 760;
-                                      final cardWidth =
-                                          twoCol ? (c.maxWidth - 16) / 2 : c.maxWidth;
-                                      return Wrap(
-                                        spacing: 16,
-                                        runSpacing: 12,
-                                        children: [
-                                          for (final m in grouped[dateKey]!)
-                                            SizedBox(
-                                              width: cardWidth,
-                                              child: MatchCard(
-                                                key: ValueKey(m['id']),
-                                                match: m,
-                                                matches: widget.session.matches,
-                                                onSave: (home, away) => _submitPrediction(
-                                                  context,
-                                                  m['id'] as int,
-                                                  home,
-                                                  away,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      else ...[
+                        ..._matchSection(
+                          context,
+                          'Jogos que não aconteceram',
+                          filtered
+                              .whereType<Map<String, dynamic>>()
+                              .where((m) => m['status'] != 'finished')
+                              .toList(),
+                        ),
+                        ..._matchSection(
+                          context,
+                          'Jogos finalizados',
+                          filtered
+                              .whereType<Map<String, dynamic>>()
+                              .where((m) => m['status'] == 'finished')
+                              .toList(),
+                        ),
+                      ],
                       SliverPadding(
                         padding: EdgeInsets.only(bottom: 24 + MediaQuery.of(context).viewInsets.bottom),
                       ),
@@ -450,6 +409,88 @@ class _MatchesScreenState extends State<MatchesScreen> with WidgetsBindingObserv
         },
       ),
     );
+  }
+
+  /// Renderiza uma seção rotulada (título + grupos por data), ou nada se vazia.
+  List<Widget> _matchSection(
+    BuildContext context,
+    String title,
+    List<Map<String, dynamic>> items,
+  ) {
+    if (items.isEmpty) return const [];
+    final theme = Theme.of(context);
+    final grouped = _groupByDate(items);
+    final dateKeys = grouped.keys.toList()..sort();
+    return [
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 4),
+        sliver: SliverToBoxAdapter(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1280),
+              child: Text(
+                title,
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ),
+      ),
+      for (final dateKey in dateKeys) ...[
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          sliver: SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1280),
+                child: _DateHeader(
+                  label: DateFormat('EEEE, dd MMMM', 'pt_BR').format(
+                    DateTime.parse('${dateKey}T12:00:00'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          sliver: SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1280),
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    final twoCol = c.maxWidth >= 760;
+                    final cardWidth = twoCol ? (c.maxWidth - 16) / 2 : c.maxWidth;
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 12,
+                      children: [
+                        for (final m in grouped[dateKey]!)
+                          SizedBox(
+                            width: cardWidth,
+                            child: MatchCard(
+                              key: ValueKey(m['id']),
+                              match: m,
+                              matches: widget.session.matches,
+                              onSave: (home, away) => _submitPrediction(
+                                context,
+                                m['id'] as int,
+                                home,
+                                away,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ];
   }
 
   List<dynamic> _applyFilters(List<dynamic> raw) {
