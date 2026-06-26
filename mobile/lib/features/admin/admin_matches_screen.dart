@@ -72,6 +72,13 @@ class _AdminMatchesScreenState extends State<AdminMatchesScreen> {
     int? homeTeamId = (m['home_team'] as Map?)?.cast<String, dynamic>()['id'] as int?;
     int? awayTeamId = (m['away_team'] as Map?)?.cast<String, dynamic>()['id'] as int?;
 
+    // Clamp team ids to null if not in the teams list (for knockout placeholders like "2A", "W73")
+    if (teams.isNotEmpty) {
+      final teamIds = teams.map((t) => (t as Map).cast<String, dynamic>()['id'] as int).toSet();
+      homeTeamId = teamIds.contains(homeTeamId) ? homeTeamId : null;
+      awayTeamId = teamIds.contains(awayTeamId) ? awayTeamId : null;
+    }
+
     if (!mounted) return;
     final saved = await showDialog<bool>(
       context: context,
