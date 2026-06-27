@@ -704,9 +704,16 @@ class _MatchCardState extends State<MatchCard> {
   @override
   void didUpdateWidget(covariant MatchCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final oldMy = oldWidget.match['my_prediction'] as Map<String, dynamic>?;
     final my = widget.match['my_prediction'] as Map<String, dynamic>?;
-    _home.text = my?['home_score']?.toString() ?? '';
-    _away.text = my?['away_score']?.toString() ?? '';
+    // Só re-sincroniza os campos quando o palpite SALVO muda (após salvar ou
+    // refresh). Em rebuilds (teclado abrindo/fechando) preserva o que o
+    // usuário está digitando — senão o resultado "zera" ao fechar o teclado.
+    if (oldMy?['home_score'] != my?['home_score'] ||
+        oldMy?['away_score'] != my?['away_score']) {
+      _home.text = my?['home_score']?.toString() ?? '';
+      _away.text = my?['away_score']?.toString() ?? '';
+    }
   }
 
   @override
