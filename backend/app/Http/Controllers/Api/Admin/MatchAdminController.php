@@ -36,6 +36,7 @@ class MatchAdminController extends Controller
                 'status' => $m->status,
                 'home_score' => $m->home_score,
                 'away_score' => $m->away_score,
+                'score_locked' => $m->score_locked,
                 'home_team' => [
                     'id' => $m->homeTeam->id,
                     'code' => $m->homeTeam->code,
@@ -78,6 +79,7 @@ class MatchAdminController extends Controller
             $match->home_score = $home;
             $match->away_score = $away;
         }
+        $match->score_locked = ($status !== 'scheduled');
         $match->save();
 
         // Recalcula pontos dos palpites do jogo (idempotente).
@@ -96,6 +98,7 @@ class MatchAdminController extends Controller
             'status' => ['sometimes', 'string', 'in:scheduled,live,finished'],
             'home_team_id' => ['sometimes', 'integer', 'exists:teams,id'],
             'away_team_id' => ['sometimes', 'integer', 'exists:teams,id'],
+            'score_locked' => ['sometimes', 'boolean'],
         ]);
 
         if (array_key_exists('group_name', $validated) && $validated['group_name'] !== null) {

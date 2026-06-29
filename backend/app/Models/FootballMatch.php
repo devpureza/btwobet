@@ -27,6 +27,7 @@ class FootballMatch extends Model
         'external_id',
         'teams_locked',
         'teams_defined_at',
+        'score_locked',
     ];
 
     protected function casts(): array
@@ -38,6 +39,7 @@ class FootballMatch extends Model
             'teams_locked' => 'boolean',
             'teams_defined_at' => 'datetime',
             'external_id' => 'integer',
+            'score_locked' => 'boolean',
         ];
     }
 
