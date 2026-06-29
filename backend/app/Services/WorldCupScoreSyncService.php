@@ -148,6 +148,10 @@ class WorldCupScoreSyncService
         bool $geStarted,
         bool $geFinished,
     ): bool {
+        if ($match->score_locked) {
+            return false; // placar travado manualmente pelo admin — sync não altera
+        }
+
         $scoresChanged = false;
 
         if ($homeScore !== null && $awayScore !== null) {
