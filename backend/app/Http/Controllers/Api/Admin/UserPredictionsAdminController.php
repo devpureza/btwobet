@@ -3,14 +3,58 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FootballMatch;
 use App\Models\Prediction;
 use App\Models\User;
+use App\Services\RankingService;
+use App\Services\ScoreCalculator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UserPredictionsAdminController extends Controller
 {
+    public function __construct(private readonly RankingService $rankingService) {}
+
+    /**
+     * Ajusta (cria ou atualiza) o palpite de um usuário num jogo e recalcula os pontos.
+     * Uso administrativo — correção de palpite digitado errado / não registrado a tempo.
+     */
+    public function set(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'match_id' => ['required', 'integer', 'exists:matches,id'],
+            'home_score' => ['required', 'integer', 'min:0', 'max:30'],
+            'away_score' => ['required', 'integer', 'min:0', 'max:30'],
+        ]);
+
+        $match = FootballMatch::findOrFail((int) $validated['match_id']);
+
+        $prediction = Prediction::updateOrCreate(
+            ['user_id' => $user->id, 'match_id' => $match->id],
+            [
+                'home_score' => (int) $validated['home_score'],
+                'away_score' => (int) $validated['away_score'],
+            ],
+        );
+
+        // Recalcula os pontos do jogo (idempotente; só pontua se o jogo já tem placar).
+        $this->rankingService->recalculateForMatch($match->fresh(), new ScoreCalculator());
+        $prediction->refresh();
+
+        return response()->json([
+            'message' => 'Palpite ajustado.',
+            'data' => [
+                'id' => $prediction->id,
+                'user_id' => $user->id,
+                'match_id' => $match->id,
+                'home_score' => $prediction->home_score,
+                'away_score' => $prediction->away_score,
+                'points' => $prediction->points,
+            ],
+        ]);
+    }
+
     public function clear(Request $request, User $user): JsonResponse
     {
         $validated = $request->validate([

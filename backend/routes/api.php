@@ -54,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/users/{user}/reject', [UserAdminController::class, 'reject']);
             Route::delete('/users/{user}', [UserAdminController::class, 'destroy']);
             Route::post('/users/{user}/predictions/clear', [UserPredictionsAdminController::class, 'clear']);
+            Route::post('/users/{user}/predictions/set', [UserPredictionsAdminController::class, 'set']);
 
             Route::get('/matches', [MatchAdminController::class, 'index']);
             Route::patch('/matches/{match}/result', [MatchAdminController::class, 'updateResult']);
